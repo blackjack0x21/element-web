@@ -3008,6 +3008,14 @@
             "spaces_explainer": "Spaces are ways to group rooms and people. Alongside the spaces you're in, you can use some pre-built ones too.",
             "title": "Sidebar"
         },
+        "sounds": {
+            "audio_playback": "Voice messages and audio files",
+            "call_sounds": "Call sounds",
+            "notifications": "Notifications",
+            "ringtone": "Ringtone",
+            "title": "Sound volume",
+            "video_playback": "Videos"
+        },
         "start_automatically": {
             "disabled": "No",
             "enabled": "Yes",

@@ -1,0 +1,24 @@
+/*
+Copyright 2026 Kreesty
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Commercial
+Please see LICENSE files in the repository root for full details.
+*/
+
+.mx_SoundVolumeSettings {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-4x);
+}
+
+.mx_SoundVolumeSetting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cpd-space-4x);
+}
+
+/* The volume slider is sized for audio players by default; give it more room here. */
+.mx_SoundVolumeSetting_slider input[type="range"] {
+    width: 200px;
+}

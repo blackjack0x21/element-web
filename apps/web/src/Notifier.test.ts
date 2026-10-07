@@ -125,11 +125,17 @@ describe("Notifier", () => {
         connect: vi.fn(),
         start: vi.fn(),
     };
+    const mockGainNode = {
+        connect: vi.fn(),
+        disconnect: vi.fn(),
+        gain: { value: 1 },
+    };
     const mockAudioContext = {
         decodeAudioData: vi.fn(),
         suspend: vi.fn(),
         resume: vi.fn(),
         createBufferSource: vi.fn().mockReturnValue(mockAudioBufferSourceNode),
+        createGain: vi.fn().mockReturnValue(mockGainNode),
         currentTime: 1337,
     };
 
@@ -695,9 +701,21 @@ describe("Notifier", () => {
             await notifier.playAudioNotification(testEvent, otherRoom);
 
             expect(customPlaySpy).toHaveBeenCalledTimes(2);
-            expect(customPlaySpy).toHaveBeenNthCalledWith(1, soundA.url);
-            expect(customPlaySpy).toHaveBeenNthCalledWith(2, soundB.url);
+            expect(customPlaySpy).toHaveBeenNthCalledWith(1, soundA.url, false, expect.anything());
+            expect(customPlaySpy).toHaveBeenNthCalledWith(2, soundB.url, false, expect.anything());
             customPlaySpy.mockRestore();
+        });
+
+        it("plays the sound at the notification volume", async () => {
+            const getValueSpy = vi.spyOn(SettingsStore, "getValue").mockImplementation((key, ...params) => {
+                if (key === "notificationSoundVolume") return 0.4;
+                return settingsStoreGetValue(key, ...params);
+            });
+
+            await notifier.playAudioNotification(testEvent, testRoom);
+
+            expect(playSpy).toHaveBeenCalledWith("media/message", ["mp3", "ogg"], false, 0.4);
+            getValueSpy.mockRestore();
         });
 
         it("does not play, and does not arm the throttle, when notifications are silenced", async () => {

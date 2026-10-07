@@ -336,7 +336,8 @@ export default class LegacyCallHandler extends TypedEventEmitter<LegacyCallHandl
         };
 
         const [urlPrefix, loop] = audioInfo[audioId];
-        const source = await this.backgroundAudio.pickFormatAndPlay(urlPrefix, ["mp3", "ogg"], loop);
+        const volume = SettingsStore.getValue(audioId === AudioID.Ring ? "ringtoneVolume" : "callSoundsVolume");
+        const source = await this.backgroundAudio.pickFormatAndPlay(urlPrefix, ["mp3", "ogg"], loop, volume);
         if (this.playingSources[audioId]) {
             logger.warn(`${logPrefix} Already playing audio ${audioId}!`);
         }

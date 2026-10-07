@@ -24,6 +24,11 @@ export interface VolumeSliderProps {
      */
     onVolumeChange: (volume: number) => void;
     /**
+     * Accessible name for the slider. Set this when several sliders are on screen together.
+     * @default "Volume"
+     */
+    label?: string;
+    /**
      * Whether the slider is disabled.
      * @default false
      */
@@ -45,6 +50,7 @@ export interface VolumeSliderProps {
 export function VolumeSlider({
     volume,
     onVolumeChange,
+    label,
     disabled,
     className,
 }: Readonly<VolumeSliderProps>): JSX.Element {
@@ -59,7 +65,7 @@ export function VolumeSlider({
                 className={styles.slider}
                 value={percent}
                 disabled={disabled}
-                aria-label={_t("a11y|volume_slider_label")}
+                aria-label={label ?? _t("a11y|volume_slider_label")}
                 aria-valuetext={`${percent}%`}
                 onChange={(ev: ChangeEvent<HTMLInputElement>) => onVolumeChange(Number(ev.target.value) / 100)}
                 // Audio players handle arrow keys themselves to seek, so keep them from seeing

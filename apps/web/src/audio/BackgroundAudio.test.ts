@@ -18,6 +18,7 @@ vi.mock("./compat", () => ({
 describe("BackgroundAudio", () => {
     let audioContext: {
         createBufferSource: Mock;
+        createGain: Mock;
         decodeAudioData: Mock;
         resume: Mock;
         suspend: Mock;
@@ -26,14 +27,22 @@ describe("BackgroundAudio", () => {
 
     /** The sources handed out by the mocked context, in the order they were created. */
     let sources: Array<{ start: Mock; disconnect: Mock; onended?: () => void }>;
+    /** The gain nodes handed out by the mocked context, in the order they were created. */
+    let gains: Array<{ connect: Mock; disconnect: Mock; gain: { value: number } }>;
 
     beforeEach(() => {
         sources = [];
+        gains = [];
         audioContext = {
             createBufferSource: vi.fn().mockImplementation(() => {
                 const source = { start: vi.fn(), connect: vi.fn(), disconnect: vi.fn() };
                 sources.push(source);
                 return source;
+            }),
+            createGain: vi.fn().mockImplementation(() => {
+                const gain = { connect: vi.fn(), disconnect: vi.fn(), gain: { value: 1 } };
+                gains.push(gain);
+                return gain;
             }),
             decodeAudioData: vi.fn().mockResolvedValue({}),
             resume: vi.fn().mockResolvedValue(undefined),
@@ -73,5 +82,31 @@ describe("BackgroundAudio", () => {
         sources[1].onended!();
 
         expect(audioContext.suspend).toHaveBeenCalledTimes(1);
+    });
+
+    it("plays at full volume by default", async () => {
+        const audio = new BackgroundAudio();
+
+        await audio.play("sound.mp3");
+
+        expect(gains[0].gain.value).toBe(1);
+        expect(gains[0].connect).toHaveBeenCalledWith(audioContext.destination);
+    });
+
+    it("plays at the given volume", async () => {
+        const audio = new BackgroundAudio();
+
+        await audio.play("sound.mp3", false, 0.25);
+
+        expect(gains[0].gain.value).toBe(0.25);
+    });
+
+    it("disconnects the volume control once the sound has finished", async () => {
+        const audio = new BackgroundAudio();
+
+        await audio.play("sound.mp3", false, 0.5);
+        sources[0].onended!();
+
+        expect(gains[0].disconnect).toHaveBeenCalled();
     });
 });

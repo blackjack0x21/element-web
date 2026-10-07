@@ -533,8 +533,8 @@ importers:
         specifier: ^7.12.5
         version: 7.29.7
       '@element-hq/element-call-component':
-        specifier: github:element-hq/element-call#main&path:/component
-        version: https://codeload.github.com/element-hq/element-call/tar.gz/2faa6c3dac1a4a0f6d69da328fca8d78e0f71396#path:/component(@vector-im/compound-design-tokens@10.2.1)(@vector-im/compound-web@10.1.0)(livekit-client@2.22.3)(matrix-js-sdk@43.0.0)(react-dom@19.3.0)(react@19.3.0)
+        specifier: link:../../../element-call/component
+        version: link:../../../element-call/component
       '@element-hq/element-web-module-api':
         specifier: workspace:*
         version: link:../../packages/module-api
@@ -786,8 +786,8 @@ importers:
         specifier: ^7.12.7
         version: 7.29.7(@babel/core@7.29.7)(supports-color@10.2.2)
       '@element-hq/element-call-embedded':
-        specifier: 0.26.1
-        version: 0.26.1
+        specifier: link:../../../element-call/embedded/web
+        version: link:../../../element-call/embedded/web
       '@element-hq/element-web-playwright-common':
         specifier: workspace:*
         version: link:../../packages/playwright-common
@@ -2830,20 +2830,6 @@ packages:
     resolution: {integrity: sha512-dfZeox66AvdPtb2lD8OsIIQh12Tp0GNCRUDfBHIKGpbmopZto2/A8nSpYYLoedPIHpqkeblZ/k8OV0Gy7PYuyQ==}
     engines: {node: '>=14.14'}
     hasBin: true
-
-  '@element-hq/element-call-component@https://codeload.github.com/element-hq/element-call/tar.gz/2faa6c3dac1a4a0f6d69da328fca8d78e0f71396#path:/component':
-    resolution: {gitHosted: true, path: /component, tarball: https://codeload.github.com/element-hq/element-call/tar.gz/2faa6c3dac1a4a0f6d69da328fca8d78e0f71396}
-    version: 0.0.0
-    peerDependencies:
-      '@vector-im/compound-design-tokens': ^11.0.0
-      '@vector-im/compound-web': ^10.0.0
-      livekit-client: ^2.22.2
-      matrix-js-sdk: '*'
-      react: ^19
-      react-dom: ^19
-
-  '@element-hq/element-call-embedded@0.26.1':
-    resolution: {integrity: sha512-0zAC8Qh+xNLTqiC7yiosu2NQ7Fw36xR7Gimgmp2WZjTbiPf8b7DmYOBZk0sWFzYbrHHZTeB2wWPDmS3TgYq51g==}
 
   '@emnapi/core@1.11.2':
     resolution: {integrity: sha512-TC8MkTuZUtcTSiFeuC0ksCh9QIJ5+F21MvZ4Wn4ORfYaFJ/0dsiudv5tVkejgwZlwQ39jL9WWDe2lz8x0WglOA==}
@@ -15085,17 +15071,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
     optional: true
-
-  '@element-hq/element-call-component@https://codeload.github.com/element-hq/element-call/tar.gz/2faa6c3dac1a4a0f6d69da328fca8d78e0f71396#path:/component(@vector-im/compound-design-tokens@10.2.1)(@vector-im/compound-web@10.1.0)(livekit-client@2.22.3)(matrix-js-sdk@43.0.0)(react-dom@19.3.0)(react@19.3.0)':
-    dependencies:
-      '@vector-im/compound-design-tokens': 10.2.1(@types/react@19.3.0)(react@19.3.0)
-      '@vector-im/compound-web': 10.1.0(@fontsource/inconsolata@5.2.8)(@fontsource/inter@5.3.0)(@types/react-dom@19.2.3)(@types/react@19.3.0)(@vector-im/compound-design-tokens@10.2.1)(react-dom@19.3.0)(react@19.3.0)
-      livekit-client: 2.22.3(@types/dom-mediacapture-record@1.0.22)
-      matrix-js-sdk: https://codeload.github.com/matrix-org/matrix-js-sdk/tar.gz/489a523001f7a20a49309c90ae42a737159a4f3b
-      react: 19.3.0
-      react-dom: 19.3.0(react@19.3.0)
-
-  '@element-hq/element-call-embedded@0.26.1': {}
 
   '@emnapi/core@1.11.2':
     dependencies:

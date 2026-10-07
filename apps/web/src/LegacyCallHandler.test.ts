@@ -352,11 +352,17 @@ describe("LegacyCallHandler without third party protocols", () => {
         start: vi.fn(),
         stop: vi.fn(),
     };
+    const mockGainNode = {
+        connect: vi.fn(),
+        disconnect: vi.fn(),
+        gain: { value: 1 },
+    };
     const mockAudioContext = {
         decodeAudioData: vi.fn().mockResolvedValue({}),
         suspend: vi.fn(),
         resume: vi.fn(),
         createBufferSource: vi.fn().mockReturnValue(mockAudioBufferSourceNode),
+        createGain: vi.fn().mockReturnValue(mockGainNode),
         currentTime: 1337,
     };
 
@@ -442,6 +448,26 @@ describe("LegacyCallHandler without third party protocols", () => {
         expect(fetchMock).toHaveFetchedTimes(1, "end:/media/ring.mp3");
         await callHandler.play(AudioID.Ring);
         expect(fetchMock).toHaveFetchedTimes(1, "end:/media/ring.mp3");
+    });
+
+    it.each([
+        [AudioID.Ring, "ringtoneVolume"],
+        [AudioID.Ringback, "callSoundsVolume"],
+        [AudioID.Busy, "callSoundsVolume"],
+        [AudioID.CallEnd, "callSoundsVolume"],
+    ])("should play %s at the volume from %s", async (audioId, setting) => {
+        const getValue = SettingsStore.getValue;
+        const getValueSpy = vi
+            .spyOn(SettingsStore, "getValue")
+            .mockImplementation((key, ...params) => (key === setting ? 0.3 : getValue(key, ...params)));
+        // @ts-ignore - backgroundAudio is private
+        const playSpy = vi.spyOn(callHandler.backgroundAudio, "pickFormatAndPlay").mockResolvedValue({} as any);
+
+        await callHandler.play(audioId);
+
+        expect(playSpy).toHaveBeenCalledWith(expect.any(String), ["mp3", "ogg"], expect.any(Boolean), 0.3);
+        getValueSpy.mockRestore();
+        playSpy.mockRestore();
     });
 
     it("should allow silencing an incoming call ring", async () => {

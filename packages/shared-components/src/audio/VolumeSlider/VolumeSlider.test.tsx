@@ -33,6 +33,11 @@ describe("VolumeSlider", () => {
         expect(slider).toHaveAttribute("aria-valuetext", "30%");
     });
 
+    it("uses the given label as the accessible name", () => {
+        render(<VolumeSlider volume={0.5} label="Ringtone" onVolumeChange={vi.fn()} />);
+        expect(screen.getByRole("slider", { name: "Ringtone" })).toBeInTheDocument();
+    });
+
     it("calls onVolumeChange with a value between 0 and 1", () => {
         const onVolumeChange = vi.fn();
         render(<VolumeSlider volume={0.5} onVolumeChange={onVolumeChange} />);

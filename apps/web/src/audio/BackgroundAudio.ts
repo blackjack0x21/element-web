@@ -25,6 +25,7 @@ export class BackgroundAudio {
         urlPrefix: string,
         formats: F,
         loop = false,
+        volume = 1,
     ): Promise<AudioBufferSourceNode> {
         const format = this.pickFormat(...formats);
         if (!format) {
@@ -32,10 +33,17 @@ export class BackgroundAudio {
             // Will probably never happen. If happened, format="" and will fail to load audio. Who cares...
         }
 
-        return this.play(`${urlPrefix}.${format}`, loop);
+        return this.play(`${urlPrefix}.${format}`, loop, volume);
     }
 
-    public async play(url: string, loop = false): Promise<AudioBufferSourceNode> {
+    /**
+     * Play a sound once, or on repeat if `loop` is set.
+     * @param url - where to fetch the sound from
+     * @param loop - whether to keep playing the sound until it is stopped
+     * @param volume - the volume to play the sound at, between 0 and 1
+     * @returns the source playing the sound, which can be used to stop it
+     */
+    public async play(url: string, loop = false, volume = 1): Promise<AudioBufferSourceNode> {
         if (!this.sounds.hasOwnProperty(url)) {
             // No cache, fetch it
             const response = await fetch(url);
@@ -49,12 +57,16 @@ export class BackgroundAudio {
         const source = this.audioContext.createBufferSource();
         source.buffer = this.sounds[url];
         source.loop = loop;
-        source.connect(this.audioContext.destination);
+        const gain = this.audioContext.createGain();
+        gain.gain.value = volume;
+        source.connect(gain);
+        gain.connect(this.audioContext.destination);
 
         await this.audioContext.resume();
         this.playing++;
         source.onended = () => {
             source.disconnect();
+            gain.disconnect();
             this.playing--;
             // Every sound played here shares the one context, which is suspended rather than closed so
             // that it can be reused. Suspending it while another sound is still going would cut that

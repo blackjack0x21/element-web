@@ -363,6 +363,9 @@ export interface Settings {
     "audioInputMuted": IBaseSetting<boolean>;
     "audioPlaybackVolume": IBaseSetting<number>;
     "videoPlaybackVolume": IBaseSetting<number>;
+    "notificationSoundVolume": IBaseSetting<number>;
+    "ringtoneVolume": IBaseSetting<number>;
+    "callSoundsVolume": IBaseSetting<number>;
     "videoInputMuted": IBaseSetting<boolean>;
     "activeCallRoomIds": IBaseSetting<string[]>;
     "releaseAnnouncementData": IBaseSetting<ReleaseAnnouncementData>;
@@ -1412,6 +1415,21 @@ export const SETTINGS: Settings = {
     },
     // Volume for videos in the timeline, between 0 and 1
     "videoPlaybackVolume": {
+        supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,
+        default: 1,
+    },
+    // Volume for the sound played on new notifications, between 0 and 1
+    "notificationSoundVolume": {
+        supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,
+        default: 1,
+    },
+    // Volume for the ringtone of incoming calls, between 0 and 1
+    "ringtoneVolume": {
+        supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,
+        default: 1,
+    },
+    // Volume for the other call sounds (ringback, busy and call ended), between 0 and 1
+    "callSoundsVolume": {
         supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,
         default: 1,
     },

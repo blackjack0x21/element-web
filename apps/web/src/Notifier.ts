@@ -339,10 +339,11 @@ export default class Notifier extends TypedEventEmitter<keyof EmittedEvents, Emi
         }
         this.lastAudioNotificationMs.set(soundKey, now);
 
+        const volume = SettingsStore.getValue("notificationSoundVolume");
         if (sound) {
-            await this.backgroundAudio.play(sound.url);
+            await this.backgroundAudio.play(sound.url, false, volume);
         } else {
-            await this.backgroundAudio.pickFormatAndPlay("media/message", ["mp3", "ogg"]);
+            await this.backgroundAudio.pickFormatAndPlay("media/message", ["mp3", "ogg"], false, volume);
         }
     }
 

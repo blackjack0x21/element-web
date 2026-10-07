@@ -21,6 +21,9 @@ export const mocks = {
         createMediaStreamSource: vi.fn(),
         createStreamTrackSource: vi.fn(),
         createBufferSource: vi.fn((): AudioBufferSourceNode => ({ ...mocks.AudioBufferSourceNode })),
+        createGain: vi.fn(
+            (): GainNode => ({ connect: vi.fn(), disconnect: vi.fn(), gain: { value: 1 } }) as unknown as GainNode,
+        ),
         getOutputTimestamp: vi.fn(),
         resume: vi.fn(),
         setSinkId: vi.fn(),

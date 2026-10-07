@@ -136,4 +136,10 @@ describe("<VoiceUserSettingsTab />", () => {
         expect(MediaDeviceHandler.setAudioEchoCancellation).toHaveBeenCalledWith(false);
         expect(MediaDeviceHandler.setAudioNoiseSuppression).toHaveBeenCalledWith(true);
     });
+
+    it("renders the sound volume settings", () => {
+        const { getByRole } = render(getComponent());
+        expect(getByRole("heading", { name: "Sound volume" })).toBeTruthy();
+        expect(getByRole("slider", { name: "Ringtone" })).toBeTruthy();
+    });
 });

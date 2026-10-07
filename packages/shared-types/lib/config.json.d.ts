@@ -127,6 +127,10 @@ export interface WebConfigJson {
         disable?: boolean;
     };
 
+    gif?: {
+        api_key: string; // Klipy API key
+    };
+
     logout_redirect_url?: string;
 
     sso_redirect_options?: {

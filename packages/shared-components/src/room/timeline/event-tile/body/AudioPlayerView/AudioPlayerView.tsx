@@ -17,6 +17,7 @@ import { useI18n } from "../../../../../core/i18n/i18nContext";
 import { formatBytes } from "../../../../../core/utils/FormattingUtils";
 import { Clock } from "../../../../../audio/Clock";
 import { SeekBar } from "../../../../../audio/SeekBar";
+import { VolumeSlider } from "../../../../../audio/VolumeSlider";
 
 export interface AudioPlayerViewSnapshot {
     /**
@@ -47,6 +48,10 @@ export interface AudioPlayerViewSnapshot {
      */
     playedSeconds: number;
     /**
+     * The playback volume, between 0 and 1.
+     */
+    volume: number;
+    /**
      * Indicates if there was an error downloading the audio.
      */
     error: boolean;
@@ -65,6 +70,10 @@ export interface AudioPlayerViewActions {
      * Handles changes to the seek bar.
      */
     onSeekbarChange: ChangeEventHandler<HTMLInputElement>;
+    /**
+     * Sets the playback volume, between 0 and 1.
+     */
+    onVolumeChange: (volume: number) => void;
 }
 
 /**
@@ -98,6 +107,7 @@ export function AudioPlayerView({ vm }: Readonly<AudioPlayerViewProps>): JSX.Ele
         durationSeconds,
         playedSeconds,
         percentComplete,
+        volume,
         error,
     } = useViewModel(vm);
     const fileSize = sizeBytes ? `(${formatBytes(sizeBytes)})` : null;
@@ -136,6 +146,7 @@ export function AudioPlayerView({ vm }: Readonly<AudioPlayerViewProps>): JSX.Ele
                 <Flex align="center" gap="var(--cpd-space-1x)" data-testid="audio-player-seek">
                     <SeekBar tabIndex={-1} disabled={disabled} value={percentComplete} onChange={vm.onSeekbarChange} />
                     <Clock className={styles.clock} seconds={playedSeconds} role="timer" />
+                    <VolumeSlider volume={volume} onVolumeChange={vm.onVolumeChange} />
                 </Flex>
             </MediaBody>
             {error && <span className={styles.error}>{_t("timeline|m.audio|error_downloading_audio")}</span>}

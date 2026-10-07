@@ -48,11 +48,13 @@ describe("AudioPlayerView", () => {
     const onKeyDown = vi.fn();
     const togglePlay = vi.fn();
     const onSeekbarChange = vi.fn();
+    const onVolumeChange = vi.fn();
 
     class AudioPlayerViewModel extends MockViewModel<AudioPlayerViewSnapshot> implements AudioPlayerViewActions {
         public onKeyDown = onKeyDown;
         public togglePlay = togglePlay;
         public onSeekbarChange = onSeekbarChange;
+        public onVolumeChange = onVolumeChange;
     }
 
     it("should attach vm methods", async () => {
@@ -64,6 +66,7 @@ describe("AudioPlayerView", () => {
             playedSeconds: 120,
             percentComplete: 30,
             sizeBytes: 3500,
+            volume: 0.8,
             error: false,
         });
 
@@ -76,6 +79,9 @@ describe("AudioPlayerView", () => {
         // user event doesn't support change events on sliders, so we use fireEvent
         fireEvent.change(screen.getByRole("slider", { name: "Audio seek bar" }), { target: { value: "50" } });
         expect(onSeekbarChange).toHaveBeenCalled();
+
+        fireEvent.change(screen.getByRole("slider", { name: "Volume" }), { target: { value: "40" } });
+        expect(onVolumeChange).toHaveBeenCalledWith(0.4);
 
         await user.type(screen.getByLabelText("Audio player"), "{arrowup}");
         expect(onKeyDown).toHaveBeenCalledWith(expect.objectContaining({ key: "ArrowUp" }));

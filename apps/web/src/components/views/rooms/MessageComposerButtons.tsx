@@ -39,6 +39,7 @@ import IconizedContextMenu, {
     IconizedContextMenuOptionList,
 } from "../context_menus/IconizedContextMenu";
 import { EmojiButton } from "./EmojiButton";
+import { GifButton } from "./GifButton";
 import { filterBoolean } from "../../../utils/arrays";
 import { useSettingValue } from "../../../hooks/useSettings";
 import AccessibleButton, { type ButtonEvent } from "../elements/AccessibleButton";
@@ -57,6 +58,7 @@ interface IProps {
     showLocationButton: boolean;
     showPollsButton: boolean;
     showStickersButton: boolean;
+    showGifButton: boolean;
     toggleButtonMenu: () => void;
     isRichTextEnabled: boolean;
     onComposerModeClick: () => void;
@@ -87,6 +89,7 @@ const MessageComposerButtons: React.FC<IProps> = (props: IProps) => {
             ) : (
                 emojiButton(props)
             ),
+            showGifButton(props),
         ];
         moreButtons = [
             // This a textual list of buttons, so we can't use the UploadButton here.
@@ -114,6 +117,7 @@ const MessageComposerButtons: React.FC<IProps> = (props: IProps) => {
             ) : (
                 emojiButton(props)
             ),
+            showGifButton(props),
             <UploadButton key="upload" vm={roomUploadVM} />,
         ];
         moreButtons = [
@@ -183,6 +187,17 @@ function showStickersButton(props: IProps): ReactElement | null {
         >
             <StickerIcon />
         </CollapsibleButton>
+    ) : null;
+}
+
+function showGifButton(props: IProps): ReactElement | null {
+    return props.showGifButton ? (
+        <GifButton
+            key="gif_button"
+            relation={props.relation}
+            menuPosition={props.menuPosition}
+            className="mx_MessageComposer_button"
+        />
     ) : null;
 }
 

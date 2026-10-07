@@ -52,7 +52,7 @@ export class AudioPlayerViewModel
     /**
      * Computes the snapshot of the audio player based on the current playback state.
      * This includes the media name, size in bytes, playback state, duration, percentage complete,
-     * played seconds, and whether there was an error.
+     * played seconds, volume, and whether there was an error.
      * @param playback - The playback instance managing the audio playback.
      * @param mediaName - Optional name of the media being played.
      * @param error - Indicates if there was an error processing the audio file.
@@ -71,6 +71,7 @@ export class AudioPlayerViewModel
             durationSeconds: playback.durationSeconds,
             percentComplete,
             playedSeconds: playback.timeSeconds,
+            volume: playback.volume,
             error,
         };
     };
@@ -140,6 +141,10 @@ export class AudioPlayerViewModel
 
     public onSeekbarChange = async (ev: ChangeEvent<HTMLInputElement>): Promise<void> => {
         await this.props.playback.skipTo((Number(ev.target.value) / 100) * this.props.playback.durationSeconds);
+    };
+
+    public onVolumeChange = (volume: number): void => {
+        this.props.playback.setVolume(volume);
     };
 
     /**

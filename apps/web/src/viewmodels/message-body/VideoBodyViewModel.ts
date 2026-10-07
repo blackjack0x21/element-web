@@ -6,7 +6,7 @@
  */
 
 import { decode } from "blurhash";
-import { type RefObject } from "react";
+import { type RefObject, type SyntheticEvent } from "react";
 import { logger } from "matrix-js-sdk/src/logger";
 import { type MatrixEvent } from "matrix-js-sdk/src/matrix";
 import { type MediaEventContent, type VideoInfo } from "matrix-js-sdk/src/types";
@@ -19,6 +19,7 @@ import {
 
 import { _t } from "../../languageHandler";
 import SettingsStore from "../../settings/SettingsStore";
+import { SettingLevel } from "../../settings/SettingLevel";
 import { mediaFromContent } from "../../customisations/Media";
 import { BLURHASH_FIELD } from "../../utils/image-media";
 import { type ImageSize, suggestedSize as suggestedVideoSize } from "../../settings/enums/ImageSize";
@@ -112,6 +113,12 @@ export class VideoBodyViewModel
             this.setImageSize(value!);
         });
         this.disposables.track(() => SettingsStore.unwatchSetting(imageSizeWatcherRef));
+
+        // Keep every video on screen at the same volume when one of them is changed.
+        const volumeWatcherRef = SettingsStore.watchSetting("videoPlaybackVolume", null, () => {
+            this.updateSnapshotFromState();
+        });
+        this.disposables.track(() => SettingsStore.unwatchSetting(volumeWatcherRef));
     }
 
     public loadInitialMediaIfVisible(): void {
@@ -250,6 +257,7 @@ export class VideoBodyViewModel
             controls: !props.inhibitInteraction,
             muted: autoplay,
             autoPlay: autoplay,
+            volume: SettingsStore.getValue("videoPlaybackVolume"),
         };
     }
 
@@ -477,6 +485,16 @@ export class VideoBodyViewModel
 
     public onPreviewClick = (): void => {
         this.props.onPreviewClick?.();
+    };
+
+    /**
+     * Saves the volume picked with the native video controls. Muting is not saved, so a video
+     * muted once does not leave every later video silent.
+     */
+    public onVolumeChange = (ev: SyntheticEvent<HTMLVideoElement>): void => {
+        const volume = ev.currentTarget.volume;
+        if (volume === SettingsStore.getValue("videoPlaybackVolume")) return;
+        void SettingsStore.setValue("videoPlaybackVolume", null, SettingLevel.DEVICE, volume);
     };
 
     public onPlay = async (): Promise<void> => {

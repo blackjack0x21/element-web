@@ -1,0 +1,159 @@
+/*
+Copyright 2025 New Vector Ltd.
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Commercial
+Please see LICENSE files in the repository root for full details.
+*/
+
+// @vitest-environment happy-dom
+
+import React from "react";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { render, screen, fireEvent, waitFor } from "test-utils-rtl";
+import fetchMock from "@fetch-mock/vitest";
+import { EventType } from "matrix-js-sdk/src/matrix";
+import { createTestClient, getRoomContext, mkStubRoom } from "test-utils";
+
+import { GifButton } from "./GifButton";
+import * as ContentMessages from "../../../ContentMessages";
+import MatrixClientContext from "../../../contexts/MatrixClientContext";
+import { ScopedRoomContextProvider } from "../../../contexts/ScopedRoomContext.tsx";
+import type { RoomContextType } from "../../../contexts/RoomContext.ts";
+import SdkConfig from "../../../SdkConfig";
+
+vi.mock("../../../ContentMessages", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("../../../ContentMessages")>()),
+    uploadFile: vi.fn(),
+}));
+
+describe("GifButton", () => {
+    const mockClient = createTestClient();
+    const roomId = "!testroom:example.org";
+
+    const mockGifResult = {
+        id: "gif-1",
+        title: "Test GIF",
+        content_description: "A funny cat",
+        media_formats: {
+            gif: { url: "https://klipy.com/full.gif", dims: [480, 360], duration: 2, size: 500_000 },
+            tinygif: { url: "https://klipy.com/tiny.gif", dims: [220, 165], duration: 2, size: 50_000 },
+            mediumgif: { url: "https://klipy.com/medium.gif", dims: [320, 240], duration: 2, size: 200_000 },
+            nanogif: { url: "https://klipy.com/nano.gif", dims: [90, 68], duration: 2, size: 15_000 },
+        },
+        created: 1234567890,
+        url: "https://klipy.com/view/gif-1",
+    };
+
+    beforeEach(() => {
+        // Configure the Klipy API key for the GIF service
+        SdkConfig.put({
+            gif: {
+                api_key: "test-klipy-api-key",
+            },
+        } as any);
+
+        // Mock IntersectionObserver which is used by GifGrid for infinite scroll
+        vi.stubGlobal(
+            "IntersectionObserver",
+            class {
+                public observe = vi.fn();
+                public unobserve = vi.fn();
+                public disconnect = vi.fn();
+            },
+        );
+
+        // Mock the Klipy featured endpoint to return a selectable GIF
+        fetchMock.getOnce(
+            "begin:https://api.klipy.com/v2/featured",
+            { results: [mockGifResult], next: "" },
+            { name: "klipy-featured" },
+        );
+
+        vi.mocked(ContentMessages.uploadFile).mockResolvedValue({ url: "mxc://example.org/uploaded-gif" });
+        vi.mocked(mockClient.sendEvent).mockResolvedValue({ event_id: "$sent-event" });
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    function renderGifButton(): void {
+        const mockRoom = mkStubRoom(roomId, "Test Room", mockClient) as any;
+        const defaultRoomContext: RoomContextType = getRoomContext(mockRoom, { narrow: false });
+
+        render(
+            <MatrixClientContext.Provider value={mockClient}>
+                <ScopedRoomContextProvider {...defaultRoomContext}>
+                    <GifButton className="mx_MessageComposer_button" />
+                </ScopedRoomContextProvider>
+            </MatrixClientContext.Provider>,
+        );
+    }
+
+    it("should render the GIF button with correct label", () => {
+        renderGifButton();
+        expect(screen.getByRole("button", { name: "GIF" })).toBeInTheDocument();
+    });
+
+    it("should open the GIF picker when clicked", () => {
+        renderGifButton();
+        const button = screen.getByRole("button", { name: "GIF" });
+        fireEvent.click(button);
+
+        // The GifPicker renders a search input inside a ContextMenu
+        expect(screen.getByRole("textbox")).toBeInTheDocument();
+    });
+
+    it("should render the 'Powered by Klipy' footer when picker is open", () => {
+        renderGifButton();
+        const button = screen.getByRole("button", { name: "GIF" });
+        fireEvent.click(button);
+
+        expect(screen.getByText("Powered by Klipy")).toBeInTheDocument();
+    });
+
+    it("should send a GIF as m.sticker when selected", async () => {
+        // Mock the fetch of the GIF binary from Klipy CDN
+        const gifBlob = new Blob(["gif-data"], { type: "image/gif" });
+        fetchMock.getOnce("https://klipy.com/full.gif", { status: 200, body: gifBlob }, { name: "gif-download" });
+
+        renderGifButton();
+
+        // Open the picker
+        const button = screen.getByRole("button", { name: "GIF" });
+        fireEvent.click(button);
+
+        // Wait for the trending GIFs to load, then click the first one
+        const gifButton = await screen.findByRole("button", { name: "A funny cat" });
+        fireEvent.click(gifButton);
+
+        // Verify uploadFile was called with the Matrix client, room ID, and a blob
+        await waitFor(() => {
+            expect(ContentMessages.uploadFile).toHaveBeenCalledWith(
+                mockClient,
+                roomId,
+                expect.objectContaining({ size: expect.any(Number), type: expect.any(String) }),
+            );
+        });
+
+        // Verify sendEvent was called with m.sticker and the correct content
+        await waitFor(() => {
+            expect(mockClient.sendEvent).toHaveBeenCalledWith(
+                roomId,
+                null, // no thread
+                EventType.Sticker,
+                expect.objectContaining({
+                    "body": "A funny cat",
+                    "url": "mxc://example.org/uploaded-gif",
+                    "io.element.gif": true,
+                    "info": expect.objectContaining({
+                        "w": 480,
+                        "h": 360,
+                        "mimetype": "image/gif",
+                        "io.element.animated": true,
+                    }),
+                }),
+            );
+        });
+    });
+});

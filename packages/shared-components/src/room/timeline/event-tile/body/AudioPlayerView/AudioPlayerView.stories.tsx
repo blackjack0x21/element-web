@@ -18,12 +18,14 @@ const AudioPlayerViewWrapperImpl = ({
     togglePlay,
     onKeyDown,
     onSeekbarChange,
+    onVolumeChange,
     ...rest
 }: AudioPlayerProps): JSX.Element => {
     const vm = useMockedViewModel(rest, {
         togglePlay,
         onKeyDown,
         onSeekbarChange,
+        onVolumeChange,
     });
     return <AudioPlayerView vm={vm} />;
 };
@@ -46,10 +48,12 @@ const meta = {
         percentComplete: 30,
         playbackState: "stopped",
         sizeBytes: 3500,
+        volume: 0.8,
         error: false,
         togglePlay: fn(),
         onKeyDown: fn(),
         onSeekbarChange: fn(),
+        onVolumeChange: fn(),
     },
 } satisfies Meta<typeof AudioPlayerViewWrapper>;
 

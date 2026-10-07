@@ -7,7 +7,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React, { type ReactNode } from "react";
-import { MediaBody } from "@element-hq/web-shared-components";
+import { MediaBody, VolumeSlider } from "@element-hq/web-shared-components";
 
 import PlayPauseButton from "./PlayPauseButton";
 import PlaybackClock from "./PlaybackClock";
@@ -58,6 +58,11 @@ export default class RecordingPlayback extends AudioPlayerBase<IProps> {
                     />
                 </div>
                 <PlaybackClock playback={this.props.playback} />
+                <VolumeSlider
+                    className="mx_RecordingPlayback_volume"
+                    volume={this.state.volume}
+                    onVolumeChange={this.onVolumeChange}
+                />
             </>
         );
     }

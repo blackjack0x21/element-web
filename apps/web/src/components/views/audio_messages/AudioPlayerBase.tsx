@@ -27,6 +27,7 @@ export interface IProps {
 
 interface IState {
     playbackPhase: PlaybackState;
+    volume: number;
     error?: boolean;
 }
 
@@ -40,6 +41,7 @@ export default abstract class AudioPlayerBase<T extends IProps = IProps> extends
         // Playback instances can be reused in the composer
         this.state = {
             playbackPhase: this.props.playback.currentState,
+            volume: this.props.playback.volume,
         };
     }
 
@@ -83,7 +85,11 @@ export default abstract class AudioPlayerBase<T extends IProps = IProps> extends
     };
 
     private onPlaybackUpdate = (ev: PlaybackState): void => {
-        this.setState({ playbackPhase: ev });
+        this.setState({ playbackPhase: ev, volume: this.props.playback.volume });
+    };
+
+    protected onVolumeChange = (volume: number): void => {
+        this.props.playback.setVolume(volume);
     };
 
     protected abstract renderComponent(): ReactNode;

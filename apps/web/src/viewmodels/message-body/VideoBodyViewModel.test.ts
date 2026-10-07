@@ -11,9 +11,11 @@ import { EventType, MatrixEvent } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
 import { VideoBodyViewState } from "@element-hq/web-shared-components";
 import { decode } from "blurhash";
+import { type SyntheticEvent } from "react";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 
 import SettingsStore from "../../settings/SettingsStore";
+import { SettingLevel } from "../../settings/SettingLevel";
 import { ImageSize } from "../../settings/enums/ImageSize";
 import { type Media, mediaFromContent } from "../../customisations/Media";
 import { BLURHASH_FIELD } from "../../utils/image-media";
@@ -32,6 +34,8 @@ describe("VideoBodyViewModel", () => {
     const mockedDecode = vi.mocked(decode);
     const videoRef = { current: null };
     let imageSizeWatcher: ((...args: [unknown, unknown, unknown, unknown, ImageSize]) => void) | undefined;
+    let videoVolumeWatcher: (() => void) | undefined;
+    let videoVolume: number;
 
     const flushPromises = async (): Promise<void> => {
         await Promise.resolve();
@@ -120,12 +124,21 @@ describe("VideoBodyViewModel", () => {
             if (setting === "autoplayVideo") {
                 return false;
             }
+            if (setting === "videoPlaybackVolume") {
+                return videoVolume;
+            }
             return originalGetValue(setting, ...args);
         });
-        vi.spyOn(SettingsStore, "watchSetting").mockImplementation((_name, _roomId, callback) => {
-            imageSizeWatcher = callback as (...args: [unknown, unknown, unknown, unknown, ImageSize]) => void;
+        videoVolume = 1;
+        vi.spyOn(SettingsStore, "watchSetting").mockImplementation((name, _roomId, callback) => {
+            if (name === "videoPlaybackVolume") {
+                videoVolumeWatcher = callback as () => void;
+            } else {
+                imageSizeWatcher = callback as (...args: [unknown, unknown, unknown, unknown, ImageSize]) => void;
+            }
             return "video-body-test-watch";
         });
+        vi.spyOn(SettingsStore, "setValue").mockResolvedValue(undefined);
         vi.spyOn(SettingsStore, "unwatchSetting").mockImplementation(vi.fn());
 
         mockedMediaFromContent.mockImplementation((content) => createMockMedia(content));
@@ -135,6 +148,7 @@ describe("VideoBodyViewModel", () => {
     afterEach(() => {
         vi.restoreAllMocks();
         imageSizeWatcher = undefined;
+        videoVolumeWatcher = undefined;
     });
 
     it("computes the initial hidden snapshot from props", () => {
@@ -203,6 +217,7 @@ describe("VideoBodyViewModel", () => {
         vi.spyOn(SettingsStore, "getValue").mockImplementation((setting, ...args) => {
             if (setting === "Images.size") return ImageSize.Normal;
             if (setting === "autoplayVideo") return true;
+            if (setting === "videoPlaybackVolume") return videoVolume;
             return originalGetValue(setting, ...args);
         });
 
@@ -346,6 +361,45 @@ describe("VideoBodyViewModel", () => {
 
         expect(vm.getSnapshot().maxWidth).toBe(800);
         expect(vm.getSnapshot().maxHeight).toBe(450);
+    });
+
+    describe("volume", () => {
+        const volumeChangeEvent = (volume: number): SyntheticEvent<HTMLVideoElement> =>
+            ({ currentTarget: { volume } }) as SyntheticEvent<HTMLVideoElement>;
+
+        it("uses the saved volume for a ready video", () => {
+            videoVolume = 0.35;
+            const vm = createVm();
+            vm.setMediaVisible(true);
+
+            expect(vm.getSnapshot().volume).toBe(0.35);
+        });
+
+        it("saves the volume when it changes", () => {
+            const vm = createVm();
+            vm.onVolumeChange(volumeChangeEvent(0.4));
+
+            expect(SettingsStore.setValue).toHaveBeenCalledWith("videoPlaybackVolume", null, SettingLevel.DEVICE, 0.4);
+        });
+
+        it("does not save the volume when it has not changed", () => {
+            // Muting fires a volume change event without changing the volume.
+            videoVolume = 0.4;
+            const vm = createVm();
+            vm.onVolumeChange(volumeChangeEvent(0.4));
+
+            expect(SettingsStore.setValue).not.toHaveBeenCalled();
+        });
+
+        it("follows volume changes made from other videos", () => {
+            const vm = createVm();
+            vm.setMediaVisible(true);
+
+            videoVolume = 0.6;
+            videoVolumeWatcher?.();
+
+            expect(vm.getSnapshot().volume).toBe(0.6);
+        });
     });
 
     it("uses the blurhash poster while the thumbnail image is loading", () => {

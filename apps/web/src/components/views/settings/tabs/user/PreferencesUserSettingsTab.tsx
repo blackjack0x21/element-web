@@ -130,6 +130,7 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
         "MessageComposerInput.ctrlEnterToSend",
         "MessageComposerInput.surroundWith",
         "MessageComposerInput.showStickersButton",
+        "MessageComposerInput.showGifButton",
         "MessageComposerInput.insertTrailingColon",
     ];
 

@@ -250,6 +250,7 @@ export interface Settings {
     "useCustomFontSize": IBaseSetting<boolean>;
     "MessageComposerInput.suggestEmoji": IBaseSetting<boolean>;
     "MessageComposerInput.showStickersButton": IBaseSetting<boolean>;
+    "MessageComposerInput.showGifButton": IBaseSetting<boolean>;
     "MessageComposerInput.showPollsButton": IBaseSetting<boolean>;
     "MessageComposerInput.insertTrailingColon": IBaseSetting<boolean>;
     "Notifications.showbold": IBaseSetting<boolean>;
@@ -360,6 +361,8 @@ export interface Settings {
     "debug_registration": IBaseSetting<boolean>;
     "debug_animation": IBaseSetting<boolean>;
     "audioInputMuted": IBaseSetting<boolean>;
+    "audioPlaybackVolume": IBaseSetting<number>;
+    "videoPlaybackVolume": IBaseSetting<number>;
     "videoInputMuted": IBaseSetting<boolean>;
     "activeCallRoomIds": IBaseSetting<string[]>;
     "releaseAnnouncementData": IBaseSetting<ReleaseAnnouncementData>;
@@ -709,6 +712,13 @@ export const SETTINGS: Settings = {
         displayName: _td("settings|show_stickers_button"),
         default: true,
         controller: new UIFeatureController(UIFeature.Widgets, false),
+    },
+    "MessageComposerInput.showGifButton": {
+        supportedLevels: LEVELS_ACCOUNT_SETTINGS,
+        displayName: _td("settings|show_gif_button"),
+        description: _td("settings|show_gif_button_description"),
+        shouldWarn: true,
+        default: false,
     },
     "MessageComposerInput.showPollsButton": {
         supportedLevels: LEVELS_ACCOUNT_SETTINGS,
@@ -1394,6 +1404,16 @@ export const SETTINGS: Settings = {
     "audioInputMuted": {
         supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,
         default: false,
+    },
+    // Volume for audio files and voice messages in the timeline, between 0 and 1
+    "audioPlaybackVolume": {
+        supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,
+        default: 1,
+    },
+    // Volume for videos in the timeline, between 0 and 1
+    "videoPlaybackVolume": {
+        supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,
+        default: 1,
     },
     "videoInputMuted": {
         supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,

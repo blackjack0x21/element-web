@@ -46,5 +46,8 @@
         "disable": false,
         "use_exclusively": false
     },
-    "map_style_url": "https://api.maptiler.com/maps/streets/style.json?key=fU3vlMsMn4Jb6dnEIFsx"
+    "map_style_url": "https://api.maptiler.com/maps/streets/style.json?key=fU3vlMsMn4Jb6dnEIFsx",
+    "gif": {
+        "api_key": "YOUR_KLIPY_API_KEY"
+    }
 }

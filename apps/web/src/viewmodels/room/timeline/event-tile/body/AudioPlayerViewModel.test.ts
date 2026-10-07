@@ -31,8 +31,23 @@ describe("AudioPlayerViewModel", () => {
             durationSeconds: 50,
             playedSeconds: 10,
             percentComplete: 20,
+            volume: 1,
             error: false,
         });
+    });
+
+    it("should set the playback volume on volume change", () => {
+        const vm = new AudioPlayerViewModel({ playback, mediaName: "mediaName" });
+        vm.onVolumeChange(0.4);
+        expect(playback.setVolume).toHaveBeenCalledWith(0.4);
+    });
+
+    it("should update the snapshot when the playback volume changes", () => {
+        const vm = new AudioPlayerViewModel({ playback, mediaName: "mediaName" });
+        const mockedPlayback = playback as unknown as MockedPlayback;
+        mockedPlayback.volume = 0.25;
+        mockedPlayback.emit("update", mockedPlayback.currentState);
+        expect(vm.getSnapshot().volume).toBe(0.25);
     });
 
     it("should toggle the playback state", async () => {

@@ -8,8 +8,8 @@ Please see LICENSE files in the repository root for full details.
 
 // @vitest-environment happy-dom
 
-import { vi, describe, it, expect, beforeEach } from "vitest";
-import React from "react";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import React, { act } from "react";
 import { logger } from "matrix-js-sdk/src/logger";
 import { fireEvent, render, type RenderResult } from "test-utils-rtl";
 import { flushPromises } from "test-utils";
@@ -19,6 +19,8 @@ import { Playback } from "../../../audio/Playback";
 import { type RoomContextType, TimelineRenderingType } from "../../../contexts/RoomContext";
 import { createAudioContext } from "../../../audio/compat";
 import { ScopedRoomContextProvider } from "../../../contexts/ScopedRoomContext.tsx";
+import SettingsStore from "../../../settings/SettingsStore";
+import { SettingLevel } from "../../../settings/SettingLevel";
 
 vi.mock("../../../WorkerManager", () => ({
     WorkerManager: vi.fn(function () {
@@ -133,6 +135,40 @@ describe("<RecordingPlayback />", () => {
             expect(component.container.querySelector(".mx_Clock")).toBeDefined();
             expect(component.container.querySelector(".mx_Waveform")).toBeDefined();
             expect(component.container.querySelector(".mx_SeekBar")).toBeFalsy();
+        });
+
+        it("should not have a volume slider", () => {
+            const playback = new Playback(new ArrayBuffer(8));
+            const component = getComponent({ playback, layout: PlaybackLayout.Composer });
+
+            expect(component.queryByRole("slider", { name: "Volume" })).toBeNull();
+        });
+    });
+
+    describe("Volume", () => {
+        afterEach(async () => {
+            await SettingsStore.setValue("audioPlaybackVolume", null, SettingLevel.DEVICE, null);
+        });
+
+        it("shows the saved volume", async () => {
+            await SettingsStore.setValue("audioPlaybackVolume", null, SettingLevel.DEVICE, 0.3);
+            const playback = new Playback(new ArrayBuffer(8));
+            const component = getComponent({ playback });
+
+            expect(component.getByRole("slider", { name: "Volume" })).toHaveValue("30");
+        });
+
+        it("sets the playback volume when the slider moves", () => {
+            const playback = new Playback(new ArrayBuffer(8));
+            const component = getComponent({ playback });
+
+            act(() => {
+                fireEvent.change(component.getByRole("slider", { name: "Volume" }), { target: { value: "60" } });
+            });
+
+            expect(playback.volume).toBe(0.6);
+            expect(SettingsStore.getValue("audioPlaybackVolume")).toBe(0.6);
+            expect(component.getByRole("slider", { name: "Volume" })).toHaveAttribute("aria-valuetext", "60%");
         });
     });
 

@@ -24,11 +24,13 @@ const { Ready, Hidden, ErrorState } = composeStories(stories);
 class TestVideoBodyViewModel extends MockViewModel<VideoBodyViewSnapshot> implements VideoBodyViewActions {
     public onPreviewClick?: VideoBodyViewActions["onPreviewClick"];
     public onPlay?: VideoBodyViewActions["onPlay"];
+    public onVolumeChange?: VideoBodyViewActions["onVolumeChange"];
 
     public constructor(snapshot: VideoBodyViewSnapshot, actions: VideoBodyViewActions = {}) {
         super(snapshot);
         this.onPreviewClick = actions.onPreviewClick;
         this.onPlay = actions.onPlay;
+        this.onVolumeChange = actions.onVolumeChange;
     }
 }
 
@@ -125,5 +127,26 @@ describe("VideoBodyView", () => {
 
         fireEvent.play(video);
         expect(onPlay).toHaveBeenCalledTimes(1);
+    });
+
+    it("applies the volume to the video element and reports volume changes", () => {
+        const onVolumeChange = vi.fn();
+        const snapshot: VideoBodyViewSnapshot = {
+            state: VideoBodyViewState.READY,
+            videoLabel: "Product demo video",
+            src: "https://example.org/demo.mp4",
+            controls: true,
+            volume: 0.3,
+        };
+        const { rerender } = render(<VideoBodyView vm={new TestVideoBodyViewModel(snapshot, { onVolumeChange })} />);
+
+        const video = screen.getByLabelText("Product demo video") as HTMLVideoElement;
+        expect(video.volume).toBe(0.3);
+
+        rerender(<VideoBodyView vm={new TestVideoBodyViewModel({ ...snapshot, volume: 0.7 }, { onVolumeChange })} />);
+        expect(video.volume).toBe(0.7);
+
+        fireEvent.volumeChange(video);
+        expect(onVolumeChange).toHaveBeenCalled();
     });
 });

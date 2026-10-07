@@ -73,6 +73,7 @@ describe("MessageComposerButtons", () => {
                 showLocationButton={true}
                 showPollsButton={true}
                 showStickersButton={true}
+                showGifButton={false}
             />,
             false,
         );
@@ -88,6 +89,7 @@ describe("MessageComposerButtons", () => {
                 showLocationButton={true}
                 showPollsButton={true}
                 showStickersButton={true}
+                showGifButton={false}
             />,
             false,
         );
@@ -112,6 +114,7 @@ describe("MessageComposerButtons", () => {
                 showLocationButton={true}
                 showPollsButton={true}
                 showStickersButton={true}
+                showGifButton={false}
             />,
             true,
         );
@@ -127,6 +130,7 @@ describe("MessageComposerButtons", () => {
                 showLocationButton={true}
                 showPollsButton={true}
                 showStickersButton={true}
+                showGifButton={false}
             />,
             true,
         );
@@ -143,6 +147,7 @@ describe("MessageComposerButtons", () => {
                     showLocationButton={true}
                     showPollsButton={true}
                     showStickersButton={true}
+                    showGifButton={false}
                 />,
                 true,
             );
@@ -158,6 +163,7 @@ describe("MessageComposerButtons", () => {
                     showLocationButton={true}
                     showPollsButton={false} // !! the change from the alternate test
                     showStickersButton={true}
+                    showGifButton={false}
                 />,
                 true,
             );

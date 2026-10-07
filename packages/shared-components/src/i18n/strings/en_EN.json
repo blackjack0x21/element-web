@@ -1,6 +1,7 @@
 {
     "a11y": {
-        "seek_bar_label": "Audio seek bar"
+        "seek_bar_label": "Audio seek bar",
+        "volume_slider_label": "Volume"
     },
     "action": {
         "back": "Back",

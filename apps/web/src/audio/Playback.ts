@@ -19,6 +19,8 @@ import { PlaybackClock } from "./PlaybackClock";
 import { createAudioContext, decodeOgg } from "./compat";
 import { DEFAULT_WAVEFORM, PLAYBACK_WAVEFORM_SAMPLES } from "./consts";
 import { PlaybackEncoder } from "../PlaybackEncoder";
+import SettingsStore from "../settings/SettingsStore";
+import { SettingLevel } from "../settings/SettingLevel";
 
 export enum PlaybackState {
     Preparing = "preparing", // preparing to decode
@@ -54,6 +56,9 @@ export class Playback extends EventEmitter implements IDestroyable, PlaybackInte
     private waveformObservable = new SimpleObservable<number[]>();
     private readonly clock: PlaybackClock;
     private readonly fileSize: number;
+    private gainNode?: GainNode;
+    private volumeLevel: number;
+    private readonly volumeWatcherRef: string;
 
     /**
      * Creates a new playback instance from a buffer.
@@ -73,6 +78,8 @@ export class Playback extends EventEmitter implements IDestroyable, PlaybackInte
         this.thumbnailWaveform = arrayFastResample(seedWaveform ?? DEFAULT_WAVEFORM, THUMBNAIL_WAVEFORM_SAMPLES);
         this.waveformObservable.update(this.resampledWaveform);
         this.clock = new PlaybackClock(this.context);
+        this.volumeLevel = SettingsStore.getValue("audioPlaybackVolume");
+        this.volumeWatcherRef = SettingsStore.watchSetting("audioPlaybackVolume", null, this.onVolumeSettingChange);
     }
 
     /**
@@ -119,6 +126,48 @@ export class Playback extends EventEmitter implements IDestroyable, PlaybackInte
         return this.currentState === PlaybackState.Playing;
     }
 
+    /**
+     * The playback volume, between 0 and 1 inclusive. Shared by every playback and persisted
+     * through the "audioPlaybackVolume" setting.
+     */
+    public get volume(): number {
+        return this.volumeLevel;
+    }
+
+    /**
+     * Sets and saves the playback volume. Every other playback picks up the new value too.
+     * @param volume The new volume, clamped to between 0 and 1.
+     */
+    public setVolume(volume: number): void {
+        this.applyVolume(clamp(volume, 0, 1));
+        void SettingsStore.setValue("audioPlaybackVolume", null, SettingLevel.DEVICE, this.volumeLevel);
+    }
+
+    private onVolumeSettingChange = (): void => {
+        this.applyVolume(SettingsStore.getValue("audioPlaybackVolume"));
+    };
+
+    private applyVolume(volume: number): void {
+        if (volume === this.volumeLevel) return;
+        this.volumeLevel = volume;
+        if (this.gainNode) this.gainNode.gain.value = volume;
+        // Bypass our emit() override: the playback state has not changed, only the volume.
+        super.emit(UPDATE_EVENT, this.state);
+    }
+
+    /**
+     * The node all sources play through, so the volume applies to them. Created on first use
+     * rather than in the constructor as most playbacks are never played.
+     */
+    private get output(): GainNode {
+        if (!this.gainNode) {
+            this.gainNode = this.context.createGain();
+            this.gainNode.gain.value = this.volumeLevel;
+            this.gainNode.connect(this.context.destination);
+        }
+        return this.gainNode;
+    }
+
     public emit(event: PlaybackState, ...args: any[]): boolean {
         this.state = event;
         super.emit(event, ...args);
@@ -132,6 +181,7 @@ export class Playback extends EventEmitter implements IDestroyable, PlaybackInte
         void this.stop();
         this.removeAllListeners();
         this.clock.destroy();
+        SettingsStore.unwatchSetting(this.volumeWatcherRef);
         this.waveformObservable.close();
         if (this.element) {
             this.element.removeEventListener("ended", this.onPlaybackEnd);
@@ -249,7 +299,7 @@ export class Playback extends EventEmitter implements IDestroyable, PlaybackInte
             this.source.addEventListener("ended", this.onPlaybackEnd);
         }
 
-        this.source.connect(this.context.destination);
+        this.source.connect(this.output);
     }
 
     public async pause(): Promise<void> {

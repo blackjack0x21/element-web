@@ -12,8 +12,11 @@ import React, {
     type PropsWithChildren,
     type ReactEventHandler,
     type Ref,
+    useEffect,
+    useRef,
 } from "react";
 import classNames from "classnames";
+import { useMergeRefs } from "react-merge-refs";
 import { FileErrorIcon, VisibilityOnIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import { InlineSpinner } from "@vector-im/compound-web";
 
@@ -89,6 +92,10 @@ export interface VideoBodyViewSnapshot {
      * Whether the video should autoplay.
      */
     autoPlay?: boolean;
+    /**
+     * Playback volume, between 0 and 1. Left at the browser default when not provided.
+     */
+    volume?: number;
 }
 
 export interface VideoBodyViewActions {
@@ -100,6 +107,10 @@ export interface VideoBodyViewActions {
      * Invoked when the video starts playing.
      */
     onPlay?: ReactEventHandler<HTMLVideoElement>;
+    /**
+     * Invoked when the volume or muted state of the video changes, including from its native controls.
+     */
+    onVolumeChange?: ReactEventHandler<HTMLVideoElement>;
 }
 
 export type VideoBodyViewModel = ViewModel<VideoBodyViewSnapshot, VideoBodyViewActions>;
@@ -155,7 +166,17 @@ export function VideoBodyView({
         controls,
         muted,
         autoPlay,
+        volume,
     } = useViewModel(vm);
+
+    // `volume` is not an HTML attribute, so it has to be set on the element directly.
+    const localVideoRef = useRef<HTMLVideoElement>(null);
+    const mergedVideoRef = useMergeRefs([localVideoRef, videoRef]);
+    useEffect(() => {
+        if (localVideoRef.current && volume !== undefined) {
+            localVideoRef.current.volume = volume;
+        }
+    }, [volume, state]);
 
     const rootClassName = classNames(className, styles.root);
     const resolvedContainerClassName = classNames(containerClassName, styles.container);
@@ -212,7 +233,7 @@ export function VideoBodyView({
                 {/* Captions will be supplied from app-side data once the VM wiring is in place. */}
                 <video
                     className={styles.video}
-                    ref={videoRef}
+                    ref={mergedVideoRef}
                     src={src}
                     aria-label={videoLabel}
                     title={videoTitle}
@@ -224,6 +245,7 @@ export function VideoBodyView({
                     autoPlay={autoPlay}
                     poster={poster}
                     onPlay={vm.onPlay}
+                    onVolumeChange={vm.onVolumeChange}
                 />
             </div>
             {children}

@@ -815,7 +815,6 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       class="_container"
                     >
                       <input
-                        checked=""
                         class="_input"
                         disabled=""
                         id="mx_SettingsFlag_hQkBerF1ejc4"
@@ -833,6 +832,52 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                     <label
                       class="_label"
                       for="mx_SettingsFlag_hQkBerF1ejc4"
+                    >
+                      Show GIF button
+                    </label>
+                    <span
+                      class="_message _help-message"
+                      id="radix-react-use-id-5"
+                    >
+                      <span>
+                        <span
+                          class="mx_SettingsTab_microcopy_warning"
+                        >
+                          WARNING:
+                        </span>
+                         GIF search queries are sent directly to Klipy and are not proxied through your homeserver.
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="_inline-field"
+                >
+                  <div
+                    class="_inline-field-control"
+                  >
+                    <div
+                      class="_container"
+                    >
+                      <input
+                        checked=""
+                        class="_input"
+                        disabled=""
+                        id="mx_SettingsFlag_GFes1UFzOK2n"
+                        role="switch"
+                        type="checkbox"
+                      />
+                      <div
+                        class="_ui"
+                      />
+                    </div>
+                  </div>
+                  <div
+                    class="_inline-field-body"
+                  >
+                    <label
+                      class="_label"
+                      for="mx_SettingsFlag_GFes1UFzOK2n"
                     >
                       Insert a trailing colon after user mentions at the start of a message
                     </label>
@@ -871,7 +916,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       <input
                         class="_input"
                         disabled=""
-                        id="mx_SettingsFlag_GFes1UFzOK2n"
+                        id="mx_SettingsFlag_vfGFMldL2r2v"
                         role="switch"
                         type="checkbox"
                       />
@@ -885,7 +930,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                   >
                     <label
                       class="_label"
-                      for="mx_SettingsFlag_GFes1UFzOK2n"
+                      for="mx_SettingsFlag_vfGFMldL2r2v"
                     >
                       Enable automatic language detection for syntax highlighting
                     </label>
@@ -903,7 +948,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       <input
                         class="_input"
                         disabled=""
-                        id="mx_SettingsFlag_vfGFMldL2r2v"
+                        id="mx_SettingsFlag_bsSwicmKUiOB"
                         role="switch"
                         type="checkbox"
                       />
@@ -917,7 +962,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                   >
                     <label
                       class="_label"
-                      for="mx_SettingsFlag_vfGFMldL2r2v"
+                      for="mx_SettingsFlag_bsSwicmKUiOB"
                     >
                       Expand code blocks by default
                     </label>
@@ -936,7 +981,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                         checked=""
                         class="_input"
                         disabled=""
-                        id="mx_SettingsFlag_bsSwicmKUiOB"
+                        id="mx_SettingsFlag_dvqsxEaZtl3A"
                         role="switch"
                         type="checkbox"
                       />
@@ -950,7 +995,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                   >
                     <label
                       class="_label"
-                      for="mx_SettingsFlag_bsSwicmKUiOB"
+                      for="mx_SettingsFlag_dvqsxEaZtl3A"
                     >
                       Show line numbers in code blocks
                     </label>
@@ -998,7 +1043,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       <input
                         checked=""
                         class="_input"
-                        id="mx_SettingsFlag_dvqsxEaZtl3A"
+                        id="mx_SettingsFlag_NIiWzqsApP1c"
                         role="switch"
                         type="checkbox"
                       />
@@ -1012,7 +1057,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                   >
                     <label
                       class="_label"
-                      for="mx_SettingsFlag_dvqsxEaZtl3A"
+                      for="mx_SettingsFlag_NIiWzqsApP1c"
                     >
                       Enable previews
                     </label>
@@ -1029,7 +1074,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                     >
                       <input
                         class="_input"
-                        id="mx_SettingsFlag_NIiWzqsApP1c"
+                        id="mx_SettingsFlag_q1SIAPqLMVXh"
                         role="switch"
                         type="checkbox"
                       />
@@ -1043,7 +1088,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                   >
                     <label
                       class="_label"
-                      for="mx_SettingsFlag_NIiWzqsApP1c"
+                      for="mx_SettingsFlag_q1SIAPqLMVXh"
                     >
                       Enable previews in encrypted rooms
                     </label>
@@ -1082,7 +1127,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       <input
                         class="_input"
                         disabled=""
-                        id="mx_SettingsFlag_q1SIAPqLMVXh"
+                        id="mx_SettingsFlag_dXFDGgBsKXay"
                         role="switch"
                         type="checkbox"
                       />
@@ -1096,7 +1141,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                   >
                     <label
                       class="_label"
-                      for="mx_SettingsFlag_q1SIAPqLMVXh"
+                      for="mx_SettingsFlag_dXFDGgBsKXay"
                     >
                       Autoplay GIFs
                     </label>
@@ -1114,7 +1159,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       <input
                         class="_input"
                         disabled=""
-                        id="mx_SettingsFlag_dXFDGgBsKXay"
+                        id="mx_SettingsFlag_7Az0xw4Bs4Tt"
                         role="switch"
                         type="checkbox"
                       />
@@ -1128,7 +1173,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                   >
                     <label
                       class="_label"
-                      for="mx_SettingsFlag_dXFDGgBsKXay"
+                      for="mx_SettingsFlag_7Az0xw4Bs4Tt"
                     >
                       Autoplay videos
                     </label>
@@ -1168,39 +1213,6 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                         checked=""
                         class="_input"
                         disabled=""
-                        id="mx_SettingsFlag_7Az0xw4Bs4Tt"
-                        role="switch"
-                        type="checkbox"
-                      />
-                      <div
-                        class="_ui"
-                      />
-                    </div>
-                  </div>
-                  <div
-                    class="_inline-field-body"
-                  >
-                    <label
-                      class="_label"
-                      for="mx_SettingsFlag_7Az0xw4Bs4Tt"
-                    >
-                      Show typing notifications
-                    </label>
-                  </div>
-                </div>
-                <div
-                  class="_inline-field"
-                >
-                  <div
-                    class="_inline-field-control"
-                  >
-                    <div
-                      class="_container"
-                    >
-                      <input
-                        checked=""
-                        class="_input"
-                        disabled=""
                         id="mx_SettingsFlag_8jmzPIlPoBCv"
                         role="switch"
                         type="checkbox"
@@ -1217,7 +1229,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       class="_label"
                       for="mx_SettingsFlag_8jmzPIlPoBCv"
                     >
-                      Show a placeholder for removed messages
+                      Show typing notifications
                     </label>
                   </div>
                 </div>
@@ -1250,7 +1262,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       class="_label"
                       for="mx_SettingsFlag_enFRaTjdsFou"
                     >
-                      Show read receipts sent by other users
+                      Show a placeholder for removed messages
                     </label>
                   </div>
                 </div>
@@ -1283,7 +1295,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       class="_label"
                       for="mx_SettingsFlag_bfwnd5rz4XNX"
                     >
-                      Show join/leave messages (invites/removes/bans unaffected)
+                      Show read receipts sent by other users
                     </label>
                   </div>
                 </div>
@@ -1316,7 +1328,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       class="_label"
                       for="mx_SettingsFlag_gs5uWEzYzZrS"
                     >
-                      Show display name changes
+                      Show join/leave messages (invites/removes/bans unaffected)
                     </label>
                   </div>
                 </div>
@@ -1349,7 +1361,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       class="_label"
                       for="mx_SettingsFlag_qWg7OgID1yRR"
                     >
-                      Show chat effects (animations when receiving e.g. confetti)
+                      Show display name changes
                     </label>
                   </div>
                 </div>
@@ -1382,7 +1394,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       class="_label"
                       for="mx_SettingsFlag_pOPewl7rtMbV"
                     >
-                      Show profile picture changes
+                      Show chat effects (animations when receiving e.g. confetti)
                     </label>
                   </div>
                 </div>
@@ -1415,7 +1427,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       class="_label"
                       for="mx_SettingsFlag_cmt3PZSyNp3v"
                     >
-                      Show avatars in user, room and event mentions
+                      Show profile picture changes
                     </label>
                   </div>
                 </div>
@@ -1448,7 +1460,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       class="_label"
                       for="mx_SettingsFlag_dJJz3lHUv9XX"
                     >
-                      Enable big emoji in chat
+                      Show avatars in user, room and event mentions
                     </label>
                   </div>
                 </div>
@@ -1481,7 +1493,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       class="_label"
                       for="mx_SettingsFlag_SBSSOZDRlzlA"
                     >
-                      Jump to the bottom of the timeline when you send a message
+                      Enable big emoji in chat
                     </label>
                   </div>
                 </div>
@@ -1513,6 +1525,39 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                     <label
                       class="_label"
                       for="mx_SettingsFlag_FLEpLCb0jpp6"
+                    >
+                      Jump to the bottom of the timeline when you send a message
+                    </label>
+                  </div>
+                </div>
+                <div
+                  class="_inline-field"
+                >
+                  <div
+                    class="_inline-field-control"
+                  >
+                    <div
+                      class="_container"
+                    >
+                      <input
+                        checked=""
+                        class="_input"
+                        disabled=""
+                        id="mx_SettingsFlag_NQFWldEwbV3q"
+                        role="switch"
+                        type="checkbox"
+                      />
+                      <div
+                        class="_ui"
+                      />
+                    </div>
+                  </div>
+                  <div
+                    class="_inline-field-body"
+                  >
+                    <label
+                      class="_label"
+                      for="mx_SettingsFlag_NQFWldEwbV3q"
                     >
                       Show current profile picture and name for users in message history
                     </label>
@@ -1550,7 +1595,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                     >
                       <input
                         class="_input"
-                        id="react-use-id-5"
+                        id="react-use-id-6"
                         role="switch"
                         type="checkbox"
                       />
@@ -1564,7 +1609,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                   >
                     <label
                       class="_label"
-                      for="react-use-id-5"
+                      for="react-use-id-6"
                     >
                       Hide avatars of room and inviter
                     </label>
@@ -1578,13 +1623,13 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                 >
                   <label
                     class="_label"
-                    for="radix-react-use-id-6"
+                    for="radix-react-use-id-7"
                   >
                     Show media in timeline
                   </label>
                   <span
                     class="_message _help-message mx_MediaPreviewAccountSetting_RadioHelp"
-                    id="radix-react-use-id-7"
+                    id="radix-react-use-id-8"
                   >
                     Hidden media can always be shown by selecting it
                   </span>
@@ -1697,7 +1742,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                         checked=""
                         class="_input"
                         disabled=""
-                        id="react-use-id-8"
+                        id="react-use-id-9"
                         role="switch"
                         type="checkbox"
                       />
@@ -1711,13 +1756,13 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                   >
                     <label
                       class="_label"
-                      for="react-use-id-8"
+                      for="react-use-id-9"
                     >
                       Allow users to invite you to rooms
                     </label>
                     <span
                       class="_message _help-message"
-                      id="radix-react-use-id-9"
+                      id="radix-react-use-id-10"
                     >
                       Your account provider does not offer this feature.
                     </span>
@@ -1762,7 +1807,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       <input
                         class="_input"
                         disabled=""
-                        id="mx_SettingsFlag_NQFWldEwbV3q"
+                        id="mx_SettingsFlag_5ZjibYJT2HFm"
                         role="switch"
                         type="checkbox"
                       />
@@ -1776,7 +1821,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                   >
                     <label
                       class="_label"
-                      for="mx_SettingsFlag_NQFWldEwbV3q"
+                      for="mx_SettingsFlag_5ZjibYJT2HFm"
                     >
                       Show NSFW content
                     </label>
@@ -1816,7 +1861,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                         checked=""
                         class="_input"
                         disabled=""
-                        id="mx_SettingsFlag_5ZjibYJT2HFm"
+                        id="mx_SettingsFlag_mTnTitfNlxc2"
                         role="switch"
                         type="checkbox"
                       />
@@ -1830,7 +1875,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                   >
                     <label
                       class="_label"
-                      for="mx_SettingsFlag_5ZjibYJT2HFm"
+                      for="mx_SettingsFlag_mTnTitfNlxc2"
                     >
                       Prompt before sending invites to potentially invalid matrix IDs
                     </label>

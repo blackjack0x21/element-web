@@ -13,6 +13,9 @@ import { logger } from "matrix-js-sdk/src/logger";
 
 import { createAudioContext, decodeOgg } from "./compat";
 import { Playback, PlaybackState } from "./Playback";
+import SettingsStore from "../settings/SettingsStore";
+import { SettingLevel } from "../settings/SettingLevel";
+import { UPDATE_EVENT } from "../stores/AsyncStore";
 
 vi.mock("../WorkerManager", () => ({
     WorkerManager: vi.fn(function () {
@@ -39,7 +42,13 @@ describe("Playback", () => {
         connect: vi.fn(),
         disconnect: vi.fn(),
     };
+    const mockGainNode = {
+        gain: { value: 1 },
+        connect: vi.fn(),
+    };
     const mockAudioContext = {
+        destination: {},
+        createGain: vi.fn().mockReturnValue(mockGainNode),
         decodeAudioData: vi.fn(),
         suspend: vi.fn(),
         resume: vi.fn(),
@@ -135,6 +144,67 @@ describe("Playback", () => {
         expect(playback.currentState).toEqual(PlaybackState.Stopped);
         // Clock should be reset to 0
         expect(playback.timeSeconds).toEqual(0);
+    });
+
+    describe("volume", () => {
+        afterEach(async () => {
+            await SettingsStore.setValue("audioPlaybackVolume", null, SettingLevel.DEVICE, null);
+        });
+
+        it("starts at the saved volume", async () => {
+            await SettingsStore.setValue("audioPlaybackVolume", null, SettingLevel.DEVICE, 0.4);
+            const playback = new Playback(new ArrayBuffer(8));
+            expect(playback.volume).toBe(0.4);
+        });
+
+        it("plays through a gain node set to the volume", async () => {
+            await SettingsStore.setValue("audioPlaybackVolume", null, SettingLevel.DEVICE, 0.4);
+            const playback = new Playback(new ArrayBuffer(8));
+            await playback.prepare();
+            await playback.play();
+
+            expect(mockGainNode.gain.value).toBe(0.4);
+            expect(mockGainNode.connect).toHaveBeenCalledWith(mockAudioContext.destination);
+            expect(mockAudioBufferSourceNode.connect).toHaveBeenCalledWith(mockGainNode);
+
+            playback.setVolume(0.7);
+            expect(mockGainNode.gain.value).toBe(0.7);
+        });
+
+        it("saves the volume and emits an update without changing the state", () => {
+            const playback = new Playback(new ArrayBuffer(8));
+            const onUpdate = vi.fn();
+            playback.on(UPDATE_EVENT, onUpdate);
+
+            playback.setVolume(0.2);
+
+            expect(playback.volume).toBe(0.2);
+            expect(SettingsStore.getValue("audioPlaybackVolume")).toBe(0.2);
+            expect(onUpdate).toHaveBeenCalledWith(PlaybackState.Decoding);
+            expect(playback.currentState).toBe(PlaybackState.Decoding);
+        });
+
+        it("clamps the volume between 0 and 1", () => {
+            const playback = new Playback(new ArrayBuffer(8));
+            playback.setVolume(3);
+            expect(playback.volume).toBe(1);
+            playback.setVolume(-1);
+            expect(playback.volume).toBe(0);
+        });
+
+        it("follows volume changes made by other playbacks", () => {
+            const playback = new Playback(new ArrayBuffer(8));
+            const other = new Playback(new ArrayBuffer(8));
+            other.setVolume(0.5);
+            expect(playback.volume).toBe(0.5);
+        });
+
+        it("stops following the volume once destroyed", () => {
+            const playback = new Playback(new ArrayBuffer(8));
+            playback.destroy();
+            new Playback(new ArrayBuffer(8)).setVolume(0.5);
+            expect(playback.volume).toBe(1);
+        });
     });
 
     describe("prepare()", () => {

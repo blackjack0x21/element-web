@@ -49,12 +49,19 @@ function SoundVolumeSetting({ setting, label }: Readonly<SoundVolumeSettingProps
             <Text as="span" size="md" weight="medium">
                 {label}
             </Text>
-            <VolumeSlider
-                className="mx_SoundVolumeSetting_slider"
-                volume={volume}
-                label={label}
-                onVolumeChange={(newVolume) => SettingsStore.setValue(setting, null, SettingLevel.DEVICE, newVolume)}
-            />
+            <div className="mx_SoundVolumeSetting_control">
+                <VolumeSlider
+                    className="mx_SoundVolumeSetting_slider"
+                    volume={volume}
+                    label={label}
+                    onVolumeChange={(newVolume) =>
+                        SettingsStore.setValue(setting, null, SettingLevel.DEVICE, newVolume)
+                    }
+                />
+                <Text as="span" size="sm" className="mx_SoundVolumeSetting_value" aria-hidden>
+                    {Math.round(volume * 100)}%
+                </Text>
+            </div>
         </div>
     );
 }

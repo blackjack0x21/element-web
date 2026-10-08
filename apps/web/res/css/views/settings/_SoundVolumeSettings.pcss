@@ -22,3 +22,16 @@ Please see LICENSE files in the repository root for full details.
 .mx_SoundVolumeSetting_slider input[type="range"] {
     width: 200px;
 }
+
+.mx_SoundVolumeSetting_control {
+    display: flex;
+    align-items: center;
+    gap: var(--cpd-space-3x);
+}
+
+.mx_SoundVolumeSetting_value {
+    min-width: 4ch;
+    text-align: end;
+    color: var(--cpd-color-text-secondary);
+    font-variant-numeric: tabular-nums;
+}

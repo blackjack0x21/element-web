@@ -20,3 +20,55 @@
 .slider {
     width: 56px;
 }
+
+/* A thicker track and larger thumb than the seek bar default, which is easy to miss and hard to grab. */
+.volumeSlider .slider {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--cpd-color-bg-subtle-primary);
+
+    &::before {
+        height: 4px;
+        border-radius: 2px;
+        background-color: var(--cpd-color-icon-accent-primary);
+    }
+
+    &::-webkit-slider-thumb {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background-color: var(--cpd-color-icon-accent-primary);
+        box-shadow: 0 0 0 2px var(--cpd-color-bg-canvas-default);
+        transition: transform 0.1s ease-out;
+    }
+
+    &::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background-color: var(--cpd-color-icon-accent-primary);
+        box-shadow: 0 0 0 2px var(--cpd-color-bg-canvas-default);
+        transition: transform 0.1s ease-out;
+    }
+
+    &::-moz-range-progress {
+        height: 4px;
+        border-radius: 2px;
+        background-color: var(--cpd-color-icon-accent-primary);
+    }
+
+    &:hover::-webkit-slider-thumb,
+    &:focus-visible::-webkit-slider-thumb {
+        transform: scale(1.15);
+    }
+
+    &:hover::-moz-range-thumb,
+    &:focus-visible::-moz-range-thumb {
+        transform: scale(1.15);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--cpd-color-border-focused);
+        outline-offset: 6px;
+    }
+}

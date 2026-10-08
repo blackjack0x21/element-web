@@ -124,8 +124,9 @@ export function AudioPlayerView({ vm }: Readonly<AudioPlayerViewProps>): JSX.Ele
                 aria-label={_t("timeline|m.audio|audio_player")}
                 role="region"
             >
-                <Flex gap="var(--cpd-space-2x)" align="center">
+                <Flex gap="var(--cpd-space-3x)" align="center">
                     <PlayPauseButton
+                        className={styles.playButton}
                         // Prevent tabbing into the button
                         // Keyboard navigation is handled at the MediaBody level
                         tabIndex={-1}
@@ -143,10 +144,18 @@ export function AudioPlayerView({ vm }: Readonly<AudioPlayerViewProps>): JSX.Ele
                         </Flex>
                     </Flex>
                 </Flex>
-                <Flex align="center" gap="var(--cpd-space-1x)" data-testid="audio-player-seek">
-                    <SeekBar tabIndex={-1} disabled={disabled} value={percentComplete} onChange={vm.onSeekbarChange} />
-                    <Clock className={styles.clock} seconds={playedSeconds} role="timer" />
-                    <VolumeSlider volume={volume} onVolumeChange={vm.onVolumeChange} />
+                <Flex direction="column" gap="var(--cpd-space-1x)" data-testid="audio-player-seek">
+                    <SeekBar
+                        className={styles.seekBar}
+                        tabIndex={-1}
+                        disabled={disabled}
+                        value={percentComplete}
+                        onChange={vm.onSeekbarChange}
+                    />
+                    <Flex align="center" justify="space-between" gap="var(--cpd-space-2x)">
+                        <Clock className={styles.clock} seconds={playedSeconds} role="timer" />
+                        <VolumeSlider volume={volume} onVolumeChange={vm.onVolumeChange} />
+                    </Flex>
                 </Flex>
             </MediaBody>
             {error && <span className={styles.error}>{_t("timeline|m.audio|error_downloading_audio")}</span>}

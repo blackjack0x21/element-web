@@ -6,7 +6,70 @@
  */
 
 .audioPlayer {
-    padding: var(--cpd-space-4x) var(--cpd-space-3x) var(--cpd-space-3x) var(--cpd-space-3x);
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-3x);
+    padding: var(--cpd-space-3x);
+    border-radius: var(--cpd-space-3x);
+}
+
+/* Compound's IconButton sizes its icon from the button's content box, so grow the button and pad it to leave a
+   centred 22px icon. Its hover rules also recolour every descendant, so the icon colour is set per state. */
+.playButton.playButton {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 8px;
+    background-color: var(--cpd-color-bg-subtle-primary);
+    transition: transform 0.1s ease-out;
+
+    &:not([aria-disabled="true"]):hover {
+        transform: scale(1.06);
+    }
+
+    /* Fill the icon wrapper, overriding the fixed size PlayPauseButton gives its icon */
+    & svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    &:not([aria-disabled="true"]) svg,
+    &:not([aria-disabled="true"]):hover svg,
+    &:not([aria-disabled="true"]):active svg {
+        color: var(--cpd-color-icon-accent-primary);
+    }
+}
+
+/* A thicker track and rounder thumb than the seek bar default, matching the volume slider. */
+.seekBar {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--cpd-color-bg-subtle-primary);
+
+    &::before {
+        height: 4px;
+        border-radius: 2px;
+        background-color: var(--cpd-color-icon-accent-primary);
+    }
+
+    &::-webkit-slider-thumb {
+        width: 12px;
+        height: 12px;
+        background-color: var(--cpd-color-icon-accent-primary);
+    }
+
+    &::-moz-range-thumb {
+        width: 12px;
+        height: 12px;
+        background-color: var(--cpd-color-icon-accent-primary);
+    }
+
+    &::-moz-range-progress {
+        height: 4px;
+        border-radius: 2px;
+        background-color: var(--cpd-color-icon-accent-primary);
+    }
 }
 
 .mediaInfo {
@@ -16,7 +79,7 @@
 
 .mediaName {
     color: var(--cpd-color-text-primary);
-    font: var(--cpd-font-body-md-regular);
+    font: var(--cpd-font-body-md-semibold);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -24,10 +87,14 @@
 }
 
 .byline {
+    color: var(--cpd-color-text-secondary);
     font: var(--cpd-font-body-xs-regular);
 }
 
 .clock {
+    color: var(--cpd-color-text-secondary);
+    font: var(--cpd-font-body-xs-regular);
+    font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
 

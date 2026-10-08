@@ -10,13 +10,13 @@ exports[`AudioPlayerView > renders the audio player in default state 1`] = `
   >
     <div
       class="Flex-module_flex"
-      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: nowrap;"
+      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
     >
       <button
         aria-disabled="false"
         aria-label="Play"
         aria-labelledby="react-use-id-1"
-        class="_icon-button_1215g_8 PlayPauseButton-module_button"
+        class="_icon-button_1215g_8 PlayPauseButton-module_button AudioPlayerView-module_playButton"
         data-kind="primary"
         role="button"
         style="--cpd-icon-button-size: 32px;"
@@ -66,11 +66,11 @@ exports[`AudioPlayerView > renders the audio player in default state 1`] = `
     <div
       class="Flex-module_flex"
       data-testid="audio-player-seek"
-      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
+      style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
     >
       <input
         aria-label="Audio seek bar"
-        class="SeekBar-module_seekBar"
+        class="SeekBar-module_seekBar AudioPlayerView-module_seekBar"
         max="100"
         min="0"
         step="1"
@@ -79,43 +79,48 @@ exports[`AudioPlayerView > renders the audio player in default state 1`] = `
         type="range"
         value="30"
       />
-      <time
-        class="mx_Clock AudioPlayerView-module_clock"
-        datetime="PT2M"
-        role="timer"
-      >
-        02:00
-      </time>
       <div
-        class="VolumeSlider-module_volumeSlider"
+        class="Flex-module_flex"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: nowrap;"
       >
-        <svg
-          aria-hidden="true"
-          class="VolumeSlider-module_icon"
-          fill="currentColor"
-          height="16px"
-          viewBox="0 0 24 24"
-          width="16px"
-          xmlns="http://www.w3.org/2000/svg"
+        <time
+          class="mx_Clock AudioPlayerView-module_clock"
+          datetime="PT2M"
+          role="timer"
         >
-          <path
-            d="M3 10a2 2 0 0 1 2-2h2l3.293-3.293c.63-.63 1.707-.184 1.707.707v13.172c0 .89-1.077 1.337-1.707.707L7 16H5a2 2 0 0 1-2-2zm4.828 4L10 16.172V7.828L7.828 10H5v4zm6.294-5.536a1 1 0 0 1 1.414 0A5 5 0 0 1 17 12c0 1.38-.56 2.632-1.464 3.535a1 1 0 1 1-1.415-1.414 3 3 0 0 0 .88-2.121c0-.829-.335-1.578-.88-2.122a1 1 0 0 1 0-1.414"
+          02:00
+        </time>
+        <div
+          class="VolumeSlider-module_volumeSlider"
+        >
+          <svg
+            aria-hidden="true"
+            class="VolumeSlider-module_icon"
+            fill="currentColor"
+            height="16px"
+            viewBox="0 0 24 24"
+            width="16px"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 10a2 2 0 0 1 2-2h2l3.293-3.293c.63-.63 1.707-.184 1.707.707v13.172c0 .89-1.077 1.337-1.707.707L7 16H5a2 2 0 0 1-2-2zm4.828 4L10 16.172V7.828L7.828 10H5v4zm6.294-5.536a1 1 0 0 1 1.414 0A5 5 0 0 1 17 12c0 1.38-.56 2.632-1.464 3.535a1 1 0 1 1-1.415-1.414 3 3 0 0 0 .88-2.121c0-.829-.335-1.578-.88-2.122a1 1 0 0 1 0-1.414"
+            />
+            <path
+              d="M18.364 5.636A1 1 0 1 0 16.95 7.05 6.98 6.98 0 0 1 19 12a6.98 6.98 0 0 1-2.05 4.95 1 1 0 0 0 1.414 1.414A8.98 8.98 0 0 0 21 12a8.98 8.98 0 0 0-2.636-6.364"
+            />
+          </svg>
+          <input
+            aria-label="Volume"
+            aria-valuetext="80%"
+            class="SeekBar-module_seekBar VolumeSlider-module_slider"
+            max="100"
+            min="0"
+            step="1"
+            style="--fillTo: 0.8;"
+            type="range"
+            value="80"
           />
-          <path
-            d="M18.364 5.636A1 1 0 1 0 16.95 7.05 6.98 6.98 0 0 1 19 12a6.98 6.98 0 0 1-2.05 4.95 1 1 0 0 0 1.414 1.414A8.98 8.98 0 0 0 21 12a8.98 8.98 0 0 0-2.636-6.364"
-          />
-        </svg>
-        <input
-          aria-label="Volume"
-          aria-valuetext="80%"
-          class="SeekBar-module_seekBar VolumeSlider-module_slider"
-          max="100"
-          min="0"
-          step="1"
-          style="--fillTo: 0.8;"
-          type="range"
-          value="80"
-        />
+        </div>
       </div>
     </div>
   </div>
@@ -132,13 +137,13 @@ exports[`AudioPlayerView > renders the audio player in error state 1`] = `
   >
     <div
       class="Flex-module_flex"
-      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: nowrap;"
+      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
     >
       <button
         aria-disabled="false"
         aria-label="Play"
         aria-labelledby="react-use-id-1"
-        class="_icon-button_1215g_8 PlayPauseButton-module_button"
+        class="_icon-button_1215g_8 PlayPauseButton-module_button AudioPlayerView-module_playButton"
         data-kind="primary"
         role="button"
         style="--cpd-icon-button-size: 32px;"
@@ -188,11 +193,11 @@ exports[`AudioPlayerView > renders the audio player in error state 1`] = `
     <div
       class="Flex-module_flex"
       data-testid="audio-player-seek"
-      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
+      style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
     >
       <input
         aria-label="Audio seek bar"
-        class="SeekBar-module_seekBar"
+        class="SeekBar-module_seekBar AudioPlayerView-module_seekBar"
         max="100"
         min="0"
         step="1"
@@ -201,43 +206,48 @@ exports[`AudioPlayerView > renders the audio player in error state 1`] = `
         type="range"
         value="30"
       />
-      <time
-        class="mx_Clock AudioPlayerView-module_clock"
-        datetime="PT2M"
-        role="timer"
-      >
-        02:00
-      </time>
       <div
-        class="VolumeSlider-module_volumeSlider"
+        class="Flex-module_flex"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: nowrap;"
       >
-        <svg
-          aria-hidden="true"
-          class="VolumeSlider-module_icon"
-          fill="currentColor"
-          height="16px"
-          viewBox="0 0 24 24"
-          width="16px"
-          xmlns="http://www.w3.org/2000/svg"
+        <time
+          class="mx_Clock AudioPlayerView-module_clock"
+          datetime="PT2M"
+          role="timer"
         >
-          <path
-            d="M3 10a2 2 0 0 1 2-2h2l3.293-3.293c.63-.63 1.707-.184 1.707.707v13.172c0 .89-1.077 1.337-1.707.707L7 16H5a2 2 0 0 1-2-2zm4.828 4L10 16.172V7.828L7.828 10H5v4zm6.294-5.536a1 1 0 0 1 1.414 0A5 5 0 0 1 17 12c0 1.38-.56 2.632-1.464 3.535a1 1 0 1 1-1.415-1.414 3 3 0 0 0 .88-2.121c0-.829-.335-1.578-.88-2.122a1 1 0 0 1 0-1.414"
+          02:00
+        </time>
+        <div
+          class="VolumeSlider-module_volumeSlider"
+        >
+          <svg
+            aria-hidden="true"
+            class="VolumeSlider-module_icon"
+            fill="currentColor"
+            height="16px"
+            viewBox="0 0 24 24"
+            width="16px"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 10a2 2 0 0 1 2-2h2l3.293-3.293c.63-.63 1.707-.184 1.707.707v13.172c0 .89-1.077 1.337-1.707.707L7 16H5a2 2 0 0 1-2-2zm4.828 4L10 16.172V7.828L7.828 10H5v4zm6.294-5.536a1 1 0 0 1 1.414 0A5 5 0 0 1 17 12c0 1.38-.56 2.632-1.464 3.535a1 1 0 1 1-1.415-1.414 3 3 0 0 0 .88-2.121c0-.829-.335-1.578-.88-2.122a1 1 0 0 1 0-1.414"
+            />
+            <path
+              d="M18.364 5.636A1 1 0 1 0 16.95 7.05 6.98 6.98 0 0 1 19 12a6.98 6.98 0 0 1-2.05 4.95 1 1 0 0 0 1.414 1.414A8.98 8.98 0 0 0 21 12a8.98 8.98 0 0 0-2.636-6.364"
+            />
+          </svg>
+          <input
+            aria-label="Volume"
+            aria-valuetext="80%"
+            class="SeekBar-module_seekBar VolumeSlider-module_slider"
+            max="100"
+            min="0"
+            step="1"
+            style="--fillTo: 0.8;"
+            type="range"
+            value="80"
           />
-          <path
-            d="M18.364 5.636A1 1 0 1 0 16.95 7.05 6.98 6.98 0 0 1 19 12a6.98 6.98 0 0 1-2.05 4.95 1 1 0 0 0 1.414 1.414A8.98 8.98 0 0 0 21 12a8.98 8.98 0 0 0-2.636-6.364"
-          />
-        </svg>
-        <input
-          aria-label="Volume"
-          aria-valuetext="80%"
-          class="SeekBar-module_seekBar VolumeSlider-module_slider"
-          max="100"
-          min="0"
-          step="1"
-          style="--fillTo: 0.8;"
-          type="range"
-          value="80"
-        />
+        </div>
       </div>
     </div>
   </div>
@@ -259,13 +269,13 @@ exports[`AudioPlayerView > renders the audio player without media name 1`] = `
   >
     <div
       class="Flex-module_flex"
-      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: nowrap;"
+      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
     >
       <button
         aria-disabled="false"
         aria-label="Play"
         aria-labelledby="react-use-id-1"
-        class="_icon-button_1215g_8 PlayPauseButton-module_button"
+        class="_icon-button_1215g_8 PlayPauseButton-module_button AudioPlayerView-module_playButton"
         data-kind="primary"
         role="button"
         style="--cpd-icon-button-size: 32px;"
@@ -315,11 +325,11 @@ exports[`AudioPlayerView > renders the audio player without media name 1`] = `
     <div
       class="Flex-module_flex"
       data-testid="audio-player-seek"
-      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
+      style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
     >
       <input
         aria-label="Audio seek bar"
-        class="SeekBar-module_seekBar"
+        class="SeekBar-module_seekBar AudioPlayerView-module_seekBar"
         max="100"
         min="0"
         step="1"
@@ -328,43 +338,48 @@ exports[`AudioPlayerView > renders the audio player without media name 1`] = `
         type="range"
         value="30"
       />
-      <time
-        class="mx_Clock AudioPlayerView-module_clock"
-        datetime="PT2M"
-        role="timer"
-      >
-        02:00
-      </time>
       <div
-        class="VolumeSlider-module_volumeSlider"
+        class="Flex-module_flex"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: nowrap;"
       >
-        <svg
-          aria-hidden="true"
-          class="VolumeSlider-module_icon"
-          fill="currentColor"
-          height="16px"
-          viewBox="0 0 24 24"
-          width="16px"
-          xmlns="http://www.w3.org/2000/svg"
+        <time
+          class="mx_Clock AudioPlayerView-module_clock"
+          datetime="PT2M"
+          role="timer"
         >
-          <path
-            d="M3 10a2 2 0 0 1 2-2h2l3.293-3.293c.63-.63 1.707-.184 1.707.707v13.172c0 .89-1.077 1.337-1.707.707L7 16H5a2 2 0 0 1-2-2zm4.828 4L10 16.172V7.828L7.828 10H5v4zm6.294-5.536a1 1 0 0 1 1.414 0A5 5 0 0 1 17 12c0 1.38-.56 2.632-1.464 3.535a1 1 0 1 1-1.415-1.414 3 3 0 0 0 .88-2.121c0-.829-.335-1.578-.88-2.122a1 1 0 0 1 0-1.414"
+          02:00
+        </time>
+        <div
+          class="VolumeSlider-module_volumeSlider"
+        >
+          <svg
+            aria-hidden="true"
+            class="VolumeSlider-module_icon"
+            fill="currentColor"
+            height="16px"
+            viewBox="0 0 24 24"
+            width="16px"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 10a2 2 0 0 1 2-2h2l3.293-3.293c.63-.63 1.707-.184 1.707.707v13.172c0 .89-1.077 1.337-1.707.707L7 16H5a2 2 0 0 1-2-2zm4.828 4L10 16.172V7.828L7.828 10H5v4zm6.294-5.536a1 1 0 0 1 1.414 0A5 5 0 0 1 17 12c0 1.38-.56 2.632-1.464 3.535a1 1 0 1 1-1.415-1.414 3 3 0 0 0 .88-2.121c0-.829-.335-1.578-.88-2.122a1 1 0 0 1 0-1.414"
+            />
+            <path
+              d="M18.364 5.636A1 1 0 1 0 16.95 7.05 6.98 6.98 0 0 1 19 12a6.98 6.98 0 0 1-2.05 4.95 1 1 0 0 0 1.414 1.414A8.98 8.98 0 0 0 21 12a8.98 8.98 0 0 0-2.636-6.364"
+            />
+          </svg>
+          <input
+            aria-label="Volume"
+            aria-valuetext="80%"
+            class="SeekBar-module_seekBar VolumeSlider-module_slider"
+            max="100"
+            min="0"
+            step="1"
+            style="--fillTo: 0.8;"
+            type="range"
+            value="80"
           />
-          <path
-            d="M18.364 5.636A1 1 0 1 0 16.95 7.05 6.98 6.98 0 0 1 19 12a6.98 6.98 0 0 1-2.05 4.95 1 1 0 0 0 1.414 1.414A8.98 8.98 0 0 0 21 12a8.98 8.98 0 0 0-2.636-6.364"
-          />
-        </svg>
-        <input
-          aria-label="Volume"
-          aria-valuetext="80%"
-          class="SeekBar-module_seekBar VolumeSlider-module_slider"
-          max="100"
-          min="0"
-          step="1"
-          style="--fillTo: 0.8;"
-          type="range"
-          value="80"
-        />
+        </div>
       </div>
     </div>
   </div>
@@ -381,13 +396,13 @@ exports[`AudioPlayerView > renders the audio player without size 1`] = `
   >
     <div
       class="Flex-module_flex"
-      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: nowrap;"
+      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
     >
       <button
         aria-disabled="false"
         aria-label="Play"
         aria-labelledby="react-use-id-1"
-        class="_icon-button_1215g_8 PlayPauseButton-module_button"
+        class="_icon-button_1215g_8 PlayPauseButton-module_button AudioPlayerView-module_playButton"
         data-kind="primary"
         role="button"
         style="--cpd-icon-button-size: 32px;"
@@ -436,11 +451,11 @@ exports[`AudioPlayerView > renders the audio player without size 1`] = `
     <div
       class="Flex-module_flex"
       data-testid="audio-player-seek"
-      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
+      style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
     >
       <input
         aria-label="Audio seek bar"
-        class="SeekBar-module_seekBar"
+        class="SeekBar-module_seekBar AudioPlayerView-module_seekBar"
         max="100"
         min="0"
         step="1"
@@ -449,43 +464,48 @@ exports[`AudioPlayerView > renders the audio player without size 1`] = `
         type="range"
         value="30"
       />
-      <time
-        class="mx_Clock AudioPlayerView-module_clock"
-        datetime="PT2M"
-        role="timer"
-      >
-        02:00
-      </time>
       <div
-        class="VolumeSlider-module_volumeSlider"
+        class="Flex-module_flex"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: nowrap;"
       >
-        <svg
-          aria-hidden="true"
-          class="VolumeSlider-module_icon"
-          fill="currentColor"
-          height="16px"
-          viewBox="0 0 24 24"
-          width="16px"
-          xmlns="http://www.w3.org/2000/svg"
+        <time
+          class="mx_Clock AudioPlayerView-module_clock"
+          datetime="PT2M"
+          role="timer"
         >
-          <path
-            d="M3 10a2 2 0 0 1 2-2h2l3.293-3.293c.63-.63 1.707-.184 1.707.707v13.172c0 .89-1.077 1.337-1.707.707L7 16H5a2 2 0 0 1-2-2zm4.828 4L10 16.172V7.828L7.828 10H5v4zm6.294-5.536a1 1 0 0 1 1.414 0A5 5 0 0 1 17 12c0 1.38-.56 2.632-1.464 3.535a1 1 0 1 1-1.415-1.414 3 3 0 0 0 .88-2.121c0-.829-.335-1.578-.88-2.122a1 1 0 0 1 0-1.414"
+          02:00
+        </time>
+        <div
+          class="VolumeSlider-module_volumeSlider"
+        >
+          <svg
+            aria-hidden="true"
+            class="VolumeSlider-module_icon"
+            fill="currentColor"
+            height="16px"
+            viewBox="0 0 24 24"
+            width="16px"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 10a2 2 0 0 1 2-2h2l3.293-3.293c.63-.63 1.707-.184 1.707.707v13.172c0 .89-1.077 1.337-1.707.707L7 16H5a2 2 0 0 1-2-2zm4.828 4L10 16.172V7.828L7.828 10H5v4zm6.294-5.536a1 1 0 0 1 1.414 0A5 5 0 0 1 17 12c0 1.38-.56 2.632-1.464 3.535a1 1 0 1 1-1.415-1.414 3 3 0 0 0 .88-2.121c0-.829-.335-1.578-.88-2.122a1 1 0 0 1 0-1.414"
+            />
+            <path
+              d="M18.364 5.636A1 1 0 1 0 16.95 7.05 6.98 6.98 0 0 1 19 12a6.98 6.98 0 0 1-2.05 4.95 1 1 0 0 0 1.414 1.414A8.98 8.98 0 0 0 21 12a8.98 8.98 0 0 0-2.636-6.364"
+            />
+          </svg>
+          <input
+            aria-label="Volume"
+            aria-valuetext="80%"
+            class="SeekBar-module_seekBar VolumeSlider-module_slider"
+            max="100"
+            min="0"
+            step="1"
+            style="--fillTo: 0.8;"
+            type="range"
+            value="80"
           />
-          <path
-            d="M18.364 5.636A1 1 0 1 0 16.95 7.05 6.98 6.98 0 0 1 19 12a6.98 6.98 0 0 1-2.05 4.95 1 1 0 0 0 1.414 1.414A8.98 8.98 0 0 0 21 12a8.98 8.98 0 0 0-2.636-6.364"
-          />
-        </svg>
-        <input
-          aria-label="Volume"
-          aria-valuetext="80%"
-          class="SeekBar-module_seekBar VolumeSlider-module_slider"
-          max="100"
-          min="0"
-          step="1"
-          style="--fillTo: 0.8;"
-          type="range"
-          value="80"
-        />
+        </div>
       </div>
     </div>
   </div>

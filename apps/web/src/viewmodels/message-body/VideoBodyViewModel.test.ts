@@ -302,6 +302,9 @@ describe("VideoBodyViewModel", () => {
 
     it("loads the encrypted source on play when only a placeholder url is present", async () => {
         const play = vi.fn();
+        // The element only has the new source once the snapshot has been rendered, which happens a frame later.
+        let renderedSrc: string | undefined = "data:video/mp4,";
+        const video = { play, getAttribute: () => renderedSrc };
         const vm = createVm({
             mxEvent: createEvent({
                 content: {
@@ -314,7 +317,7 @@ describe("VideoBodyViewModel", () => {
                 sourceUrl: "blob:played-video",
             }),
             mediaVisible: true,
-            videoRef: { current: { play } } as any,
+            videoRef: { current: video } as any,
         });
         vm.loadInitialMediaIfVisible();
 
@@ -322,7 +325,11 @@ describe("VideoBodyViewModel", () => {
         await vm.onPlay();
 
         expect(vm.getSnapshot().src).toBe("blob:played-video");
-        expect(play).toHaveBeenCalledTimes(1);
+        // Not played while the element still has the placeholder source
+        expect(play).not.toHaveBeenCalled();
+
+        renderedSrc = vm.getSnapshot().src;
+        await vi.waitFor(() => expect(play).toHaveBeenCalledTimes(1));
     });
 
     it("shows an error when play is requested without encrypted media data", async () => {

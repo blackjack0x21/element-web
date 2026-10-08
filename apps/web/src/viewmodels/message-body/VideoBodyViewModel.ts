@@ -497,6 +497,25 @@ export class VideoBodyViewModel
         void SettingsStore.setValue("videoPlaybackVolume", null, SettingLevel.DEVICE, volume);
     };
 
+    /**
+     * Plays the video once the rendered element has the given source. Calling play() straight after
+     * updating the snapshot would run before React applies the new source, and the source change
+     * would then reset the video to paused.
+     */
+    private async playWhenSourceApplied(src: string | null): Promise<void> {
+        if (!src) return;
+        const maxFrames = 30;
+        for (let frame = 0; frame < maxFrames; frame++) {
+            const video = this.props.videoRef.current;
+            if (this.isDisposed || !video) return;
+            if (video.getAttribute("src") === src) {
+                void video.play();
+                return;
+            }
+            await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        }
+    }
+
     public onPlay = async (): Promise<void> => {
         if (this.hasContentUrl() || this.state.fetchingData || this.state.error !== null) {
             return;
@@ -539,7 +558,7 @@ export class VideoBodyViewModel
                 fetchingData: false,
             };
             this.updateSnapshotFromState();
-            void this.props.videoRef.current?.play();
+            void this.playWhenSourceApplied(decryptedUrl);
         } catch (error) {
             if (
                 this.isDisposed ||

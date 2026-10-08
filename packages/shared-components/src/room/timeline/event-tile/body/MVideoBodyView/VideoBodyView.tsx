@@ -111,6 +111,10 @@ export interface VideoBodyViewActions {
      * Invoked when the volume or muted state of the video changes, including from its native controls.
      */
     onVolumeChange?: ReactEventHandler<HTMLVideoElement>;
+    /**
+     * Invoked when the user clicks the video.
+     */
+    onClick?: MouseEventHandler<HTMLVideoElement>;
 }
 
 export type VideoBodyViewModel = ViewModel<VideoBodyViewSnapshot, VideoBodyViewActions>;
@@ -246,6 +250,7 @@ export function VideoBodyView({
                     poster={poster}
                     onPlay={vm.onPlay}
                     onVolumeChange={vm.onVolumeChange}
+                    onClick={vm.onClick}
                 />
             </div>
             {children}

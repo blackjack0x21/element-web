@@ -6,7 +6,7 @@
  */
 
 import { decode } from "blurhash";
-import { type RefObject, type SyntheticEvent } from "react";
+import { type MouseEvent, type RefObject, type SyntheticEvent } from "react";
 import { logger } from "matrix-js-sdk/src/logger";
 import { type MatrixEvent } from "matrix-js-sdk/src/matrix";
 import { type MediaEventContent, type VideoInfo } from "matrix-js-sdk/src/types";
@@ -90,6 +90,11 @@ interface InternalState {
      */
     imageSize: ImageSize;
 }
+
+/**
+ * Approximate height in pixels of the browser's native control bar along the bottom of the video.
+ */
+const NATIVE_CONTROLS_HEIGHT = 50;
 
 type VideoInfoWithBlurhash = VideoInfo & {
     [BLURHASH_FIELD]?: string;
@@ -495,6 +500,22 @@ export class VideoBodyViewModel
         const volume = ev.currentTarget.volume;
         if (volume === SettingsStore.getValue("videoPlaybackVolume")) return;
         void SettingsStore.setValue("videoPlaybackVolume", null, SettingLevel.DEVICE, volume);
+    };
+
+    /**
+     * Starts playback when the video surface is clicked before any data has loaded. The native
+     * controls only toggle playback on a click once the video has data, so until then only the
+     * play button would work. Clicks on the control bar are left to the native controls, so
+     * pressing mute or fullscreen does not start the video.
+     */
+    public onClick = (ev: MouseEvent<HTMLVideoElement>): void => {
+        const video = ev.currentTarget;
+        if (video.readyState > 0 || !video.paused) return; // readyState 0 means no data yet
+
+        const { bottom } = video.getBoundingClientRect();
+        if (ev.clientY > bottom - NATIVE_CONTROLS_HEIGHT) return;
+
+        void video.play();
     };
 
     /**

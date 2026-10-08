@@ -25,12 +25,14 @@ class TestVideoBodyViewModel extends MockViewModel<VideoBodyViewSnapshot> implem
     public onPreviewClick?: VideoBodyViewActions["onPreviewClick"];
     public onPlay?: VideoBodyViewActions["onPlay"];
     public onVolumeChange?: VideoBodyViewActions["onVolumeChange"];
+    public onClick?: VideoBodyViewActions["onClick"];
 
     public constructor(snapshot: VideoBodyViewSnapshot, actions: VideoBodyViewActions = {}) {
         super(snapshot);
         this.onPreviewClick = actions.onPreviewClick;
         this.onPlay = actions.onPlay;
         this.onVolumeChange = actions.onVolumeChange;
+        this.onClick = actions.onClick;
     }
 }
 
@@ -85,6 +87,19 @@ describe("VideoBodyView", () => {
         render(<VideoBodyView vm={vm} />);
 
         expect(screen.getByText("Error decrypting video")).toBeInTheDocument();
+    });
+
+    it("forwards clicks on the video", () => {
+        const onClick = vi.fn();
+        const vm = new TestVideoBodyViewModel(
+            { state: VideoBodyViewState.READY, videoLabel: "Clickable video", src: "https://example.org/demo.mp4" },
+            { onClick },
+        );
+
+        render(<VideoBodyView vm={vm} />);
+        fireEvent.click(screen.getByLabelText("Clickable video"));
+
+        expect(onClick).toHaveBeenCalledTimes(1);
     });
 
     it("renders a video element with the expected attributes and file body content", () => {

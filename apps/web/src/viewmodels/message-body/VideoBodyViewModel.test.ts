@@ -11,7 +11,7 @@ import { EventType, MatrixEvent } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
 import { VideoBodyViewState } from "@element-hq/web-shared-components";
 import { decode } from "blurhash";
-import { type SyntheticEvent } from "react";
+import { type MouseEvent, type SyntheticEvent } from "react";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 
 import SettingsStore from "../../settings/SettingsStore";
@@ -380,6 +380,47 @@ describe("VideoBodyViewModel", () => {
             vm.setMediaVisible(true);
 
             expect(vm.getSnapshot().volume).toBe(0.35);
+        });
+
+        describe("clicking the video", () => {
+            const clickEvent = (video: Partial<HTMLVideoElement>, clientY: number): MouseEvent<HTMLVideoElement> =>
+                ({
+                    clientY,
+                    currentTarget: {
+                        paused: true,
+                        readyState: 0,
+                        getBoundingClientRect: () => ({ bottom: 200 }),
+                        ...video,
+                    },
+                }) as unknown as MouseEvent<HTMLVideoElement>;
+
+            it("plays a video that has not loaded any data yet", () => {
+                const play = vi.fn();
+                createVm().onClick(clickEvent({ play }, 80));
+
+                expect(play).toHaveBeenCalledTimes(1);
+            });
+
+            it("leaves clicks on the native control bar alone", () => {
+                const play = vi.fn();
+                createVm().onClick(clickEvent({ play }, 190));
+
+                expect(play).not.toHaveBeenCalled();
+            });
+
+            it("leaves a video with data to the native controls", () => {
+                const play = vi.fn();
+                createVm().onClick(clickEvent({ play, readyState: 4 }, 80));
+
+                expect(play).not.toHaveBeenCalled();
+            });
+
+            it("does not play a video that is already playing", () => {
+                const play = vi.fn();
+                createVm().onClick(clickEvent({ play, paused: false }, 80));
+
+                expect(play).not.toHaveBeenCalled();
+            });
         });
 
         it("saves the volume when it changes", () => {

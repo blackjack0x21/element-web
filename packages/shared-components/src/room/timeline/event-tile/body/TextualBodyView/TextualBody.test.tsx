@@ -24,7 +24,7 @@ import {
 import * as publicApi from "./index";
 import * as stories from "./TextualBody.stories";
 
-const { Default, Notice, CaptionWithPreview, Emote } = composeStories(stories);
+const { Default, Notice, CaptionWithPreview, Emote, Silent } = composeStories(stories);
 
 describe("TextualBodyView", () => {
     it("renders the default message body", () => {
@@ -45,6 +45,21 @@ describe("TextualBodyView", () => {
     it("renders emote messages with annotations", () => {
         const { container } = render(<Emote />);
         expect(container).toMatchSnapshot();
+    });
+
+    it("renders the silent marker with a tooltip", async () => {
+        const user = userEvent.setup();
+        render(<Silent />);
+
+        const marker = screen.getByRole("img", { name: "Silent message" });
+        await user.hover(marker);
+
+        expect(await screen.findByRole("tooltip")).toHaveTextContent("Silent messageSent without notifications");
+    });
+
+    it("does not render the silent marker by default", () => {
+        render(<Default />);
+        expect(screen.queryByRole("img", { name: "Silent message" })).not.toBeInTheDocument();
     });
 
     it("re-exports the public TextualBodyView API", () => {

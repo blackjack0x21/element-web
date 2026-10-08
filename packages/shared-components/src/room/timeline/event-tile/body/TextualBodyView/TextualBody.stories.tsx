@@ -98,6 +98,9 @@ const meta = {
         editedMarkerText: "(edited)",
         editedMarkerTooltip: "Edited yesterday at 11:48",
         editedMarkerCaption: "View edit history",
+        showSilentMarker: false,
+        silentMarkerLabel: "Silent message",
+        silentMarkerCaption: "Sent without notifications",
         showPendingModerationMarker: false,
         pendingModerationText: "(Visible to you while moderation is pending)",
         emoteSenderName: "Alice",
@@ -127,6 +130,22 @@ export const CaptionWithPreview: Story = {
 
 export const Edited: Story = {
     args: {
+        showEditedMarker: true,
+    },
+};
+
+/**
+ * A message sent with the `@silent` prefix, which did not notify anyone.
+ */
+export const Silent: Story = {
+    args: {
+        showSilentMarker: true,
+    },
+};
+
+export const SilentAndEdited: Story = {
+    args: {
+        showSilentMarker: true,
         showEditedMarker: true,
     },
 };

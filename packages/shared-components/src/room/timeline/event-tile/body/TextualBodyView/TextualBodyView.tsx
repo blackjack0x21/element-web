@@ -16,6 +16,7 @@ import React, {
 } from "react";
 import classNames from "classnames";
 import { Tooltip } from "@vector-im/compound-web";
+import NotificationsOffIcon from "@vector-im/compound-design-tokens/assets/web/icons/notifications-off";
 
 import { type ViewModel, useViewModel } from "../../../../../core/viewmodel";
 import { useEventPresentationAttributes } from "../../../EventPresentation/EventPresentationContext";
@@ -75,6 +76,18 @@ export interface TextualBodyViewSnapshot {
      * Optional tooltip caption for the edited marker.
      */
     editedMarkerCaption?: string;
+    /**
+     * Whether to render the silent-message marker, for messages sent without notifying anyone.
+     */
+    showSilentMarker?: boolean;
+    /**
+     * Accessible label and tooltip description for the silent-message marker.
+     */
+    silentMarkerLabel?: string;
+    /**
+     * Optional tooltip caption for the silent-message marker.
+     */
+    silentMarkerCaption?: string;
     /**
      * Whether to render the pending-moderation marker.
      */
@@ -153,7 +166,7 @@ function attachBodyRef(body: ReactElement, bodyRef?: TextualBodyContentRef): Rea
  * Renders a textual message body for timeline events.
  *
  * The view supports text, notice, emote, and caption layouts, optional
- * link or action wrappers, edited and moderation markers, and appended
+ * link or action wrappers, silent, edited and moderation markers, and appended
  * URL previews.
  */
 export function TextualBodyView({
@@ -175,6 +188,9 @@ export function TextualBodyView({
         editedMarkerAriaLabel,
         editedMarkerTooltip,
         editedMarkerCaption,
+        showSilentMarker,
+        silentMarkerLabel,
+        silentMarkerCaption,
         showPendingModerationMarker,
         pendingModerationText,
         emoteSenderName,
@@ -197,6 +213,26 @@ export function TextualBodyView({
         : undefined;
 
     const markers: ReactNode[] = [];
+    if (showSilentMarker) {
+        markers.push(
+            <Tooltip
+                key="silent-marker"
+                description={silentMarkerLabel ?? ""}
+                caption={silentMarkerCaption}
+                isTriggerInteractive={false}
+            >
+                <span
+                    className={classNames(styles.annotation, styles.silentMarker)}
+                    role="img"
+                    aria-label={silentMarkerLabel}
+                    data-textual-body-silent-marker=""
+                >
+                    <NotificationsOffIcon width="14px" height="14px" />
+                </span>
+            </Tooltip>,
+        );
+    }
+
     if (showEditedMarker) {
         const editedMarkerButton = (
             <button

@@ -107,6 +107,28 @@ describe("TextualBodyViewModel", () => {
         expect(vm.getSnapshot().emoteSenderName).toBe("Bob");
     });
 
+    it("shows the silent marker for silent messages, even after they are edited", () => {
+        const vm = createVm();
+        expect(vm.getSnapshot().showSilentMarker).toBe(false);
+
+        const silentEvent = createEvent({
+            "body": "Hello world",
+            "msgtype": MsgType.Text,
+            "org.matrix.custom.silent": true,
+        });
+        // Edits replace the content but not the original content
+        vi.spyOn(silentEvent, "getContent").mockReturnValue({ body: "Edited", msgtype: MsgType.Text });
+        vm.setEvent(silentEvent);
+
+        expect(vm.getSnapshot()).toEqual(
+            expect.objectContaining({
+                showSilentMarker: true,
+                silentMarkerLabel: "Silent message",
+                silentMarkerCaption: "Sent without notifications",
+            }),
+        );
+    });
+
     it("updates wrapper state when the highlight link changes", () => {
         const starterLinkEvent = createEvent({
             body: "Open the integration",

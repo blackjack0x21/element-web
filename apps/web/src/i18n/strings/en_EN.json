@@ -3636,6 +3636,10 @@
         "send_state_failed": "Failed to send",
         "send_state_sending": "Sending your message…",
         "send_state_sent": "Your message was sent",
+        "silent_message": {
+            "caption": "Sent without notifications",
+            "label": "Silent message"
+        },
         "summary": {
             "banned": {
                 "one": "was banned",

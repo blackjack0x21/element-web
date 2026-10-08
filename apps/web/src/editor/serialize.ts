@@ -12,10 +12,11 @@ import escapeHtml from "escape-html";
 
 import Markdown from "../Markdown";
 import { makeGenericPermalink } from "../utils/permalinks/Permalinks";
-import type EditorModel from "./model";
+import EditorModel from "./model";
 import SettingsStore from "../settings/SettingsStore";
 import SdkConfig from "../SdkConfig";
 import { Type } from "./parts";
+import { getSilentPrefixLength } from "../utils/silentMessages";
 
 export function mdSerialize(model: EditorModel): string {
     return model.parts.reduce((html, part) => {
@@ -182,6 +183,44 @@ export function textSerialize(model: EditorModel): string {
                 return text + part.text;
         }
     }, "");
+}
+
+/**
+ * Get the length of the `@silent ` prefix at the start of the composer.
+ * While typing, the prefix is usually split into a pill candidate (`@silent`) and a plain part, so the leading
+ * text parts are joined before matching. Text after a pill, e.g. `@silent @alice hi`, still counts as content.
+ * @param model - the composer model
+ * @returns the length of the prefix, or 0 if the message is not silent
+ */
+export function getSilentPrefixLengthOfModel(model: EditorModel): number {
+    let leadingText = "";
+    let index = 0;
+    for (; index < model.parts.length; index++) {
+        const part = model.parts[index];
+        if (part.type !== Type.Plain && part.type !== Type.PillCandidate) break;
+        leadingText += part.text;
+    }
+    const hasPartsAfterText = index < model.parts.length;
+    return getSilentPrefixLength(leadingText, hasPartsAfterText);
+}
+
+/**
+ * Remove the `@silent ` prefix from the start of the composer.
+ * @param model - the composer model
+ * @param prefixLength - the length returned by {@link getSilentPrefixLengthOfModel}
+ * @returns a copy of the model without the prefix
+ */
+export function stripSilentPrefix(model: EditorModel, prefixLength: number): EditorModel {
+    model = model.clone();
+    model.removeText({ index: 0, offset: 0 }, prefixLength);
+    // The rest of the message can be left in the `@silent` pill candidate, which would stop it being
+    // recognised as e.g. `/me`, so turn it back into plain text.
+    const [firstPart, ...otherParts] = model.parts;
+    if (firstPart?.type === Type.PillCandidate) {
+        const { partCreator } = model;
+        model = new EditorModel([partCreator.plain(firstPart.text), ...otherParts], partCreator);
+    }
+    return model;
 }
 
 export function containsEmote(model: EditorModel): boolean {

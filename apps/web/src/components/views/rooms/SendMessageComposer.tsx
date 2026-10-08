@@ -31,10 +31,12 @@ import dis from "../../../dispatcher/dispatcher";
 import EditorModel from "../../../editor/model";
 import {
     containsEmote,
+    getSilentPrefixLengthOfModel,
     htmlSerializeIfNeeded,
     startsWith,
     stripEmoteCommand,
     stripPrefix,
+    stripSilentPrefix,
     textSerialize,
     unescapeMessage,
 } from "../../../editor/serialize";
@@ -68,6 +70,7 @@ import { attachMentions, attachRelation, attachUrlPreviews } from "../../../util
 import { type RoomUploadViewModel, useRoomUploadViewModel } from "../../../viewmodels/room/RoomUploadViewModel";
 import { type MessageComposerUrlPreviewViewModel } from "../../../viewmodels/composer/MessageComposerUrlPreviewViewModel";
 import { linksIn } from "../../../utils/UrlUtils";
+import { attachSilentFlag } from "../../../utils/silentMessages";
 import { type MessageComposerUrlPreviewSnapshot } from "@element-hq/web-shared-components";
 
 // The prefix used when persisting editor drafts to localstorage.
@@ -80,6 +83,11 @@ export function createMessageContent(
     replyToEvent: MatrixEvent | undefined,
     relation: IEventRelation | undefined,
 ): RoomMessageEventContent {
+    // Strip `@silent` first so that it can be combined with `/me`
+    const silentPrefixLength = getSilentPrefixLengthOfModel(model);
+    if (silentPrefixLength) {
+        model = stripSilentPrefix(model, silentPrefixLength);
+    }
     const isEmote = containsEmote(model);
     if (isEmote) {
         model = stripEmoteCommand(model);
@@ -105,6 +113,10 @@ export function createMessageContent(
 
     // Build the mentions property and add it to the event content.
     attachMentions(sender, content, model, replyToEvent);
+
+    if (silentPrefixLength) {
+        attachSilentFlag(content);
+    }
 
     attachRelation(content, relation);
     if (replyToEvent) {

@@ -150,6 +150,63 @@ describe("<SendMessageComposer/>", () => {
             });
         });
 
+        it("strips @silent from messages and marks them as silent", () => {
+            const model = new EditorModel([], createPartCreator());
+            const documentOffset = new DocumentOffset(19, true);
+            model.update("@silent hello world", "insertText", documentOffset);
+
+            const content = createMessageContent("@alice:test", model, undefined, undefined);
+
+            expect(content).toEqual({
+                "body": "hello world",
+                "msgtype": "m.text",
+                "m.mentions": {},
+                "org.matrix.custom.silent": true,
+            });
+        });
+
+        it("allows combining @silent with /me", () => {
+            const model = new EditorModel([], createPartCreator());
+            const documentOffset = new DocumentOffset(18, true);
+            model.update("@silent /me blinks", "insertText", documentOffset);
+
+            const content = createMessageContent("@alice:test", model, undefined, undefined);
+
+            expect(content).toEqual({
+                "body": "blinks",
+                "msgtype": "m.emote",
+                "m.mentions": {},
+                "org.matrix.custom.silent": true,
+            });
+        });
+
+        it("keeps mentions after @silent", () => {
+            const partCreator = createPartCreator();
+            const model = new EditorModel(
+                [partCreator.plain("@silent "), partCreator.userPill("Bob", "@bob:test"), partCreator.plain(" hi")],
+                partCreator,
+            );
+
+            const content = createMessageContent("@alice:test", model, undefined, undefined);
+
+            expect(content.body).toBe("Bob hi");
+            expect(content["m.mentions"]).toEqual({ user_ids: ["@bob:test"] });
+            expect(content).toHaveProperty(["org.matrix.custom.silent"], true);
+        });
+
+        it.each(["@silent", "@silent   ", "@silenthello", "hello @silent world", "@Silent hello"])(
+            "does not treat %j as a silent message",
+            (text) => {
+                const model = new EditorModel([], createPartCreator());
+                model.update(text, "insertText", new DocumentOffset(text.length, true));
+
+                const content = createMessageContent("@alice:test", model, undefined, undefined);
+
+                expect(content).not.toHaveProperty(["org.matrix.custom.silent"]);
+                expect(content.body).toBe(text);
+            },
+        );
+
         it("allows sending double-slash escaped slash commands correctly", () => {
             const model = new EditorModel([], createPartCreator());
             const documentOffset = new DocumentOffset(32, true);

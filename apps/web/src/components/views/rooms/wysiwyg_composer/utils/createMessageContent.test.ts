@@ -42,6 +42,33 @@ describe("createMessageContent", () => {
             });
         });
 
+        it("Should strip @silent and mark the message as silent", async () => {
+            const content = await createMessageContent(`@silent&nbsp;${message}`, true, {});
+
+            expect(content).toEqual({
+                "body": "*__hello__ world*",
+                "format": "org.matrix.custom.html",
+                "formatted_body": message,
+                "msgtype": "m.text",
+                "org.matrix.custom.silent": true,
+            });
+        });
+
+        it("Should allow combining @silent with /me", async () => {
+            const content = await createMessageContent("@silent /me waves", true, {});
+
+            expect(content.msgtype).toBe(MsgType.Emote);
+            expect(content.body).toBe("waves");
+            expect(content).toHaveProperty(["org.matrix.custom.silent"], true);
+        });
+
+        it("Should not treat a lone @silent as a silent message", async () => {
+            const content = await createMessageContent("@silent", true, {});
+
+            expect(content.body).toBe("@silent");
+            expect(content).not.toHaveProperty(["org.matrix.custom.silent"]);
+        });
+
         it("Should add relation to message", async () => {
             // When
             const relation = {

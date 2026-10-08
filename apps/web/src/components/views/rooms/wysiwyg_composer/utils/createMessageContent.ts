@@ -18,8 +18,12 @@ import SettingsStore from "../../../../../settings/SettingsStore";
 import { parsePermalink } from "../../../../../utils/permalinks/Permalinks";
 import { addReplyToMessageContent } from "../../../../../utils/Reply";
 import { isNotNull } from "../../../../../Typeguards";
+import { attachSilentFlag } from "../../../../../utils/silentMessages";
 
 export const EMOTE_PREFIX = "/me ";
+
+// The rich text editor may encode the spaces after `@silent` as non-breaking spaces
+const SILENT_PREFIX_REGEX = /^@silent(?: |&nbsp;|\u00a0)+(?=\S)/;
 
 // Merges favouring the given relation
 function attachRelation(content: IContent, relation?: IEventRelation): void {
@@ -45,6 +49,12 @@ export async function createMessageContent(
     { relation, replyToEvent, editedEvent }: CreateMessageContentParams,
 ): Promise<RoomMessageEventContent> {
     const isEditing = isMatrixEvent(editedEvent);
+
+    // Strip `@silent` first so that it can be combined with `/me`
+    const silentPrefix = isEditing ? null : SILENT_PREFIX_REGEX.exec(message);
+    if (silentPrefix) {
+        message = message.slice(silentPrefix[0].length);
+    }
 
     const isEmote = message.startsWith(EMOTE_PREFIX);
     if (isEmote) {
@@ -95,6 +105,10 @@ export async function createMessageContent(
     // TODO Do we need to attach mentions here?
     // TODO Handle editing?
     attachRelation(content, newRelation);
+
+    if (silentPrefix) {
+        attachSilentFlag(content);
+    }
 
     if (!isEditing && replyToEvent) {
         addReplyToMessageContent(content, replyToEvent);

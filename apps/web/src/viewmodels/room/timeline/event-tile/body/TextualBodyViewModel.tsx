@@ -27,6 +27,7 @@ import { type ViewUserPayload } from "../../../../../dispatcher/payloads/ViewUse
 import QuestionDialog from "../../../../../components/views/dialogs/QuestionDialog";
 import MessageEditHistoryDialog from "../../../../../components/views/dialogs/MessageEditHistoryDialog";
 import { type TimelineRenderingType } from "../../../../../contexts/RoomContext";
+import { isSilentMessage } from "../../../../../utils/silentMessages";
 
 const CAPTION_MESSAGE_TYPES = new Set<MsgType>([MsgType.Image, MsgType.File, MsgType.Audio, MsgType.Video]);
 
@@ -146,6 +147,24 @@ export class TextualBodyViewModel
         };
     };
 
+    private static readonly computeSilentMarkerSnapshot = (
+        props: TextualBodyViewModelProps,
+    ): Pick<TextualBodyViewSnapshot, "showSilentMarker" | "silentMarkerLabel" | "silentMarkerCaption"> => {
+        if (!isSilentMessage(props.mxEvent)) {
+            return {
+                showSilentMarker: false,
+                silentMarkerLabel: undefined,
+                silentMarkerCaption: undefined,
+            };
+        }
+
+        return {
+            showSilentMarker: true,
+            silentMarkerLabel: _t("timeline|silent_message|label"),
+            silentMarkerCaption: _t("timeline|silent_message|caption"),
+        };
+    };
+
     private static readonly computePendingModerationSnapshot = (
         props: TextualBodyViewModelProps,
     ): Pick<TextualBodyViewSnapshot, "showPendingModerationMarker" | "pendingModerationText"> => {
@@ -183,6 +202,9 @@ export class TextualBodyViewModel
         | "editedMarkerText"
         | "editedMarkerTooltip"
         | "editedMarkerCaption"
+        | "showSilentMarker"
+        | "silentMarkerLabel"
+        | "silentMarkerCaption"
         | "showPendingModerationMarker"
         | "pendingModerationText"
         | "emoteSenderName"
@@ -191,6 +213,7 @@ export class TextualBodyViewModel
         emoteSenderName: props.mxEvent.sender?.name ?? props.mxEvent.getSender(),
         ...TextualBodyViewModel.computeBodyWrapperSnapshot(props),
         ...TextualBodyViewModel.computeEditedMarkerSnapshot(props),
+        ...TextualBodyViewModel.computeSilentMarkerSnapshot(props),
         ...TextualBodyViewModel.computePendingModerationSnapshot(props),
     });
 

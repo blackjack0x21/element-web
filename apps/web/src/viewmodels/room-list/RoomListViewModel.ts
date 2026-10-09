@@ -52,18 +52,6 @@ import { type RoomViewStore } from "../../stores/RoomViewStore.tsx";
 import { UPDATE_EVENT } from "../../stores/AsyncStore";
 import { EffectiveMembership, getEffectiveMembership } from "../../utils/membership";
 
-/**
- * Tracks the position of the active room within a specific section.
- * Used to implement sticky room behaviour so the selected room doesn't
- * jump around when the room list is re-sorted.
- */
-interface StickyRoomPosition {
-    /** The tag of the section the room belongs to. */
-    sectionTag: string;
-    /** The index of the room within that section. */
-    indexInSection: number;
-}
-
 interface RoomListViewModelProps {
     client: MatrixClient;
     roomViewStore: RoomViewStore;
@@ -134,7 +122,6 @@ export class RoomListViewModel
      * List of sections to display in the room list, derived from roomsResult and section header view model expansion state.
      */
     private sections: Section[] = [];
-    private lastActiveRoomPosition: StickyRoomPosition | undefined = undefined;
 
     // Child view model management
     private readonly roomItemViewModels = new Map<string, RoomListItemViewModel>();
@@ -732,8 +719,7 @@ export class RoomListViewModel
     private onDispatch = async (payload: any): Promise<void> => {
         if (payload.action === Action.ActiveRoomChanged) {
             // When the active room changes, update the room list data to reflect the new selected room
-            // Pass isRoomChange=true so sticky logic doesn't prevent the index from updating
-            await this.updateRoomListData(true);
+            await this.updateRoomListData();
             // Show the room wherever it was opened from: the global search, a permalink, a
             // notification. A tile that is already fully visible is left alone by the list.
             if (payload.newRoomId) await this.requestScrollRoomIntoView(payload.newRoomId);
@@ -847,7 +833,7 @@ export class RoomListViewModel
             // Space changed - get the last selected room for the new space to prevent flicker
             const lastSelectedRoom = this.props.spaceStore.getLastSelectedRoomIdForSpace(newSpaceId);
 
-            void this.updateRoomListData(true, lastSelectedRoom);
+            void this.updateRoomListData(lastSelectedRoom);
             return;
         }
 
@@ -879,74 +865,7 @@ export class RoomListViewModel
         return index >= 0 ? index : undefined;
     }
 
-    /**
-     * Find the position of a room within the sections list.
-     * Returns undefined if the room is not found.
-     */
-    private findRoomPosition(sections: Section[], roomId: string): StickyRoomPosition | undefined {
-        for (const section of sections) {
-            const idx = section.rooms.findIndex((room) => room.roomId === roomId);
-            if (idx !== -1) return { sectionTag: section.tag, indexInSection: idx };
-        }
-        return undefined;
-    }
-
-    /**
-     * Apply sticky room logic to keep the active room at the same position within its section.
-     * When the room list updates, this prevents the selected room from jumping around in the UI.
-     *
-     * @param isRoomChange - Whether this update is due to a room change (not a list update)
-     * @param roomId - The room ID to apply sticky logic for (can be null/undefined)
-     * @returns The modified sections array with sticky positioning applied
-     */
-    private applyStickyRoom(isRoomChange: boolean, roomId: string | null | undefined): Section[] {
-        const sections = this.roomsResult.sections;
-
-        // When opening another room, the index should obviously change
-        if (!roomId || isRoomChange) return sections;
-
-        // If there was no previously tracked position, nothing to stick to
-        const oldPosition = this.lastActiveRoomPosition;
-        if (!oldPosition) return sections;
-
-        const newPosition = this.findRoomPosition(sections, roomId);
-
-        // If the room is no longer in the list, nothing to do
-        if (!newPosition) return sections;
-
-        // If the room moved to a different section, this is an intentional structural
-        // change (e.g. favourited/unfavourited), so don't apply sticky logic
-        if (newPosition.sectionTag !== oldPosition.sectionTag) return sections;
-
-        // If the index within the section hasn't changed, nothing to do
-        if (newPosition.indexInSection === oldPosition.indexInSection) return sections;
-
-        // Find the target section and apply the sticky swap within it
-        return sections.map((section) => {
-            // Different section - no change
-            if (section.tag !== oldPosition.sectionTag) return section;
-
-            const sectionRooms = section.rooms;
-
-            // If the old index falls out of the bounds of the section
-            // (usually because rooms were removed), we can no longer place
-            // the active room in the same old position
-            if (oldPosition.indexInSection > sectionRooms.length - 1) {
-                return section;
-            }
-
-            // Making the active room sticky is as simple as removing it from
-            // its new index and placing it in the old index within the section
-            const newRooms = [...sectionRooms];
-            const [stickyRoom] = newRooms.splice(newPosition.indexInSection, 1);
-            newRooms.splice(oldPosition.indexInSection, 0, stickyRoom);
-
-            return { ...section, rooms: newRooms };
-        });
-    }
-
     private async updateRoomListData(
-        isRoomChange: boolean = false,
         roomIdOverride: string | null = null,
         scrollToSectionTag: string | undefined = undefined,
     ): Promise<void> {
@@ -957,22 +876,9 @@ export class RoomListViewModel
         // Use override if provided (e.g., during space changes), otherwise fall back to RoomViewStore
         const roomId = roomIdOverride ?? this.props.roomViewStore.getRoomId();
 
-        // Apply sticky room logic to keep selected room at same position within its section
-        const stickySections = this.applyStickyRoom(isRoomChange, roomId);
-
-        // Update roomsResult with the sticky-adjusted sections
-        this.roomsResult = {
-            ...this.roomsResult,
-            sections: stickySections,
-        };
-
-        // Rebuild roomsMap with the reordered rooms
         this.updateRoomsMap(this.roomsResult);
 
         this.updatePreviewItem();
-
-        // Track the current active room position for future sticky calculations
-        this.lastActiveRoomPosition = roomId ? this.findRoomPosition(this.roomsResult.sections, roomId) : undefined;
 
         // Update section header view models with current rooms for unread state tracking
         for (const section of this.roomsResult.sections) {
@@ -1081,7 +987,7 @@ export class RoomListViewModel
         const filterKeys = this.activeFilter !== undefined ? [this.activeFilter] : undefined;
         this.roomsResult = RoomListStoreV3.instance.getSortedRoomsInActiveSpace(filterKeys);
         this.updateRoomsMap(this.roomsResult);
-        void this.updateRoomListData(false, null, tag);
+        void this.updateRoomListData(null, tag);
         this.showToast("section_created");
     };
 
@@ -1128,7 +1034,7 @@ export class RoomListViewModel
         const filterKeys = this.activeFilter !== undefined ? [this.activeFilter] : undefined;
         this.roomsResult = RoomListStoreV3.instance.getSortedRoomsInActiveSpace(filterKeys);
         this.updateRoomsMap(this.roomsResult);
-        void this.updateRoomListData(false, null, sourceTag);
+        void this.updateRoomListData(null, sourceTag);
     };
 
     public onSectionOrRoomDragStart = (): void => {

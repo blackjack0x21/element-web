@@ -1355,6 +1355,39 @@ describe("RoomListStoreV3", () => {
                 }
             });
 
+            it("moves a direct message to the top of the People section when it receives a message", async () => {
+                enableSections(true);
+                const { rooms } = getClientAndRooms();
+                mockDmRooms([rooms[3], rooms[7], rooms[12]]);
+
+                const store = new RoomListStoreV3Class(dispatcher);
+                await store.start();
+
+                const peopleRooms = () =>
+                    findSection(store.getSortedRoomsInActiveSpace().sections, DefaultTagID.DM)!.rooms;
+                const room = peopleRooms()[2];
+
+                const event = mkMessage({
+                    room: room.roomId,
+                    user: "@other:matrix.org",
+                    ts: Date.now() + 1e6,
+                    event: true,
+                });
+                vi.spyOn(room.getLiveTimeline(), "getEvents").mockReturnValue([event]);
+                dispatcher.dispatch(
+                    {
+                        action: "MatrixActions.Room.timeline",
+                        event,
+                        isLiveEvent: true,
+                        isLiveUnfilteredRoomTimelineEvent: true,
+                        room,
+                    },
+                    true,
+                );
+
+                expect(peopleRooms()[0]).toBe(room);
+            });
+
             it.each([DefaultTagID.Favourite, DefaultTagID.LowPriority, customTag])(
                 "places a direct message tagged with %s in that section only",
                 async (tag) => {

@@ -471,8 +471,8 @@ describe("RoomListViewModel", () => {
         });
     });
 
-    describe("Sticky room behavior", () => {
-        it("should keep selected room at same index when room list updates", async () => {
+    describe("Open room position", () => {
+        it("should move the selected room when the room list re-sorts", async () => {
             viewModel = new RoomListViewModel({
                 client: matrixClient,
                 spaceStore: SDKContextClass.instance.spaceStore,
@@ -497,12 +497,12 @@ describe("RoomListViewModel", () => {
 
             RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
 
-            // Active room should still be at index 1 (sticky behavior)
-            expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBe(1);
-            expect(viewModel.getSnapshot().sections[0].roomIds[1]).toBe("!room2:server");
+            // The open room follows the sort order, like any other room
+            expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBe(0);
+            expect(viewModel.getSnapshot().sections[0].roomIds[0]).toBe("!room2:server");
         });
 
-        it("should not apply sticky behavior when user changes rooms", async () => {
+        it("should update the active index when user changes rooms", async () => {
             viewModel = new RoomListViewModel({
                 client: matrixClient,
                 spaceStore: SDKContextClass.instance.spaceStore,
@@ -1793,7 +1793,7 @@ describe("RoomListViewModel", () => {
                 });
             });
 
-            it("should apply sticky room within the correct section", async () => {
+            it("should move the open room within its section", async () => {
                 stubClient();
                 viewModel = new RoomListViewModel({
                     client: matrixClient,
@@ -1823,10 +1823,10 @@ describe("RoomListViewModel", () => {
 
                 RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
 
-                // Sticky room should keep favRoom1 at index 0 within the favourites section
+                // The open room follows the sort order within the favourites section
                 const snapshot = viewModel.getSnapshot();
-                expect(snapshot.sections[0].roomIds[0]).toBe("!fav1:server");
-                expect(snapshot.roomListState.activeRoomIndex).toBe(0);
+                expect(snapshot.sections[0].roomIds[1]).toBe("!fav1:server");
+                expect(snapshot.roomListState.activeRoomIndex).toBe(1);
             });
 
             describe("Drag and drop", () => {

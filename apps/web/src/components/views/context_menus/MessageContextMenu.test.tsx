@@ -360,6 +360,36 @@ describe("MessageContextMenu", () => {
         });
     });
 
+    describe("search with Google button", () => {
+        beforeEach(() => {
+            vi.clearAllMocks();
+        });
+
+        it("opens a Google search for the selected text", () => {
+            vi.mocked(getSelectedText).mockReturnValue("hello & world");
+            const open = vi.spyOn(window, "open").mockReturnValue(null);
+
+            createRightClickMenuWithContent(createMessageEventContent("hello"));
+            const button = document.querySelector('li[aria-label="Search with Google"]');
+            expect(button).toBeTruthy();
+            fireEvent.mouseDown(button!);
+
+            expect(open).toHaveBeenCalledWith(
+                "https://www.google.com/search?q=hello%20%26%20world",
+                "_blank",
+                "noopener,noreferrer",
+            );
+            open.mockRestore();
+        });
+
+        it("is hidden when nothing is selected", () => {
+            vi.mocked(getSelectedText).mockReturnValue("");
+
+            createRightClickMenuWithContent(createMessageEventContent("hello"));
+            expect(document.querySelector('li[aria-label="Search with Google"]')).toBeFalsy();
+        });
+    });
+
     describe("quote button", () => {
         beforeEach(() => {
             vi.clearAllMocks();

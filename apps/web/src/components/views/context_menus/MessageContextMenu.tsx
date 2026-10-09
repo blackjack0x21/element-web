@@ -40,6 +40,7 @@ import {
     VisibilityOnIcon,
     ShareIcon,
     CopyIcon,
+    SearchIcon,
     TreeIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
 
@@ -316,6 +317,18 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
 
     private onCopyClick = (): void => {
         void copyPlaintext(getSelectedText());
+        this.closeMenu();
+    };
+
+    private onSearchWithGoogleClick = (): void => {
+        const query = getSelectedText().trim();
+        if (query) {
+            window.open(
+                `https://www.google.com/search?q=${encodeURIComponent(query)}`,
+                "_blank",
+                "noopener,noreferrer",
+            );
+        }
         this.closeMenu();
     };
 
@@ -620,6 +633,18 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
             );
         }
 
+        let searchButton: JSX.Element | undefined;
+        if (rightClick && selectedText && selectedText.trim().length > 0) {
+            searchButton = (
+                <IconizedContextMenuOption
+                    icon={<SearchIcon />}
+                    label={_t("action|search_with_google")}
+                    triggerOnMouseDown={true} // Same as copy: keep the selection until we've read it
+                    onClick={this.onSearchWithGoogleClick}
+                />
+            );
+        }
+
         let quoteButton: JSX.Element | undefined;
         if (rightClick && selectedText && selectedText.trim().length > 0 && this.isSelectionWithinSingleTextBody()) {
             quoteButton = (
@@ -697,10 +722,11 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         }
 
         let nativeItemsList: JSX.Element | undefined;
-        if (copyButton || quoteButton || copyLinkButton) {
+        if (copyButton || searchButton || quoteButton || copyLinkButton) {
             nativeItemsList = (
                 <IconizedContextMenuOptionList>
                     {copyButton}
+                    {searchButton}
                     {quoteButton}
                     {copyLinkButton}
                 </IconizedContextMenuOptionList>

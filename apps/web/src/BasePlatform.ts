@@ -34,6 +34,7 @@ import SdkConfig from "./SdkConfig";
 import { buildAndEncodePickleKey, encryptPickleKey } from "./utils/tokens/pickling";
 import Favicon from "./favicon.ts";
 import { getVectorConfig } from "./vector/getconfig.ts";
+import { type GlobalShortcutStatus } from "./utils/globalShortcuts.ts";
 
 export const SSO_HOMESERVER_URL_KEY = "mx_sso_hs_url";
 export const SSO_ID_SERVER_URL_KEY = "mx_sso_is_url";
@@ -273,6 +274,19 @@ export default abstract class BasePlatform {
     }
 
     public setSettingValue(settingName: string, value: any): Promise<void> {
+        throw new Error("Unimplemented");
+    }
+
+    /** Whether the platform can bind system-wide shortcuts that work while the app is in the background. */
+    public supportsGlobalShortcuts(): boolean {
+        return false;
+    }
+
+    public async getGlobalShortcuts(): Promise<GlobalShortcutStatus | undefined> {
+        return undefined;
+    }
+
+    public setGlobalShortcuts(bindings: GlobalShortcutStatus["bindings"]): Promise<GlobalShortcutStatus> {
         throw new Error("Unimplemented");
     }
 

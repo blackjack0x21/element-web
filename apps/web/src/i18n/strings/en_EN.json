@@ -2676,6 +2676,18 @@
             "unable_to_load_msisdns": "Unable to load phone numbers",
             "username": "Username"
         },
+        "global_shortcuts": {
+            "description": "Control a call from anywhere, even when %(brand)s is minimised or in the background.",
+            "hang_up": "Leave call",
+            "heading": "Global shortcuts",
+            "managed_by_system": "Your desktop environment manages global shortcuts. If one doesn't work, check the entry for %(brand)s in your system's shortcut settings.",
+            "not_registered": "This shortcut couldn't be registered. Another app may already be using it.",
+            "press_keys": "Press keys…",
+            "toggle_camera": "Turn camera on or off",
+            "toggle_deafen": "Deafen or undeafen",
+            "toggle_microphone": "Mute or unmute microphone",
+            "unbound": "Not set"
+        },
         "inline_url_previews_default": "Enable previews",
         "inline_url_previews_encrypted": "Enable previews in encrypted rooms",
         "inline_url_previews_encrypted_bundled_only": "Only show bundled previews in encrypted rooms",

@@ -43,6 +43,7 @@ import { MatrixClientPeg } from "../../MatrixClientPeg";
 import { SeshatIndexManager } from "./SeshatIndexManager";
 import { IPCManager } from "./IPCManager";
 import { _t } from "../../languageHandler";
+import { type GlobalShortcutStatus, handleGlobalShortcut, isGlobalShortcutAction } from "../../utils/globalShortcuts";
 import { BadgeOverlayRenderer } from "../../favicon";
 import { GenericToast } from "@element-hq/web-shared-components";
 
@@ -113,6 +114,10 @@ export default class ElectronPlatform extends BasePlatform {
             false if there is not
             or the error if one is encountered
          */
+        this.electron.on("globalShortcut", (_event, action: unknown) => {
+            if (isGlobalShortcutAction(action)) void handleGlobalShortcut(action);
+        });
+
         this.electron.on("check_updates", (event, status) => {
             dis.dispatch<CheckUpdatesPayload>({
                 action: Action.CheckUpdates,
@@ -382,6 +387,18 @@ export default class ElectronPlatform extends BasePlatform {
     public async setSettingValue(settingName: string, value: any): Promise<void> {
         await this.initialised;
         return this.electron.setSettingValue(settingName, value);
+    }
+
+    public supportsGlobalShortcuts(): boolean {
+        return true;
+    }
+
+    public async getGlobalShortcuts(): Promise<GlobalShortcutStatus> {
+        return this.ipc.call("getGlobalShortcuts");
+    }
+
+    public async setGlobalShortcuts(bindings: GlobalShortcutStatus["bindings"]): Promise<GlobalShortcutStatus> {
+        return this.ipc.call("setGlobalShortcuts", bindings);
     }
 
     public async canSelfUpdate(): Promise<boolean> {

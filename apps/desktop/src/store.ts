@@ -89,6 +89,8 @@ interface StoreData {
     locale?: string | string[];
     disableHardwareAcceleration: boolean;
     enableContentProtection: boolean;
+    /** system-wide shortcut accelerators, keyed by action */
+    globalShortcuts?: Record<string, string>;
     safeStorage?: Record<string, string>;
     /** the safeStorage backend used for the safeStorage data as written */
     safeStorageBackend?: SafeStorageBackend;
@@ -238,6 +240,10 @@ class Store extends ElectronStore<StoreData> {
                 enableContentProtection: {
                     type: "boolean",
                     default: false,
+                },
+                globalShortcuts: {
+                    type: "object",
+                    additionalProperties: { type: "string" },
                 },
                 safeStorage: {
                     type: "object",

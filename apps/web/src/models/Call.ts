@@ -1207,16 +1207,67 @@ export class ElementCall extends Call {
         this.close(); // User is done with the call; tell the UI to close it
     }
 
+    /** The last mute state Element Call reported, or null before it has reported one. */
+    private deviceMuteState: DeviceMuteState | null = null;
+
     /** Element Call reports its mute state (`HostBridge.notifyDeviceMute` / `io.element.device_mute`). */
-    public handleDeviceMute(_state?: DeviceMuteState): void {
-        // Nothing to do yet; Element Web does not track the call's mute state.
+    public handleDeviceMute(state?: DeviceMuteState): void {
+        if (state) {
+            this.deviceMuteState = {
+                audio_enabled: state.audio_enabled,
+                video_enabled: state.video_enabled,
+                deafened: state.deafened ?? false,
+            };
+        }
     }
 
     private readonly onDeviceMute = (ev: CustomEvent<IWidgetApiRequest>): void => {
         ev.preventDefault();
         this.widgetApi!.transport.reply(ev.detail, {}); // ack
-        this.handleDeviceMute();
+        const { audio_enabled, video_enabled, deafened } = (ev.detail.data ?? {}) as Partial<DeviceMuteState>;
+        this.handleDeviceMute(
+            typeof audio_enabled === "boolean" && typeof video_enabled === "boolean"
+                ? { audio_enabled, video_enabled, deafened: deafened === true }
+                : undefined,
+        );
     };
+
+    /**
+     * Asks Element Call to change the microphone and/or camera state, whichever way it is embedded.
+     * The widget API reply carries no state, so the new state is taken from the request on that route.
+     */
+    private async setDeviceMute(request: Partial<DeviceMuteState>): Promise<void> {
+        if (this.componentHandle !== null) {
+            this.handleDeviceMute(await this.componentHandle.setDeviceMute(request));
+        } else if (this.widgetApi !== null) {
+            await this.widgetApi.transport.send(ElementWidgetActions.DeviceMute, request);
+            const next = {
+                audio_enabled: true,
+                video_enabled: true,
+                deafened: false,
+                ...this.deviceMuteState,
+                ...request,
+            };
+            // Deafening takes the microphone with it
+            if (request.deafened) next.audio_enabled = false;
+            this.handleDeviceMute(next);
+        }
+    }
+
+    /** Mutes the microphone if it is on, and turns it on if it is muted. */
+    public async toggleMicrophone(): Promise<void> {
+        await this.setDeviceMute({ audio_enabled: !(this.deviceMuteState?.audio_enabled ?? true) });
+    }
+
+    /** Deafens the user if they can hear the call, and undeafens them if they can't. */
+    public async toggleDeafen(): Promise<void> {
+        await this.setDeviceMute({ deafened: !(this.deviceMuteState?.deafened ?? false) });
+    }
+
+    /** Turns the camera off if it is on, and on if it is off. */
+    public async toggleCamera(): Promise<void> {
+        await this.setDeviceMute({ video_enabled: !(this.deviceMuteState?.video_enabled ?? true) });
+    }
 
     private readonly onJoin = (ev: CustomEvent<IWidgetApiRequest>): void => {
         ev.preventDefault();

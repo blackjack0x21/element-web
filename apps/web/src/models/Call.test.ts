@@ -1216,6 +1216,30 @@ describe("ElementCall with the React component embedding", () => {
         expect(onClose).toHaveBeenCalled();
     });
 
+    it("toggles the microphone and camera through the component, from the state it reported", async () => {
+        const setDeviceMute = vi.fn(async (request: { audio_enabled?: boolean; video_enabled?: boolean }) => ({
+            audio_enabled: request.audio_enabled ?? true,
+            video_enabled: request.video_enabled ?? true,
+        }));
+        call.setComponentHandle({ setDeviceMute } as unknown as ElementCallHandle);
+
+        // Nothing reported yet: assume both are on, so the first toggle mutes
+        await call.toggleMicrophone();
+        expect(setDeviceMute).toHaveBeenLastCalledWith({ audio_enabled: false });
+        await call.toggleMicrophone();
+        expect(setDeviceMute).toHaveBeenLastCalledWith({ audio_enabled: true });
+
+        call.handleDeviceMute({ audio_enabled: true, video_enabled: false });
+        await call.toggleCamera();
+        expect(setDeviceMute).toHaveBeenLastCalledWith({ video_enabled: true });
+
+        await call.toggleDeafen();
+        expect(setDeviceMute).toHaveBeenLastCalledWith({ deafened: true });
+        call.handleDeviceMute({ audio_enabled: false, video_enabled: false, deafened: true });
+        await call.toggleDeafen();
+        expect(setDeviceMute).toHaveBeenLastCalledWith({ deafened: false });
+    });
+
     it("fails to disconnect when no component is listening", async () => {
         call.handleJoined();
         await expect(call.disconnect()).rejects.toThrow("no Element Call component is mounted");

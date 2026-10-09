@@ -49,6 +49,7 @@ import { getAsarPath } from "./asar.js";
 import { getIconPath } from "./icon.js";
 import { getArgs } from "./args.js";
 import { type ConfigOptions, loadConfig } from "./config.js";
+import { registerGlobalShortcuts, unregisterGlobalShortcuts } from "./global-shortcuts.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -394,6 +395,8 @@ app.on("ready", async () => {
     ); // Use Mac OS 15+ native picker
 
     setupMediaAuth(global.mainWindow);
+
+    void registerGlobalShortcuts();
 });
 
 app.on("window-all-closed", () => {
@@ -410,6 +413,7 @@ app.on("activate", () => {
 });
 
 function beforeQuit(): void {
+    unregisterGlobalShortcuts();
     global.appQuitting = true;
     global.mainWindow?.webContents.send("before-quit");
 }

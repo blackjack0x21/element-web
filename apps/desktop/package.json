@@ -1,5 +1,6 @@
 {
     "name": "element-desktop",
+    "desktopName": "element-desktop-dev.desktop",
     "productName": "Element",
     "main": "lib/electron-main.js",
     "exports": "./lib/electron-main.js",
@@ -52,6 +53,7 @@
         "sane-postinstall": "electron-builder install-app-deps"
     },
     "dependencies": {
+        "@homebridge/dbus-native": "^0.7.9",
         "@matrix-org/seshat": "^6.0.1",
         "@sentry/electron": "^7.0.0",
         "auto-launch": "^5.0.5",

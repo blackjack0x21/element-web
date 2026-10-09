@@ -12,6 +12,7 @@ import { randomArray } from "./utils.js";
 import { consumeDisplayMediaCallback } from "./displayMediaCallback.js";
 import Store, { clearData } from "./store.js";
 import { getConfig } from "./config.js";
+import { getGlobalShortcutStatus, setGlobalShortcutBindings } from "./global-shortcuts.js";
 
 let focusHandlerAttached = false;
 ipcMain.on("loudNotification", function (): void {
@@ -170,6 +171,13 @@ ipcMain.on("ipcCall", async function (_ev: IpcMainEvent, payload) {
         case "callDisplayMediaCallback":
             consumeDisplayMediaCallback()?.({ video: args[0] });
             ret = null;
+            break;
+
+        case "getGlobalShortcuts":
+            ret = getGlobalShortcutStatus();
+            break;
+        case "setGlobalShortcuts":
+            ret = await setGlobalShortcutBindings(args[0]);
             break;
 
         case "clearStorage":

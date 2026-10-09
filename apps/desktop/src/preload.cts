@@ -18,6 +18,7 @@ import type { X509Api } from "shared-types" with { "resolution-mode": "import" }
 const CHANNELS = [
     "app_onAction",
     "before-quit",
+    "globalShortcut",
     "check_updates",
     "install_update",
     "ipcCall",

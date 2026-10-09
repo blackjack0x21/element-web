@@ -42,6 +42,7 @@ import { type SDKContextClass } from "../contexts/SDKContextClass.ts";
 type ElectronChannel =
     | "app_onAction"
     | "before-quit"
+    | "globalShortcut"
     | "check_updates"
     | "install_update"
     | "ipcCall"

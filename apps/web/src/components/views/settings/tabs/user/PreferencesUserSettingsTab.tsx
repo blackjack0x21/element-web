@@ -29,6 +29,7 @@ import SettingsTab from "../SettingsTab";
 import { SettingsSection } from "../../shared/SettingsSection";
 import LanguageDropdown from "../../../elements/LanguageDropdown";
 import PlatformPeg from "../../../../../PlatformPeg";
+import { GlobalShortcutSettings } from "../../GlobalShortcutSettings";
 import { IS_MAC } from "../../../../../Keyboard";
 import SpellCheckSettings from "../../SpellCheckSettings";
 import * as TimezoneHandler from "../../../../../TimezoneHandler";
@@ -378,6 +379,15 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
                         <MediaPreviewAccountSettings />
                         <InviteRulesAccountSetting />
                     </SettingsSubsection>
+
+                    {PlatformPeg.get()?.supportsGlobalShortcuts() && (
+                        <SettingsSubsection
+                            heading={_t("settings|global_shortcuts|heading")}
+                            description={_t("settings|global_shortcuts|description", { brand })}
+                        >
+                            <GlobalShortcutSettings />
+                        </SettingsSubsection>
+                    )}
 
                     <SettingsSubsection heading={_t("settings|preferences|room_directory_heading")} formWrap>
                         {this.renderGroup(PreferencesUserSettingsTab.ROOM_DIRECTORY_SETTINGS)}

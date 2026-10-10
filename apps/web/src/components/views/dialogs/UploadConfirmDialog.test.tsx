@@ -207,4 +207,11 @@ describe("<UploadConfirmDialog />", () => {
             expect(onFinished).not.toHaveBeenCalled();
         });
     });
+
+    it("should focus the caption field when opened", () => {
+        const file = new File(["hello"], "notes.txt", { type: "text/plain" });
+        render(<UploadConfirmDialog file={file} currentIndex={0} totalFiles={1} onFinished={vi.fn()} />);
+
+        expect(screen.getByLabelText("Add a caption (optional)")).toHaveFocus();
+    });
 });

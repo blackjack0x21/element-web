@@ -159,12 +159,7 @@ export default function UploadConfirmDialog({
                 <UploadCaptionField value={caption} onChange={setCaption} onSubmit={onUploadClick} />
             </div>
 
-            <DialogButtons
-                primaryButton={_t("action|upload")}
-                hasCancel={false}
-                onPrimaryButtonClick={onUploadClick}
-                focus={true}
-            >
+            <DialogButtons primaryButton={_t("action|upload")} hasCancel={false} onPrimaryButtonClick={onUploadClick}>
                 {uploadAllButton}
             </DialogButtons>
         </BaseDialog>

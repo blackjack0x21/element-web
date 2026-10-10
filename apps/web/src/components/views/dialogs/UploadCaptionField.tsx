@@ -202,6 +202,7 @@ export function UploadCaptionField({ value, onChange, onSubmit }: Props): JSX.El
                 label={_t("upload_file|caption_label")}
                 value={value}
                 inputRef={inputRef}
+                autoFocus={true}
                 onChange={onInputChange}
                 onKeyDown={onKeyDown}
                 onKeyUp={(ev: KeyboardEvent<HTMLInputElement>) => {

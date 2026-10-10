@@ -8,7 +8,8 @@ Please see LICENSE files in the repository root for full details.
 // @vitest-environment happy-dom
 
 import React from "react";
-import { render, waitFor } from "test-utils-rtl";
+import { render, waitFor, screen } from "test-utils-rtl";
+import userEvent from "@testing-library/user-event";
 import { secureRandomString } from "matrix-js-sdk/src/randomstring";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 
@@ -109,5 +110,26 @@ describe("<UploadConfirmDialog />", () => {
 
         expect(getByText("notes.txt")).toBeInTheDocument();
         expect(container.querySelector("img, video, audio")).toBeNull();
+    });
+
+    it("should pass the entered caption when uploading", async () => {
+        const onFinished = vi.fn();
+        const file = new File(["hello"], "notes.txt", { type: "text/plain" });
+        render(<UploadConfirmDialog file={file} currentIndex={0} totalFiles={1} onFinished={onFinished} />);
+
+        await userEvent.type(screen.getByLabelText("Add a caption (optional)"), "look at this");
+        await userEvent.click(screen.getByRole("button", { name: "Upload" }));
+
+        expect(onFinished).toHaveBeenCalledWith(true, false, "look at this");
+    });
+
+    it("should upload when pressing Enter in the caption field", async () => {
+        const onFinished = vi.fn();
+        const file = new File(["hello"], "notes.txt", { type: "text/plain" });
+        render(<UploadConfirmDialog file={file} currentIndex={0} totalFiles={1} onFinished={onFinished} />);
+
+        await userEvent.type(screen.getByLabelText("Add a caption (optional)"), "hi{Enter}");
+
+        expect(onFinished).toHaveBeenCalledWith(true, false, "hi");
     });
 });

@@ -499,17 +499,19 @@ export default class ContentMessages {
             const file = okFiles[i];
             const loopPromiseBefore = promBefore;
 
+            let caption: string | undefined;
             if (!uploadAll) {
                 const { finished } = Modal.createDialog(UploadConfirmDialog, {
                     file,
                     currentIndex: i,
                     totalFiles: okFiles.length,
                 });
-                const [shouldContinue, shouldUploadAll] = await finished;
+                const [shouldContinue, shouldUploadAll, enteredCaption] = await finished;
                 if (!shouldContinue) break;
                 if (shouldUploadAll) {
                     uploadAll = true;
                 }
+                caption = enteredCaption;
             }
             sentFileTypes.push(file.type.split("/")[0]);
 
@@ -523,6 +525,7 @@ export default class ContentMessages {
                         matrixClient,
                         replyToEvent ?? undefined,
                         loopPromiseBefore,
+                        caption,
                     ),
                 matrixClient,
             );
@@ -591,10 +594,14 @@ export default class ContentMessages {
         matrixClient: MatrixClient,
         replyToEvent: MatrixEvent | undefined,
         promBefore?: Promise<any>,
+        caption?: string,
     ): Promise<void> {
         const fileName = file.name || _t("common|attachment");
+        const trimmedCaption = caption?.trim();
         const content: Omit<MediaEventContent, "info"> & { info: Partial<MediaEventInfo> } = {
-            body: fileName,
+            // As per the spec, a caption goes in `body` and the real file name moves to `filename`
+            body: trimmedCaption || fileName,
+            ...(trimmedCaption ? { filename: fileName } : {}),
             info: {
                 size: file.size,
             },

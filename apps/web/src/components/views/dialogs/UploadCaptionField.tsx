@@ -16,15 +16,20 @@ import React, {
     type KeyboardEvent,
     type SyntheticEvent,
 } from "react";
+import { createPortal } from "react-dom";
 
 import { _t } from "../../../languageHandler";
 import Field from "../elements/Field";
+import UIStore from "../../../stores/UIStore";
 import { EmojiButton } from "../rooms/EmojiButton";
 import EmojiProvider from "../../../autocomplete/EmojiProvider";
 import { type ICompletion } from "../../../autocomplete/Autocompleter";
 import { replaceEmojiShortcodes } from "../../../utils/replaceEmojiShortcodes";
 
 const MAX_SUGGESTIONS = 8;
+/** Matches the max-height of the suggestion list in CSS */
+const SUGGESTIONS_HEIGHT = 220;
+const SUGGESTIONS_GAP = 4;
 
 interface Props {
     value: string;
@@ -38,6 +43,7 @@ interface Props {
  * suggests emoji while a shortcode is being typed, and has a button to open the emoji picker.
  */
 export function UploadCaptionField({ value, onChange, onSubmit }: Props): JSX.Element {
+    const wrapperRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     // Created once: it only reads the emoji data and the user's recent emoji
     const provider = useRef<EmojiProvider>(null);
@@ -150,8 +156,46 @@ export function UploadCaptionField({ value, onChange, onSubmit }: Props): JSX.El
         }
     };
 
+    /**
+     * The list is a popup over the dialog rather than part of its layout, so it is drawn in a portal
+     * (the dialog scrolls, which would otherwise clip it) and placed next to the field.
+     */
+    let popup: JSX.Element | undefined;
+    const fieldRect = wrapperRef.current?.querySelector(".mx_Field")?.getBoundingClientRect();
+    if (suggestions.length > 0 && fieldRect) {
+        const fitsBelow = fieldRect.bottom + SUGGESTIONS_GAP + SUGGESTIONS_HEIGHT <= UIStore.instance.windowHeight;
+        popup = createPortal(
+            <div
+                className="mx_UploadCaptionField_suggestions"
+                role="listbox"
+                aria-label={_t("composer|autocomplete|emoji_a11y")}
+                style={{
+                    left: fieldRect.left,
+                    width: fieldRect.width,
+                    ...(fitsBelow
+                        ? { top: fieldRect.bottom + SUGGESTIONS_GAP }
+                        : { bottom: UIStore.instance.windowHeight - fieldRect.top + SUGGESTIONS_GAP }),
+                }}
+            >
+                {suggestions.map((completion, i) =>
+                    cloneElement(completion.component, {
+                        "key": completion.completion,
+                        "aria-selected": i === selected,
+                        "className": i === selected ? "mx_UploadCaptionField_selected" : undefined,
+                        // mousedown rather than click: the input must not lose focus first
+                        "onMouseDown": (ev: React.MouseEvent) => {
+                            ev.preventDefault();
+                            pickSuggestion(completion);
+                        },
+                    } as Partial<React.HTMLAttributes<HTMLElement>>),
+                )}
+            </div>,
+            document.body,
+        );
+    }
+
     return (
-        <div className="mx_UploadCaptionField">
+        <div className="mx_UploadCaptionField" ref={wrapperRef}>
             <Field
                 className="mx_UploadCaptionField_field"
                 type="text"
@@ -167,26 +211,7 @@ export function UploadCaptionField({ value, onChange, onSubmit }: Props): JSX.El
                 onBlur={closeSuggestions}
                 postfixComponent={<EmojiButton className="mx_UploadCaptionField_emojiButton" addEmoji={addEmoji} />}
             />
-            {suggestions.length > 0 && (
-                <div
-                    className="mx_UploadCaptionField_suggestions"
-                    role="listbox"
-                    aria-label={_t("composer|autocomplete|emoji_a11y")}
-                >
-                    {suggestions.map((completion, i) =>
-                        cloneElement(completion.component, {
-                            "key": completion.completion,
-                            "aria-selected": i === selected,
-                            "className": i === selected ? "mx_UploadCaptionField_selected" : undefined,
-                            // mousedown rather than click: the input must not lose focus first
-                            "onMouseDown": (ev: React.MouseEvent) => {
-                                ev.preventDefault();
-                                pickSuggestion(completion);
-                            },
-                        } as Partial<React.HTMLAttributes<HTMLElement>>),
-                    )}
-                </div>
-            )}
+            {popup}
         </div>
     );
 }

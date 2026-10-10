@@ -51,12 +51,16 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .mx_UploadCaptionField_suggestions {
-    margin-top: var(--cpd-space-2x);
+    position: fixed;
+    /* Above the dialog (--dialog-zIndex-standard) */
+    z-index: calc(var(--dialog-zIndex-standard) + 1);
+    box-sizing: border-box;
     max-height: 220px;
     overflow-y: auto;
     border: 1px solid var(--cpd-color-border-interactive-secondary);
     border-radius: var(--cpd-space-2x);
     background: var(--cpd-color-bg-canvas-default);
+    box-shadow: 0 4px 16px rgb(0 0 0 / 20%);
 
     .mx_Autocomplete_Completion_pill {
         border-radius: 0;

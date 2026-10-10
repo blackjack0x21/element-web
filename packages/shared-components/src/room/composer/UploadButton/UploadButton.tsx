@@ -67,7 +67,7 @@ export function UploadButton({
         const { label, icon: Icon } = options[0];
         return (
             <IconButton
-                size="26px"
+                size="32px"
                 {...rootButtonProps}
                 tooltip={label}
                 aria-label={label}
@@ -81,7 +81,7 @@ export function UploadButton({
     const trigger = (
         <IconButton
             {...rootButtonProps}
-            size="26px"
+            size="32px"
             tooltip={i18n.translate("common|attachment")}
             onClick={onMenuClick}
             title={i18n.translate("common|attachment")}

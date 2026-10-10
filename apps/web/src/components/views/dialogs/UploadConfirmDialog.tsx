@@ -7,12 +7,14 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { useCallback, useState, type ChangeEvent, type JSX, type KeyboardEvent } from "react";
+import React, { useCallback, useRef, useState, type ChangeEvent, type JSX, type KeyboardEvent } from "react";
 
 import { _t } from "../../../languageHandler";
 import BaseDialog from "./BaseDialog";
 import DialogButtons from "../elements/DialogButtons";
 import Field from "../elements/Field";
+import { EmojiButton } from "../rooms/EmojiButton";
+import { replaceEmojiShortcodes } from "../../../utils/replaceEmojiShortcodes";
 import { fileSize } from "../../../utils/FileUtils";
 import {
     attachmentIcon,
@@ -110,6 +112,7 @@ export default function UploadConfirmDialog({
 }: IProps): JSX.Element {
     const vm = useCreateAutoDisposedViewModel(() => new UploadPreviewViewModel(file));
     const [caption, setCaption] = useState("");
+    const captionRef = useRef<HTMLInputElement>(null);
 
     let title: string;
     if (totalFiles > 1 && currentIndex !== undefined) {
@@ -134,8 +137,36 @@ export default function UploadConfirmDialog({
     }, [onFinished, caption]);
 
     const onCaptionChange = useCallback((ev: ChangeEvent<HTMLInputElement>): void => {
-        setCaption(ev.target.value);
+        const input = ev.target;
+        const replaced = replaceEmojiShortcodes(input.value);
+        setCaption(replaced);
+        if (replaced !== input.value) {
+            // Keep the cursor where the user was typing, which is after the text that got shorter.
+            const fromEnd = input.value.length - (input.selectionStart ?? input.value.length);
+            const cursor = Math.max(0, replaced.length - fromEnd);
+            requestAnimationFrame(() => input.setSelectionRange(cursor, cursor));
+        }
     }, []);
+
+    const addEmoji = useCallback(
+        (unicode: string): boolean => {
+            const input = captionRef.current;
+            const start = input?.selectionStart ?? null;
+            const end = input?.selectionEnd ?? null;
+            setCaption((current) => {
+                const from = start ?? current.length;
+                const to = end ?? current.length;
+                return current.slice(0, from) + unicode + current.slice(to);
+            });
+            const cursor = (start ?? caption.length) + unicode.length;
+            requestAnimationFrame(() => {
+                input?.focus();
+                input?.setSelectionRange(cursor, cursor);
+            });
+            return true;
+        },
+        [caption.length],
+    );
 
     const onCaptionKeyDown = useCallback(
         (ev: KeyboardEvent<HTMLInputElement>): void => {
@@ -175,6 +206,8 @@ export default function UploadConfirmDialog({
                     type="text"
                     label={_t("upload_file|caption_label")}
                     value={caption}
+                    inputRef={captionRef}
+                    postfixComponent={<EmojiButton addEmoji={addEmoji} />}
                     onChange={onCaptionChange}
                     onKeyDown={onCaptionKeyDown}
                 />

@@ -15,6 +15,9 @@ import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 
 import UploadConfirmDialog from "./UploadConfirmDialog.tsx";
 
+// Choosing an emoji records it as recent, which needs a settings handler the test does not set up.
+vi.mock("../../../emojipicker/recent", () => ({ get: () => [], add: vi.fn() }));
+
 /**
  * The shared media preview tile hides the image until it has loaded it once out of band, which jsdom
  * never does: it fires neither `load` nor `error` for a real element. Stub the loader so the preview
@@ -131,5 +134,29 @@ describe("<UploadConfirmDialog />", () => {
         await userEvent.type(screen.getByLabelText("Add a caption (optional)"), "hi{Enter}");
 
         expect(onFinished).toHaveBeenCalledWith(true, false, "hi");
+    });
+
+    it("should replace emoji shortcodes in the caption", async () => {
+        const onFinished = vi.fn();
+        const file = new File(["hello"], "notes.txt", { type: "text/plain" });
+        render(<UploadConfirmDialog file={file} currentIndex={0} totalFiles={1} onFinished={onFinished} />);
+
+        await userEvent.type(screen.getByLabelText("Add a caption (optional)"), "sad :sob: day");
+        await userEvent.click(screen.getByRole("button", { name: "Upload" }));
+
+        expect(onFinished).toHaveBeenCalledWith(true, false, "sad 😭 day");
+    });
+
+    it("should insert an emoji chosen from the picker into the caption", async () => {
+        const onFinished = vi.fn();
+        const file = new File(["hello"], "notes.txt", { type: "text/plain" });
+        render(<UploadConfirmDialog file={file} currentIndex={0} totalFiles={1} onFinished={onFinished} />);
+
+        await userEvent.type(screen.getByLabelText("Add a caption (optional)"), "hi ");
+        await userEvent.click(screen.getByRole("button", { name: "Emoji" }));
+        await userEvent.click(await screen.findByRole("button", { name: "🎉" }));
+        await userEvent.click(screen.getByRole("button", { name: "Upload" }));
+
+        expect(onFinished).toHaveBeenCalledWith(true, false, "hi 🎉");
     });
 });

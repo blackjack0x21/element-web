@@ -21,7 +21,7 @@ import { addReplyToMessageContent } from "../../../utils/Reply";
 import { getFavorites, toggleFavorite } from "../../../gif/favorites";
 import { useSettingValue } from "../../../hooks/useSettings";
 import { GifSearch } from "./GifSearch";
-import { GifGrid, GIFS_PER_ROW } from "./GifGrid";
+import { GifGrid } from "./GifGrid";
 import { useScopedRoomContext } from "../../../contexts/ScopedRoomContext.tsx";
 import MatrixClientContext from "../../../contexts/MatrixClientContext";
 import {
@@ -282,43 +282,40 @@ export function GifPicker({ relation, onFinished }: GifPickerProps): JSX.Element
 
             if (!state.activeNode) return;
 
-            // Get DOM structure: button -> gridcell -> row
-            const gridcellNode = state.activeNode.parentElement;
-            const rowElement = gridcellNode?.parentElement;
-            if (!rowElement || !gridcellNode) return;
-
-            const columnIndex = Array.from(rowElement.children).indexOf(gridcellNode);
-            const refIndex = state.nodes.indexOf(state.activeNode);
-
+            // The columns have different heights, so pick the neighbour by on-screen position: for left/right the
+            // nearest GIF in the next column over, for up/down the nearest GIF above/below in the same column.
+            const from = state.activeNode.getBoundingClientRect();
+            const fromX = from.left + from.width / 2;
+            const fromY = from.top + from.height / 2;
             let focusNode: HTMLElement | undefined;
-            let newRowElement: Element | undefined;
-
-            switch (ev.key) {
-                case Key.ARROW_LEFT:
-                    focusNode = state.nodes[refIndex - 1];
-                    newRowElement = focusNode?.parentElement?.parentElement ?? undefined;
-                    break;
-
-                case Key.ARROW_RIGHT:
-                    focusNode = state.nodes[refIndex + 1];
-                    newRowElement = focusNode?.parentElement?.parentElement ?? undefined;
-                    break;
-
-                case Key.ARROW_UP:
-                case Key.ARROW_DOWN: {
-                    // Calculate the offset to move to the same column in prev/next row
-                    const offset =
-                        ev.key === Key.ARROW_UP
-                            ? -(columnIndex + 1 + (GIFS_PER_ROW - 1 - columnIndex))
-                            : GIFS_PER_ROW - columnIndex;
-                    const targetNode = state.nodes[refIndex + offset];
-                    newRowElement = targetNode?.parentElement?.parentElement ?? undefined;
-                    if (newRowElement) {
-                        const newColumnIndex = Math.min(columnIndex, newRowElement.children.length - 1);
-                        const targetCell = newRowElement.children[newColumnIndex];
-                        focusNode = targetCell?.children[0] as HTMLElement | undefined;
-                    }
-                    break;
+            let best = Infinity;
+            for (const node of state.nodes) {
+                if (node === state.activeNode) continue;
+                const rect = node.getBoundingClientRect();
+                const dx = rect.left + rect.width / 2 - fromX;
+                const dy = rect.top + rect.height / 2 - fromY;
+                const sameColumn = Math.abs(dx) < from.width / 2;
+                let distance: number;
+                switch (ev.key) {
+                    case Key.ARROW_LEFT:
+                        if (dx >= 0 || sameColumn) continue;
+                        distance = Math.abs(dx) * 1000 + Math.abs(dy);
+                        break;
+                    case Key.ARROW_RIGHT:
+                        if (dx <= 0 || sameColumn) continue;
+                        distance = Math.abs(dx) * 1000 + Math.abs(dy);
+                        break;
+                    case Key.ARROW_UP:
+                        if (dy >= 0 || !sameColumn) continue;
+                        distance = -dy;
+                        break;
+                    default:
+                        if (dy <= 0 || !sameColumn) continue;
+                        distance = dy;
+                }
+                if (distance < best) {
+                    best = distance;
+                    focusNode = node;
                 }
             }
 
@@ -329,12 +326,10 @@ export function GifPicker({ relation, onFinished }: GifPickerProps): JSX.Element
                     payload: { node: focusNode },
                 });
 
-                if (rowElement !== newRowElement) {
-                    focusNode.scrollIntoView({
-                        behavior: "auto",
-                        block: "nearest",
-                    });
-                }
+                focusNode.scrollIntoView({
+                    behavior: "auto",
+                    block: "nearest",
+                });
 
                 ev.preventDefault();
                 ev.stopPropagation();

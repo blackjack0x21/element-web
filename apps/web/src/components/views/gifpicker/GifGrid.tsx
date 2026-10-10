@@ -14,8 +14,8 @@ import { type KlipyGifResult, pickBestFormat } from "../../../gif/KlipyGifServic
 import { _t } from "../../../languageHandler";
 import { RovingAccessibleButton } from "../../../accessibility/RovingTabIndex";
 
-/** Number of GIF items per row - must match CSS grid-template-columns */
-export const GIFS_PER_ROW = 2;
+/** Number of masonry columns - must match the CSS in _GifPicker.pcss */
+export const GIF_COLUMNS = 2;
 
 interface GifGridProps {
     results: KlipyGifResult[];
@@ -30,7 +30,7 @@ interface GifGridProps {
 }
 
 /**
- * A responsive grid of GIF thumbnail previews with full keyboard navigation.
+ * A two column masonry of GIF thumbnails, each shown at its natural aspect ratio like Discord does.
  * Uses the pickBestFormat preview fallback chain for fast loading and supports infinite scroll via IntersectionObserver.
  */
 export function GifGrid({
@@ -68,13 +68,21 @@ export function GifGrid({
         [onSelect],
     );
 
-    // Group results into rows for proper grid accessibility
-    const rows = useMemo(() => {
-        const result: KlipyGifResult[][] = [];
-        for (let i = 0; i < results.length; i += GIFS_PER_ROW) {
-            result.push(results.slice(i, i + GIFS_PER_ROW));
+    // Put each GIF in the currently shortest column. Placement only depends on the GIFs before it, so loading more
+    // results never moves GIFs that are already on screen.
+    const columns = useMemo(() => {
+        const cols = Array.from({ length: GIF_COLUMNS }, (_, i) => ({
+            key: `column-${i}`,
+            gifs: [] as KlipyGifResult[],
+        }));
+        const heights: number[] = Array.from({ length: GIF_COLUMNS }, () => 0);
+        for (const gif of results) {
+            const { width, height } = pickBestFormat(gif).preview;
+            const shortest = heights.indexOf(Math.min(...heights));
+            cols[shortest].gifs.push(gif);
+            heights[shortest] += height / width || 1;
         }
-        return result;
+        return cols;
     }, [results]);
 
     if (results.length === 0 && !loading) {
@@ -87,14 +95,14 @@ export function GifGrid({
 
     return (
         <>
-            <div className="mx_GifPicker_grid" role="grid" aria-label={_t("composer|gif_grid_label")}>
-                {rows.map((row) => (
-                    <div key={row[0].id} role="row">
-                        {row.map((gif) => {
+            <div className="mx_GifPicker_grid" role="group" aria-label={_t("composer|gif_grid_label")}>
+                {columns.map((column) => (
+                    <div key={column.key} className="mx_GifPicker_column">
+                        {column.gifs.map((gif) => {
                             const preview = pickBestFormat(gif).preview;
                             const favorite = isFavorite(gif.id);
                             return (
-                                <div role="gridcell" key={gif.id}>
+                                <div className="mx_GifPicker_cell" key={gif.id}>
                                     <RovingAccessibleButton
                                         className="mx_GifPicker_gridItem"
                                         data-gif-id={gif.id}

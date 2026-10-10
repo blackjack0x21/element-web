@@ -24,7 +24,6 @@ import { mediaFromContent } from "../../customisations/Media";
 import { TimelineRenderingType } from "../../contexts/RoomContext";
 import SettingsStore from "../../settings/SettingsStore";
 import { type ImageSize, suggestedSize as suggestedImageSize } from "../../settings/enums/ImageSize";
-import { presentableTextForFile } from "../../utils/FileUtils";
 import { type MediaEventHelper } from "../../utils/MediaEventHelper";
 import { blobIsAnimated, mayBeAnimated } from "../../utils/Image";
 import { type RoomPermalinkCreator } from "../../utils/permalinks/Permalinks";
@@ -184,10 +183,6 @@ export class ImageBodyViewModel
         return _t("timeline|m.image|error");
     }
 
-    private static shouldShowBanner(timelineRenderingType: TimelineRenderingType): boolean {
-        return ![TimelineRenderingType.ThreadsList, TimelineRenderingType.File].includes(timelineRenderingType);
-    }
-
     private static computeSnapshot(props: ImageBodyViewModelProps, state: InternalState): ImageBodyViewSnapshot {
         const content = props.mxEvent.getContent<ImageContent>();
         const dimensions = ImageBodyViewModel.getImageDimensions(props, state);
@@ -224,9 +219,6 @@ export class ImageBodyViewModel
             placeholder: !props.forExport && !state.imgLoaded ? state.placeholder : ImageBodyViewPlaceholder.NONE,
             blurhash: content.info?.[BLURHASH_FIELD],
             gifLabel: state.isAnimated && !autoplayGifs ? "GIF" : undefined,
-            bannerLabel: ImageBodyViewModel.shouldShowBanner(props.timelineRenderingType)
-                ? presentableTextForFile(content, _t("common|image"), true, true)
-                : undefined,
             linkUrl: contentUrl ?? undefined,
             linkTarget: props.forExport ? "_blank" : undefined,
             ...dimensions,

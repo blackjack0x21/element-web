@@ -961,8 +961,8 @@ describe("ImageBodyViewModel", () => {
         expect(setMediaVisible).toHaveBeenCalledWith(true);
         expect(vm.getSnapshot()).toMatchObject({
             linkTarget: "_blank",
-            bannerLabel: undefined,
         });
+        expect(vm.getSnapshot().bannerLabel).toBeUndefined();
     });
 
     it("resets state and reloads when the event changes while visible", async () => {

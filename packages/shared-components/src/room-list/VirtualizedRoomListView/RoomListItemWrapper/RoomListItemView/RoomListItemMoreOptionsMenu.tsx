@@ -24,6 +24,7 @@ import {
 import { _t } from "../../../../core/i18n/i18n";
 import { useViewModel, type ViewModel } from "../../../../core/viewmodel";
 import type { RoomListItemViewSnapshot, RoomListItemViewActions } from "./RoomListItemView";
+import { useHoverSubMenu } from "./useHoverSubMenu";
 import { RoomListItemNotificationMenu } from "./RoomListItemNotificationMenu";
 import styles from "./RoomListItemMoreOptionsMenu.module.css";
 
@@ -77,6 +78,7 @@ interface MoreOptionContentProps {
 export function MoreOptionContent({ vm }: MoreOptionContentProps): JSX.Element {
     const snapshot = useViewModel(vm);
     const hasSections = snapshot.sections.length > 0;
+    const sectionSubMenu = useHoverSubMenu();
     const isInSection = useMemo(() => snapshot.sections.some((section) => section.isSelected), [snapshot.sections]);
     return (
         <div onKeyDown={(e) => e.stopPropagation()}>
@@ -141,31 +143,40 @@ export function MoreOptionContent({ vm }: MoreOptionContentProps): JSX.Element {
             {snapshot.areSectionsEnabled && snapshot.canChangeSection && (
                 <>
                     <SubMenu
+                        open={sectionSubMenu.open}
+                        onOpenChange={sectionSubMenu.onOpenChange}
                         trigger={
                             <MenuItem
                                 Icon={ArrowRightIcon}
                                 label={_t("room_list|more_options|move_to_section")}
                                 onSelect={null}
+                                {...sectionSubMenu.handlers}
                             />
                         }
                     >
-                        {snapshot.sections.map((section) => (
+                        <div {...sectionSubMenu.handlers}>
+                            {snapshot.sections.map((section) => (
+                                <MenuItem
+                                    key={section.tag}
+                                    label={section.name}
+                                    labelProps={{ className: styles.sectionLabel }}
+                                    onSelect={() => vm.onToggleSection(section.tag)}
+                                    onClick={(evt) => evt.stopPropagation()}
+                                    hideChevron={true}
+                                    aria-checked={section.isSelected}
+                                >
+                                    {section.isSelected && (
+                                        <CheckIcon color="var(--cpd-color-icon-tertiary)" width="24px" height="24px" />
+                                    )}
+                                </MenuItem>
+                            ))}
+                            {hasSections && <Separator />}
                             <MenuItem
-                                key={section.tag}
-                                label={section.name}
-                                labelProps={{ className: styles.sectionLabel }}
-                                onSelect={() => vm.onToggleSection(section.tag)}
-                                onClick={(evt) => evt.stopPropagation()}
+                                label={_t("action|new_section")}
+                                onSelect={vm.onCreateSection}
                                 hideChevron={true}
-                                aria-checked={section.isSelected}
-                            >
-                                {section.isSelected && (
-                                    <CheckIcon color="var(--cpd-color-icon-tertiary)" width="24px" height="24px" />
-                                )}
-                            </MenuItem>
-                        ))}
-                        {hasSections && <Separator />}
-                        <MenuItem label={_t("action|new_section")} onSelect={vm.onCreateSection} hideChevron={true} />
+                            />
+                        </div>
                     </SubMenu>
                     {isInSection && (
                         <MenuItem

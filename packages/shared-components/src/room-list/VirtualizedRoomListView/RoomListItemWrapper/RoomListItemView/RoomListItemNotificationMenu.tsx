@@ -15,6 +15,7 @@ import {
 
 import { _t } from "../../../../core/i18n/i18n";
 import { RoomNotifState } from "./RoomNotifs";
+import { useHoverSubMenu } from "./useHoverSubMenu";
 import { useViewModel, type ViewModel } from "../../../../core/viewmodel";
 import type { RoomListItemViewSnapshot, RoomListItemViewActions } from "./RoomListItemView";
 
@@ -37,6 +38,7 @@ export interface RoomListItemNotificationMenuProps {
  */
 export function RoomListItemNotificationMenu({ vm }: RoomListItemNotificationMenuProps): JSX.Element {
     const snapshot = useViewModel(vm);
+    const { open, onOpenChange, handlers } = useHoverSubMenu();
     const isMuted = snapshot.roomNotifState === RoomNotifState.Mute;
     const checkComponent = <CheckIcon width="24px" height="24px" color="var(--cpd-color-icon-primary)" />;
 
@@ -49,26 +51,31 @@ export function RoomListItemNotificationMenu({ vm }: RoomListItemNotificationMen
 
     return (
         <SubMenu
+            open={open}
+            onOpenChange={onOpenChange}
             trigger={
                 <MenuItem
                     Icon={isMuted ? NotificationsOffSolidIcon : NotificationsSolidIcon}
                     label={_t("room_list|notification_options")}
                     onSelect={null}
+                    {...handlers}
                 />
             }
         >
-            {options.map(({ state, label }) => (
-                <MenuItem
-                    key={state}
-                    aria-selected={snapshot.roomNotifState === state}
-                    hideChevron={true}
-                    label={label}
-                    onSelect={() => vm.onSetRoomNotifState(state)}
-                    onClick={(evt) => evt.stopPropagation()}
-                >
-                    {snapshot.roomNotifState === state && checkComponent}
-                </MenuItem>
-            ))}
+            <div {...handlers}>
+                {options.map(({ state, label }) => (
+                    <MenuItem
+                        key={state}
+                        aria-selected={snapshot.roomNotifState === state}
+                        hideChevron={true}
+                        label={label}
+                        onSelect={() => vm.onSetRoomNotifState(state)}
+                        onClick={(evt) => evt.stopPropagation()}
+                    >
+                        {snapshot.roomNotifState === state && checkComponent}
+                    </MenuItem>
+                ))}
+            </div>
         </SubMenu>
     );
 }

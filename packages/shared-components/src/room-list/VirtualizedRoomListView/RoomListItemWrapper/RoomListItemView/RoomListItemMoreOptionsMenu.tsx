@@ -24,6 +24,7 @@ import {
 import { _t } from "../../../../core/i18n/i18n";
 import { useViewModel, type ViewModel } from "../../../../core/viewmodel";
 import type { RoomListItemViewSnapshot, RoomListItemViewActions } from "./RoomListItemView";
+import { RoomListItemNotificationMenu } from "./RoomListItemNotificationMenu";
 import styles from "./RoomListItemMoreOptionsMenu.module.css";
 
 /**
@@ -117,6 +118,7 @@ export function MoreOptionContent({ vm }: MoreOptionContentProps): JSX.Element {
                     />
                 </>
             )}
+            {snapshot.showNotificationMenu && <RoomListItemNotificationMenu vm={vm} />}
             <Separator />
             {snapshot.canInvite && (
                 <MenuItem

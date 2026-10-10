@@ -79,7 +79,7 @@ export interface RoomListItemViewSnapshot {
     notification: NotificationDecorationData;
     /** Whether the more options menu should be shown */
     showMoreOptionsMenu: boolean;
-    /** Whether the notification menu should be shown */
+    /** Whether the notification options should be shown in the options menu */
     showNotificationMenu: boolean;
     /** Whether the room is a favourite room */
     isFavourite: boolean;

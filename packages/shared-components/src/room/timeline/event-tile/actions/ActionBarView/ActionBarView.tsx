@@ -53,6 +53,10 @@ export interface ActionBarViewSnapshot {
     isPinned: boolean;
     /** Whether the reply chain is currently expanded. */
     isQuoteExpanded: boolean;
+    /** Emoji shown as one-click reactions at the start of the toolbar. */
+    quickReactions?: string[];
+    /** Emoji from `quickReactions` that the user has already reacted with. */
+    reactedQuickReactions?: string[];
     /** Whether starting or replying in a thread is allowed for this event. */
     isThreadReplyAllowed: boolean;
 }
@@ -71,6 +75,7 @@ export interface ActionBarViewActions {
     onHideClick?: (anchor: HTMLElement | null) => void;
     onOptionsClick?: (anchor: HTMLElement | null) => void;
     onPinClick?: (anchor: HTMLElement | null) => void;
+    onQuickReactionClick?: (emoji: string) => void;
     onReactionsClick?: (anchor: HTMLElement | null) => void;
     onRemoveClick?: (anchor: HTMLElement | null) => void;
     onReplyClick?: (anchor: HTMLElement | null) => void;
@@ -140,6 +145,8 @@ export function ActionBarView({ vm, className }: Readonly<ActionBarViewProps>): 
         isDownloadLoading,
         isPinned,
         isQuoteExpanded,
+        quickReactions = [],
+        reactedQuickReactions = [],
     } = useViewModel(vm);
 
     // Track the live button element for each action and keep the callback refs stable
@@ -364,9 +371,22 @@ export function ActionBarView({ vm, className }: Readonly<ActionBarViewProps>): 
             disabled: isActionDisabled(action),
         }));
     }, [actions, isActionDisabled]);
-    const rovingProviderKey = toolbarButtons
-        .map(({ action, disabled }) => `${action}:${disabled ? "1" : "0"}`)
-        .join("|");
+    const rovingProviderKey = [
+        ...quickReactions.map((emoji) => `quick:${emoji}`),
+        ...toolbarButtons.map(({ action, disabled }) => `${action}:${disabled ? "1" : "0"}`),
+    ].join("|");
+
+    const quickReactionButtons = quickReactions.map((emoji) => (
+        <ActionBarButton
+            key={`quick-${emoji}`}
+            presentation={presentation}
+            buttonRef={null}
+            label={emoji}
+            emoji={emoji}
+            onActivate={() => vm.onQuickReactionClick?.(emoji)}
+            ariaPressed={reactedQuickReactions.includes(emoji)}
+        />
+    ));
 
     if (toolbarButtons.length === 0) {
         return null;
@@ -385,6 +405,7 @@ export function ActionBarView({ vm, className }: Readonly<ActionBarViewProps>): 
                     onKeyDown={onKeyDownHandler}
                     className={classNames(className, styles.toolbar)}
                 >
+                    {quickReactionButtons}
                     {toolbarButtons.map((meta) => actionButtons[meta.action])}
                 </Flex>
             )}

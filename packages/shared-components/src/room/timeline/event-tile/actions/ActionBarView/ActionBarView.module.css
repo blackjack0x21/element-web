@@ -33,6 +33,15 @@
         color: var(--cpd-color-icon-secondary);
     }
 
+    .toolbar_item[data-presentation="emoji"] {
+        block-size: 28px;
+        inline-size: 28px;
+
+        font: var(--cpd-font-body-lg-regular);
+        /* Compound underlines tertiary buttons; only visible here because the content is text */
+        text-decoration: none;
+    }
+
     .toolbar_item[data-presentation="label"] {
         padding-inline-start: var(--cpd-space-2x);
         padding-inline-end: var(--cpd-space-2x);

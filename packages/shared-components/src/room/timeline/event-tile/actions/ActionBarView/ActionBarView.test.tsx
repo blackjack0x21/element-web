@@ -348,4 +348,29 @@ describe("ActionBarView", () => {
         fireEvent.contextMenu(viewSourceButton);
         expect(onViewSourceClick).toHaveBeenCalledWith(viewSourceButton);
     });
+
+    it("renders quick reactions before the other actions and reports clicks", () => {
+        const onQuickReactionClick = vi.fn();
+        const vm = new MockViewModel<ActionBarViewSnapshot>({
+            actions: [ActionBarAction.React, ActionBarAction.Options],
+            presentation: "icon",
+            isDownloadEncrypted: false,
+            isDownloadLoading: false,
+            isPinned: false,
+            isQuoteExpanded: false,
+            isThreadReplyAllowed: true,
+            quickReactions: ["👍", "🎉"],
+            reactedQuickReactions: ["🎉"],
+        }) as MockViewModel<ActionBarViewSnapshot> & ActionBarViewActions;
+        vm.onQuickReactionClick = onQuickReactionClick;
+
+        render(<ActionBarView vm={vm} />);
+
+        const buttons = screen.getAllByRole("button");
+        expect(buttons.map((b) => b.getAttribute("aria-label"))).toEqual(["👍", "🎉", "React", "Options"]);
+        expect(buttons[1]).toHaveAttribute("aria-pressed", "true");
+
+        fireEvent.click(buttons[0]);
+        expect(onQuickReactionClick).toHaveBeenCalledWith("👍");
+    });
 });

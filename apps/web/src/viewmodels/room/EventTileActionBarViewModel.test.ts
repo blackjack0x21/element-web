@@ -39,6 +39,7 @@ import { ModuleApi } from "../../modules/Api";
 import { canCancel, canEditContent, editEvent, isContentActionable } from "../../utils/EventUtils";
 import { shouldDisplayReply } from "../../utils/Reply";
 import { MediaEventHelper } from "../../utils/MediaEventHelper";
+import * as recent from "../../emojipicker/recentReactions";
 import { getMediaVisibility, setMediaVisibility } from "../../utils/media/mediaVisibility";
 
 vi.mock("../../dispatcher/dispatcher", () => ({
@@ -237,6 +238,64 @@ describe("EventTileActionBarViewModel", () => {
                 isThreadReplyAllowed: true,
             }),
         );
+    });
+
+    describe("quick reactions", () => {
+        beforeEach(() => {
+            vi.spyOn(recent, "get").mockReturnValue(["👍", "🎉", "❤️"]);
+            vi.spyOn(recent, "add").mockImplementation(() => {});
+            vi.spyOn(client, "sendEvent").mockResolvedValue({ event_id: "$r" });
+            vi.spyOn(client, "redactEvent").mockResolvedValue({ event_id: "$x" });
+            vi.spyOn(client, "getSafeUserId").mockReturnValue(userId);
+        });
+
+        const withMyReaction = (emoji: string) => {
+            const reaction = new MatrixEvent({ event_id: "$mine", type: EventType.Reaction });
+            vi.spyOn(reaction, "getRelation").mockReturnValue({
+                rel_type: RelationType.Annotation,
+                event_id: "$event",
+                key: emoji,
+            });
+            return vi.fn().mockReturnValue({ getAnnotationsBySender: () => ({ [userId]: new Set([reaction]) }) });
+        };
+
+        it("exposes the most used emoji, marking those already used", () => {
+            const vm = createVm({ getRelationsForEvent: withMyReaction("🎉") });
+
+            expect(vm.getSnapshot().quickReactions).toEqual(["👍", "🎉", "❤️"]);
+            expect(vm.getSnapshot().reactedQuickReactions).toEqual(["🎉"]);
+        });
+
+        it("exposes none when reacting is not possible", () => {
+            const vm = createVm({ canReact: false });
+
+            expect(vm.getSnapshot().quickReactions).toEqual([]);
+        });
+
+        it("sends a reaction and records the emoji as recent", () => {
+            const vm = createVm();
+            vm.onQuickReactionClick("👍");
+
+            expect(client.sendEvent).toHaveBeenCalledWith(roomId, EventType.Reaction, {
+                "m.relates_to": { rel_type: RelationType.Annotation, event_id: "$event", key: "👍" },
+            });
+            expect(recent.add).toHaveBeenCalledWith("👍");
+        });
+
+        it("removes an existing reaction when allowed", () => {
+            const vm = createVm({ getRelationsForEvent: withMyReaction("🎉"), canSelfRedact: true });
+            vm.onQuickReactionClick("🎉");
+
+            expect(client.redactEvent).toHaveBeenCalledWith(roomId, "$mine");
+            expect(client.sendEvent).not.toHaveBeenCalled();
+        });
+
+        it("keeps an existing reaction when the user cannot redact", () => {
+            const vm = createVm({ getRelationsForEvent: withMyReaction("🎉"), canSelfRedact: false });
+            vm.onQuickReactionClick("🎉");
+
+            expect(client.redactEvent).not.toHaveBeenCalled();
+        });
     });
 
     it("reacts to media download permission hints and room state updates", async () => {

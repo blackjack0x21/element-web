@@ -18,6 +18,8 @@ interface ActionBarButtonProps {
     label: string;
     onActivate?: (anchor: HTMLElement | null) => void;
     icon?: React.ComponentProps<typeof Button>["Icon"];
+    /** Emoji to render as the button content instead of an icon. */
+    emoji?: string;
     disabled?: boolean;
     ariaPressed?: boolean;
     ariaExpanded?: boolean;
@@ -31,6 +33,7 @@ export function ActionBarButton({
     label,
     onActivate,
     icon,
+    emoji,
     disabled,
     ariaPressed,
     ariaExpanded,
@@ -63,11 +66,11 @@ export function ActionBarButton({
     return (
         <Tooltip description={tooltipDescription ?? label} caption={tooltipCaption} placement="top">
             <Button
-                data-presentation={presentation}
+                data-presentation={emoji ? "emoji" : presentation}
                 ref={ref}
                 kind="tertiary"
                 size="md"
-                iconOnly={iconOnly}
+                iconOnly={iconOnly && !emoji}
                 aria-label={label}
                 aria-pressed={ariaPressed}
                 aria-expanded={ariaExpanded}
@@ -76,9 +79,9 @@ export function ActionBarButton({
                 onContextMenu={handleContextMenu}
                 onFocus={disabled ? undefined : onFocus}
                 className={styles.toolbar_item}
-                Icon={iconOnly ? icon : undefined}
+                Icon={iconOnly && !emoji ? icon : undefined}
             >
-                {iconOnly ? undefined : label}
+                {emoji ?? (iconOnly ? undefined : label)}
             </Button>
         </Tooltip>
     );

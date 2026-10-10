@@ -44,6 +44,10 @@ import { _t } from "../../languageHandler";
 import Modal from "../../Modal";
 import ErrorDialog from "../../components/views/dialogs/ErrorDialog";
 import { ModuleApi } from "../../modules/Api";
+import * as recent from "../../emojipicker/recentReactions";
+
+/** Number of most-used emoji offered as one-click reactions in the action bar. */
+const QUICK_REACTION_COUNT = 3;
 
 /** Props for the event-tile action bar view model. */
 export interface EventTileActionBarViewModelProps {
@@ -55,6 +59,8 @@ export interface EventTileActionBarViewModelProps {
     canSendMessages: boolean;
     /** Whether the current user can react to the event. */
     canReact: boolean;
+    /** Whether the current user can remove their own reactions. */
+    canSelfRedact?: boolean;
     /** Whether the tile is being rendered in search results. */
     isSearch?: boolean;
     /** Whether the tile is being rendered inside a card-style surface. */
@@ -138,7 +144,34 @@ export class EventTileActionBarViewModel
             isPinned: eventState.isPinned,
             isQuoteExpanded: eventState.isQuoteExpanded,
             isThreadReplyAllowed: eventState.isThreadReplyAllowed,
+            ...EventTileActionBarViewModel.getQuickReactions(props, eventState.showReact, client.getSafeUserId()),
         };
+    }
+
+    private static getQuickReactions(
+        props: EventTileActionBarViewModelProps,
+        showReact: boolean,
+        userId: string,
+    ): Pick<ActionBarViewSnapshot, "quickReactions" | "reactedQuickReactions"> {
+        if (!showReact) return { quickReactions: [], reactedQuickReactions: [] };
+
+        const quickReactions = recent.get(QUICK_REACTION_COUNT);
+        const reacted = new Set(EventTileActionBarViewModel.getMyReactions(props, userId).keys());
+        return { quickReactions, reactedQuickReactions: quickReactions.filter((emoji) => reacted.has(emoji)) };
+    }
+
+    /** Maps each emoji the user has reacted to the event with to its reaction event id. */
+    private static getMyReactions(props: EventTileActionBarViewModelProps, userId: string): Map<string, string> {
+        const eventId = props.mxEvent.getId();
+        const relations = eventId
+            ? props.getRelationsForEvent?.(eventId, RelationType.Annotation, EventType.Reaction)
+            : undefined;
+        const result = new Map<string, string>();
+        for (const event of relations?.getAnnotationsBySender()?.[userId] ?? []) {
+            const key = event.getRelation()?.key;
+            if (key && !event.isRedacted()) result.set(key, event.getId()!);
+        }
+        return result;
     }
 
     private static resolveActions(eventState: DerivedEventState, mediaState: DerivedMediaState): ActionBarAction[] {
@@ -256,6 +289,8 @@ export class EventTileActionBarViewModel
         this.trackEvent(mxEvent, MatrixEventEvent.BeforeRedaction, this.refreshSnapshot);
         this.watchSetting("mediaPreviewConfig", roomId ?? null);
         this.watchSetting("showMediaEventIds", null);
+        this.watchSetting("recent_reactions", null);
+        this.watchSetting("recent_emoji", null);
 
         const roomState = roomId
             ? MatrixClientPeg.safeGet().getRoom(roomId)?.getLiveTimeline().getState(EventTimeline.FORWARDS)
@@ -476,6 +511,28 @@ export class EventTileActionBarViewModel
     /** Forwards the reactions action using the triggering button as the anchor. */
     public onReactionsClick = (anchor: HTMLElement | null): void => {
         this.props.onReactionsClick?.(anchor);
+    };
+
+    /** Sends the chosen quick reaction, or removes it if the user already reacted with it. */
+    public onQuickReactionClick = (emoji: string): void => {
+        const { mxEvent, timelineRenderingType, canSelfRedact } = this.props;
+        const client = MatrixClientPeg.safeGet();
+        const roomId = mxEvent.getRoomId();
+        const eventId = mxEvent.getId();
+        if (!roomId || !eventId) return;
+
+        const existing = EventTileActionBarViewModel.getMyReactions(this.props, client.getSafeUserId()).get(emoji);
+        if (existing) {
+            if (!canSelfRedact) return;
+            void client.redactEvent(roomId, existing);
+        } else {
+            void client.sendEvent(roomId, EventType.Reaction, {
+                "m.relates_to": { rel_type: RelationType.Annotation, event_id: eventId, key: emoji },
+            });
+            defaultDispatcher.dispatch({ action: "message_sent" });
+            recent.add(emoji);
+        }
+        defaultDispatcher.dispatch({ action: Action.FocusAComposer, context: timelineRenderingType });
     };
 
     /** Opens or starts the thread associated with the current event. */

@@ -36,6 +36,10 @@ import { RoomListItemViewModel } from "./RoomListItemViewModel";
 import RoomListStoreV3 from "../../stores/room-list-v3/RoomListStoreV3";
 import * as tagRoomModule from "../../utils/room/tagRoom";
 import { CHATS_TAG } from "../../stores/room-list-v3/section";
+import { EchoChamber } from "../../stores/local-echo/EchoChamber";
+import { PROPERTY_UPDATED } from "../../stores/local-echo/GenericEchoChamber";
+import { RoomNotifState as ElementRoomNotifState } from "../../RoomNotifs";
+import { RoomNotifState } from "@element-hq/web-shared-components";
 
 vi.mock("./utils", () => ({
     hasAccessToOptionsMenu: vi.fn().mockReturnValue(true),
@@ -484,6 +488,22 @@ describe("RoomListItemViewModel", () => {
 
             await flushPromises();
             expect(viewModel.getSnapshot().name).toBe("Updated Room");
+        });
+    });
+
+    describe("Room notification option", () => {
+        it("should update the snapshot when the room notification volume changes", async () => {
+            const echoChamber = EchoChamber.forRoom(room);
+            const volume = vi.spyOn(echoChamber, "notificationVolume", "get");
+            volume.mockReturnValue(ElementRoomNotifState.AllMessages);
+
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            expect(viewModel.getSnapshot().roomNotifState).toBe(RoomNotifState.AllMessages);
+
+            volume.mockReturnValue(ElementRoomNotifState.Mute);
+            echoChamber.emit(PROPERTY_UPDATED);
+
+            expect(viewModel.getSnapshot().roomNotifState).toBe(RoomNotifState.Mute);
         });
     });
 

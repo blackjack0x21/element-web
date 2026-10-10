@@ -361,15 +361,6 @@ export function GifPicker({ relation, onFinished }: GifPickerProps): JSX.Element
                             </button>
                         ))}
                     </div>
-                    <div className="mx_GifPicker_header">
-                        <span>
-                            {query.trim() !== ""
-                                ? query
-                                : showFavorites
-                                  ? _t("composer|gif_tab_favorites")
-                                  : _t("composer|gif_trending")}
-                        </span>
-                    </div>
                     <div className="mx_GifPicker_body">
                         {error ? (
                             <div className="mx_GifPicker_error">
@@ -391,9 +382,6 @@ export function GifPicker({ relation, onFinished }: GifPickerProps): JSX.Element
                                 <InlineSpinner />
                             </div>
                         )}
-                    </div>
-                    <div className="mx_GifPicker_footer">
-                        <span>{_t("composer|gif_powered_by_klipy")}</span>
                     </div>
                 </div>
             )}

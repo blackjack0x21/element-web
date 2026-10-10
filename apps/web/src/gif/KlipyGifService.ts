@@ -8,6 +8,7 @@ Please see LICENSE files in the repository root for full details.
 import { logger } from "matrix-js-sdk/src/logger";
 
 import SdkConfig from "../SdkConfig";
+import SettingsStore from "../settings/SettingsStore";
 
 const KLIPY_API_BASE = "https://api.klipy.com/v2";
 
@@ -134,11 +135,12 @@ export function pickBestFormat(gif: KlipyGifResult): BestGifFormats {
 }
 
 /**
- * Returns the Klipy API key from the deployment config, or undefined if not configured.
+ * Returns the Klipy API key, or undefined if not configured. The user's own key (stored in their account data)
+ * takes priority; the deployment config's `gif.api_key` is the fallback, so existing setups keep working.
  */
-function getApiKey(): string | undefined {
-    const gifConfig = SdkConfig.get("gif");
-    return gifConfig?.api_key;
+export function getApiKey(): string | undefined {
+    const userKey = SettingsStore.getValue("gif_api_key")?.trim();
+    return userKey || SdkConfig.get("gif")?.api_key || undefined;
 }
 
 /**
@@ -165,7 +167,7 @@ function buildUrl(endpoint: string, params: Record<string, string>): string {
  * Service for interacting with the Klipy GIF API.
  *
  * Provides methods for searching GIFs, fetching trending GIFs, and fetching categories.
- * Requires a Klipy API key to be configured in the deployment config under `gif.api_key`.
+ * Requires a Klipy API key, set in the user's settings or in the deployment config under `gif.api_key`.
  */
 export class KlipyGifService {
     private static instance: KlipyGifService | null = null;

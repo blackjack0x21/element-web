@@ -41,6 +41,7 @@ import SettingsDropdown from "../../../elements/SettingsDropdown.tsx";
 interface IState {
     timezone: string | undefined;
     timezones: string[];
+    gifApiKey: string;
     autocompleteDelay: string;
     readMarkerInViewThresholdMs: string;
     readMarkerOutOfViewThresholdMs: string;
@@ -131,7 +132,6 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
         "MessageComposerInput.ctrlEnterToSend",
         "MessageComposerInput.surroundWith",
         "MessageComposerInput.showStickersButton",
-        "MessageComposerInput.showGifButton",
         "MessageComposerInput.insertTrailingColon",
     ];
 
@@ -173,6 +173,7 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
         this.state = {
             timezone: TimezoneHandler.getUserTimezone(),
             timezones: TimezoneHandler.getAllTimezones(),
+            gifApiKey: SettingsStore.getValueAt(SettingLevel.ACCOUNT, "gif_api_key") ?? "",
             autocompleteDelay: SettingsStore.getValueAt(SettingLevel.DEVICE, "autocompleteDelay").toString(10),
             readMarkerInViewThresholdMs: SettingsStore.getValueAt(
                 SettingLevel.DEVICE,
@@ -202,6 +203,11 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
             : TimezoneHandler.getAllTimezones();
 
         this.setState({ timezones });
+    };
+
+    private onGifApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+        this.setState({ gifApiKey: e.target.value });
+        void SettingsStore.setValue("gif_api_key", null, SettingLevel.ACCOUNT, e.target.value.trim());
     };
 
     private onAutocompleteDelayChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -341,6 +347,17 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
 
                     <SettingsSubsection heading={_t("settings|preferences|composer_heading")} formWrap>
                         {this.renderGroup(PreferencesUserSettingsTab.COMPOSER_SETTINGS)}
+                    </SettingsSubsection>
+
+                    <SettingsSubsection heading={_t("settings|preferences|gif_picker_heading")} formWrap>
+                        <SettingsFlag name="MessageComposerInput.showGifButton" level={SettingLevel.ACCOUNT} />
+                        <Field
+                            label={_t("settings|gif_api_key")}
+                            type="password"
+                            autoComplete="off"
+                            value={this.state.gifApiKey}
+                            onChange={this.onGifApiKeyChange}
+                        />
                     </SettingsSubsection>
 
                     <SettingsSubsection heading={_t("settings|preferences|code_blocks_heading")} formWrap>

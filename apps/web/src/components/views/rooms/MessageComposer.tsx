@@ -256,6 +256,7 @@ export class MessageComposer extends React.Component<IProps, IState> {
 
         SettingsStore.monitorSetting("MessageComposerInput.showStickersButton", null);
         SettingsStore.monitorSetting("MessageComposerInput.showGifButton", null);
+        SettingsStore.monitorSetting("gif_api_key", null);
         SettingsStore.monitorSetting("MessageComposerInput.showPollsButton", null);
         SettingsStore.monitorSetting("feature_wysiwyg_composer", null);
 
@@ -305,6 +306,11 @@ export class MessageComposer extends React.Component<IProps, IState> {
                         if (this.state.showGifButton !== showGifButton) {
                             this.setState({ showGifButton });
                         }
+                        break;
+                    }
+                    case "gif_api_key": {
+                        // Whether the GIF button is available depends on the key
+                        this.forceUpdate();
                         break;
                     }
                     case "MessageComposerInput.showPollsButton": {

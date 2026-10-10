@@ -302,6 +302,7 @@ export interface Settings {
     "recent_emoji": IBaseSetting<RecentEmojiData>;
     "recent_reactions": IBaseSetting<RecentEmojiData>;
     "gif_favorites": IBaseSetting<KlipyGifResult[]>;
+    "gif_api_key": IBaseSetting<string>;
     "showMediaEventIds": IBaseSetting<{ [eventId: string]: boolean }>;
     "pdfViewerState": IBaseSetting<{ [mxcUri: string]: PdfViewerState }>;
     "SpotlightSearch.recentSearches": IBaseSetting<string[]>;
@@ -1094,6 +1095,14 @@ export const SETTINGS: Settings = {
         supportedLevels: [SettingLevel.ACCOUNT],
         default: [], // saved GIFs, most recently added first
         // For privacy
+        shouldExportToRageshake: false,
+    },
+    "gif_api_key": {
+        // Klipy API key; falls back to `gif.api_key` from config.json when empty
+        supportedLevels: [SettingLevel.ACCOUNT],
+        displayName: _td("settings|gif_api_key"),
+        default: "",
+        // The key is a credential
         shouldExportToRageshake: false,
     },
     "SpotlightSearch.recentSearches": {

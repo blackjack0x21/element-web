@@ -2681,6 +2681,7 @@
             "unable_to_load_msisdns": "Unable to load phone numbers",
             "username": "Username"
         },
+        "gif_api_key": "Klipy API key for GIFs",
         "global_shortcuts": {
             "description": "Control a call from anywhere, even when %(brand)s is minimised or in the background.",
             "hang_up": "Leave call",
@@ -2832,6 +2833,7 @@
             "enable_content_protection": "Enable content protection",
             "enable_hardware_acceleration": "Enable hardware acceleration",
             "enable_tray_icon": "Show tray icon and minimise window to it on close",
+            "gif_picker_heading": "GIF picker",
             "keyboard_heading": "Keyboard shortcuts",
             "keyboard_view_shortcuts_button": "To view all keyboard shortcuts, <a>click here</a>.",
             "link_previews_description": "Shows information about links underneath messages",

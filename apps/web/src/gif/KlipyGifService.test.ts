@@ -5,10 +5,11 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import fetchMock from "@fetch-mock/vitest";
 
-import { KlipyGifService, pickBestFormat, type KlipyGifResult } from "./KlipyGifService";
+import SettingsStore from "../settings/SettingsStore";
+import { KlipyGifService, getApiKey, pickBestFormat, type KlipyGifResult } from "./KlipyGifService";
 import SdkConfig from "../SdkConfig";
 
 describe("KlipyGifService", () => {
@@ -23,10 +24,34 @@ describe("KlipyGifService", () => {
         } as any);
     });
 
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
     describe("isAvailable", () => {
         it("should return true when API key is configured", () => {
             const service = KlipyGifService.sharedInstance();
             expect(service.isAvailable()).toBe(true);
+        });
+
+        it("should return true when only the user setting provides an API key", () => {
+            SdkConfig.put({} as any);
+            vi.spyOn(SettingsStore, "getValue").mockImplementation((name) =>
+                name === "gif_api_key" ? "  user-key " : null,
+            );
+            expect(KlipyGifService.sharedInstance().isAvailable()).toBe(true);
+            expect(getApiKey()).toBe("user-key");
+        });
+
+        it("should prefer the user setting over the config", () => {
+            vi.spyOn(SettingsStore, "getValue").mockImplementation((name) =>
+                name === "gif_api_key" ? "user-key" : null,
+            );
+            expect(getApiKey()).toBe("user-key");
+        });
+
+        it("should fall back to the config when the setting is empty", () => {
+            expect(getApiKey()).toBe(mockApiKey);
         });
 
         it("should return false when API key is not configured", () => {

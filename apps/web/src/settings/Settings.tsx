@@ -1151,7 +1151,7 @@ export const SETTINGS: Settings = {
     },
     "autocompleteDelay": {
         supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS_WITH_CONFIG,
-        default: 200,
+        default: 0,
     },
     "readMarkerInViewThresholdMs": {
         supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS_WITH_CONFIG,

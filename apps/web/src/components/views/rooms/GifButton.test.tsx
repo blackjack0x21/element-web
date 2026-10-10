@@ -20,6 +20,8 @@ import MatrixClientContext from "../../../contexts/MatrixClientContext";
 import { ScopedRoomContextProvider } from "../../../contexts/ScopedRoomContext.tsx";
 import type { RoomContextType } from "../../../contexts/RoomContext.ts";
 import SdkConfig from "../../../SdkConfig";
+import SettingsStore from "../../../settings/SettingsStore";
+import { SettingLevel } from "../../../settings/SettingLevel";
 
 vi.mock("../../../ContentMessages", async (importOriginal) => ({
     ...(await importOriginal<typeof import("../../../ContentMessages")>()),
@@ -154,6 +156,73 @@ describe("GifButton", () => {
                     }),
                 }),
             );
+        });
+    });
+
+    describe("favorites", () => {
+        let favorites: (typeof mockGifResult)[];
+
+        beforeEach(() => {
+            favorites = [];
+            const getValue = SettingsStore.getValue.bind(SettingsStore);
+            vi.spyOn(SettingsStore, "getValue").mockImplementation((name: any, ...args: any[]) =>
+                name === "gif_favorites" ? favorites : (getValue as any)(name, ...args),
+            );
+            const setValue = vi.spyOn(SettingsStore, "setValue").mockImplementation(async (_n, _r, _l, value) => {
+                favorites = value as typeof favorites;
+            });
+            setValue.mockClear();
+        });
+
+        afterEach(() => {
+            vi.restoreAllMocks();
+        });
+
+        it("should save a GIF when its star is clicked", async () => {
+            renderGifButton();
+            fireEvent.click(screen.getByRole("button", { name: "GIF" }));
+            await screen.findByRole("button", { name: "A funny cat" });
+
+            fireEvent.click(screen.getByRole("button", { name: "Add to favorites" }));
+
+            expect(SettingsStore.setValue).toHaveBeenCalledWith("gif_favorites", null, SettingLevel.ACCOUNT, [
+                expect.objectContaining({ id: "gif-1" }),
+            ]);
+        });
+
+        it("should save the focused GIF when pressing f", async () => {
+            renderGifButton();
+            fireEvent.click(screen.getByRole("button", { name: "GIF" }));
+            const gif = await screen.findByRole("button", { name: "A funny cat" });
+            gif.focus();
+
+            fireEvent.keyDown(gif, { key: "f" });
+
+            expect(SettingsStore.setValue).toHaveBeenCalledTimes(1);
+        });
+
+        it("should show saved GIFs in the Favorites tab without fetching", async () => {
+            favorites = [mockGifResult];
+            renderGifButton();
+            fireEvent.click(screen.getByRole("button", { name: "GIF" }));
+            await screen.findByRole("button", { name: "A funny cat" });
+            fetchMock.callHistory.clear();
+
+            fireEvent.click(screen.getByRole("tab", { name: "Favorites" }));
+
+            expect(screen.getByRole("button", { name: "A funny cat" })).toBeInTheDocument();
+            expect(screen.getByRole("button", { name: "Remove from favorites" })).toBeInTheDocument();
+            expect(fetchMock.callHistory.called()).toBe(false);
+        });
+
+        it("should show an empty message when there are no favorites", async () => {
+            renderGifButton();
+            fireEvent.click(screen.getByRole("button", { name: "GIF" }));
+            await screen.findByRole("button", { name: "A funny cat" });
+
+            fireEvent.click(screen.getByRole("tab", { name: "Favorites" }));
+
+            expect(screen.getByText("No favorites yet. Star a GIF to save it here.")).toBeInTheDocument();
         });
     });
 });

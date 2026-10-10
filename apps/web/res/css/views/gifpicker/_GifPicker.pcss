@@ -136,3 +136,57 @@ Please see LICENSE files in the repository root for full details.
     height: 1px;
     width: 100%;
 }
+
+.mx_GifPicker_tabs {
+    display: flex;
+    gap: var(--cpd-space-2x);
+    padding: 0 var(--cpd-space-2x);
+}
+
+.mx_GifPicker_tab {
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: var(--cpd-space-1x) var(--cpd-space-3x);
+    border-radius: var(--cpd-space-4x);
+    color: var(--cpd-color-text-secondary);
+    font: var(--cpd-font-body-sm-semibold);
+
+    &[aria-selected="true"] {
+        background-color: var(--cpd-color-bg-subtle-secondary);
+        color: var(--cpd-color-text-primary);
+    }
+}
+
+.mx_GifPicker_grid [role="gridcell"] {
+    position: relative;
+}
+
+.mx_GifPicker_favoriteButton {
+    position: absolute;
+    top: var(--cpd-space-1x);
+    right: var(--cpd-space-1x);
+    display: none;
+    cursor: pointer;
+    border: none;
+    border-radius: 50%;
+    padding: var(--cpd-space-1x);
+    background-color: rgb(0, 0, 0, 0.55);
+    color: var(--cpd-color-icon-on-solid-primary);
+
+    svg {
+        display: block;
+        width: 16px;
+        height: 16px;
+    }
+}
+
+.mx_GifPicker_favoriteButton_active {
+    display: block;
+    color: var(--cpd-color-icon-accent-primary);
+}
+
+.mx_GifPicker_grid [role="gridcell"]:hover .mx_GifPicker_favoriteButton,
+.mx_GifPicker_favoriteButton:focus-visible {
+    display: block;
+}

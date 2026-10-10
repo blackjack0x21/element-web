@@ -48,6 +48,7 @@ import { type IRightPanelForRoomStored } from "../stores/right-panel/RightPanelS
 import { type ILayoutSettings } from "../stores/widgets/WidgetLayoutStore.ts";
 import { type ReleaseAnnouncementData } from "../stores/ReleaseAnnouncementStore.ts";
 import { type RecentEmojiData } from "../emojipicker/recent.ts";
+import { type KlipyGifResult } from "../gif/KlipyGifService.ts";
 import { type Assignable } from "../@types/common.ts";
 import { SortingAlgorithm } from "../stores/room-list-v3/skip-list/sorters/index.ts";
 import MediaPreviewConfigController from "./controllers/MediaPreviewConfigController.ts";
@@ -299,6 +300,7 @@ export interface Settings {
     "language": IBaseSetting<string>;
     "breadcrumb_rooms": IBaseSetting<string[]>;
     "recent_emoji": IBaseSetting<RecentEmojiData>;
+    "gif_favorites": IBaseSetting<KlipyGifResult[]>;
     "showMediaEventIds": IBaseSetting<{ [eventId: string]: boolean }>;
     "pdfViewerState": IBaseSetting<{ [mxcUri: string]: PdfViewerState }>;
     "SpotlightSearch.recentSearches": IBaseSetting<string[]>;
@@ -1076,6 +1078,13 @@ export const SETTINGS: Settings = {
         // not really a setting
         supportedLevels: [SettingLevel.ACCOUNT],
         default: [],
+        // For privacy
+        shouldExportToRageshake: false,
+    },
+    "gif_favorites": {
+        // not really a setting
+        supportedLevels: [SettingLevel.ACCOUNT],
+        default: [], // saved GIFs, most recently added first
         // For privacy
         shouldExportToRageshake: false,
     },

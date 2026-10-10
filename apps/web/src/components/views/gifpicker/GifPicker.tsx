@@ -5,7 +5,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type Dispatch, type JSX, useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { type Dispatch, type JSX, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { type IContent, type IEventRelation, EventType, THREAD_RELATION_TYPE } from "matrix-js-sdk/src/matrix";
 import { type StickerEventContent } from "matrix-js-sdk/src/types";
 import { logger } from "matrix-js-sdk/src/logger";
@@ -18,6 +18,8 @@ import { uploadFile } from "../../../ContentMessages";
 import dis from "../../../dispatcher/dispatcher";
 import { attachRelation } from "../../../utils/messages";
 import { addReplyToMessageContent } from "../../../utils/Reply";
+import { getFavorites, toggleFavorite } from "../../../gif/favorites";
+import { useSettingValue } from "../../../hooks/useSettings";
 import { GifSearch } from "./GifSearch";
 import { GifGrid, GIFS_PER_ROW } from "./GifGrid";
 import { useScopedRoomContext } from "../../../contexts/ScopedRoomContext.tsx";
@@ -52,7 +54,15 @@ export function GifPicker({ relation, onFinished }: GifPickerProps): JSX.Element
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [nextCursor, setNextCursor] = useState<string | undefined>();
+    const [tab, setTab] = useState<"trending" | "favorites">("trending");
+    // Read through the setting hook so the grid updates when favourites change (including from another device)
+    const favorites = useSettingValue("gif_favorites");
+    const favoriteIds = useMemo(() => new Set(favorites.map((gif) => gif.id)), [favorites]);
+    const isFavorite = useCallback((id: string) => favoriteIds.has(id), [favoriteIds]);
+    const showFavorites = tab === "favorites" && query.trim() === "";
 
+    const resultsRef = useRef<KlipyGifResult[]>([]);
+    resultsRef.current = results;
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const abortRef = useRef<AbortController | null>(null);
 
@@ -88,6 +98,8 @@ export function GifPicker({ relation, onFinished }: GifPickerProps): JSX.Element
     const handleQueryChange = useCallback(
         (newQuery: string): void => {
             setQuery(newQuery);
+            // Searching always searches Klipy, so leave the favourites tab
+            if (newQuery.trim() !== "") setTab("trending");
 
             if (debounceRef.current) {
                 clearTimeout(debounceRef.current);
@@ -234,6 +246,18 @@ export function GifPicker({ relation, onFinished }: GifPickerProps): JSX.Element
     // Keyboard navigation for grid - handles arrow keys to move between GIF items
     const handleKeyDown = useCallback(
         (ev: React.KeyboardEvent, state: RovingState, dispatch: Dispatch<RovingAction>): void => {
+            // "f" on a focused GIF toggles it as a favourite (the star button is mouse-only)
+            if (ev.key.toLowerCase() === "f" && !ev.ctrlKey && !ev.metaKey && !ev.altKey) {
+                const id = state.activeNode?.dataset.gifId;
+                const gif = id ? [...resultsRef.current, ...getFavorites()].find((g) => g.id === id) : undefined;
+                if (gif && ev.target === state.activeNode) {
+                    toggleFavorite(gif);
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                }
+                return;
+            }
+
             if (![Key.ARROW_DOWN, Key.ARROW_RIGHT, Key.ARROW_LEFT, Key.ARROW_UP].includes(ev.key)) return;
 
             // On first arrow key press, focus the first GIF item
@@ -324,8 +348,32 @@ export function GifPicker({ relation, onFinished }: GifPickerProps): JSX.Element
             {({ onKeyDownHandler }) => (
                 <div className="mx_GifPicker" onKeyDown={onKeyDownHandler}>
                     <GifSearch query={query} onChange={handleQueryChange} />
+                    <div className="mx_GifPicker_tabs" role="tablist">
+                        {(["trending", "favorites"] as const).map((id) => (
+                            <button
+                                key={id}
+                                type="button"
+                                role="tab"
+                                className="mx_GifPicker_tab"
+                                aria-selected={tab === id}
+                                onClick={() => {
+                                    setTab(id);
+                                    // Leaving a search to look at favourites (or back) clears the query
+                                    if (query !== "") handleQueryChange("");
+                                }}
+                            >
+                                {id === "trending" ? _t("composer|gif_tab_trending") : _t("composer|gif_tab_favorites")}
+                            </button>
+                        ))}
+                    </div>
                     <div className="mx_GifPicker_header">
-                        <span>{query.trim() === "" ? _t("composer|gif_trending") : query}</span>
+                        <span>
+                            {query.trim() !== ""
+                                ? query
+                                : showFavorites
+                                  ? _t("composer|gif_tab_favorites")
+                                  : _t("composer|gif_trending")}
+                        </span>
                     </div>
                     <div className="mx_GifPicker_body">
                         {error ? (
@@ -334,13 +382,16 @@ export function GifPicker({ relation, onFinished }: GifPickerProps): JSX.Element
                             </div>
                         ) : (
                             <GifGrid
-                                results={results}
+                                results={showFavorites ? favorites : results}
                                 onSelect={handleSelect}
-                                onLoadMore={handleLoadMore}
-                                loading={loading}
+                                onLoadMore={showFavorites ? undefined : handleLoadMore}
+                                loading={showFavorites ? false : loading}
+                                isFavorite={isFavorite}
+                                onToggleFavorite={toggleFavorite}
+                                emptyMessage={showFavorites ? _t("composer|gif_no_favorites") : undefined}
                             />
                         )}
-                        {loading && (
+                        {loading && !showFavorites && (
                             <div className="mx_GifPicker_loading">
                                 <InlineSpinner />
                             </div>

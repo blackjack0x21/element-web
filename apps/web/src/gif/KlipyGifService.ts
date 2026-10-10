@@ -12,15 +12,15 @@ import SdkConfig from "../SdkConfig";
 const KLIPY_API_BASE = "https://api.klipy.com/v2";
 
 /** Media format details returned by the Klipy API. */
-export interface KlipyMediaFormat {
+export type KlipyMediaFormat = {
     url: string;
     dims: [number, number]; // [width, height]
     duration: number;
     size: number;
-}
+};
 
 /** A single GIF result from the Klipy API. */
-export interface KlipyGifResult {
+export type KlipyGifResult = {
     id: string;
     title: string;
     content_description: string;
@@ -35,7 +35,7 @@ export interface KlipyGifResult {
     };
     created: number;
     url: string;
-}
+};
 
 /** Response from the Klipy search and featured endpoints. */
 export interface KlipySearchResponse {

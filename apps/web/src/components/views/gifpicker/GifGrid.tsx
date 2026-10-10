@@ -5,7 +5,10 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
+import classNames from "classnames";
 import React, { type JSX, useCallback, useEffect, useMemo, useRef } from "react";
+
+import { FavouriteIcon, FavouriteSolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { type KlipyGifResult, pickBestFormat } from "../../../gif/KlipyGifService";
 import { _t } from "../../../languageHandler";
@@ -19,13 +22,26 @@ interface GifGridProps {
     onSelect: (gif: KlipyGifResult) => void;
     onLoadMore?: () => void;
     loading: boolean;
+    /** Whether the GIF with this id is saved as a favourite. */
+    isFavorite: (id: string) => boolean;
+    onToggleFavorite: (gif: KlipyGifResult) => void;
+    /** Text shown when there are no results. Defaults to the "no results" message. */
+    emptyMessage?: string;
 }
 
 /**
  * A responsive grid of GIF thumbnail previews with full keyboard navigation.
  * Uses the pickBestFormat preview fallback chain for fast loading and supports infinite scroll via IntersectionObserver.
  */
-export function GifGrid({ results, onSelect, onLoadMore, loading }: GifGridProps): JSX.Element {
+export function GifGrid({
+    results,
+    onSelect,
+    onLoadMore,
+    loading,
+    isFavorite,
+    onToggleFavorite,
+    emptyMessage,
+}: GifGridProps): JSX.Element {
     const sentinelRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -64,7 +80,7 @@ export function GifGrid({ results, onSelect, onLoadMore, loading }: GifGridProps
     if (results.length === 0 && !loading) {
         return (
             <div className="mx_GifPicker_empty">
-                <span>{_t("composer|gif_no_results")}</span>
+                <span>{emptyMessage ?? _t("composer|gif_no_results")}</span>
             </div>
         );
     }
@@ -76,10 +92,12 @@ export function GifGrid({ results, onSelect, onLoadMore, loading }: GifGridProps
                     <div key={row[0].id} role="row">
                         {row.map((gif) => {
                             const preview = pickBestFormat(gif).preview;
+                            const favorite = isFavorite(gif.id);
                             return (
                                 <div role="gridcell" key={gif.id}>
                                     <RovingAccessibleButton
                                         className="mx_GifPicker_gridItem"
+                                        data-gif-id={gif.id}
                                         onClick={handleClick(gif)}
                                         title={gif.content_description}
                                         aria-label={gif.content_description || _t("composer|gif_item")}
@@ -92,6 +110,28 @@ export function GifGrid({ results, onSelect, onLoadMore, loading }: GifGridProps
                                             height={preview.height}
                                         />
                                     </RovingAccessibleButton>
+                                    {/* Not in the roving tab order: keyboard users press "f" on the GIF instead */}
+                                    <button
+                                        type="button"
+                                        className={classNames("mx_GifPicker_favoriteButton", {
+                                            mx_GifPicker_favoriteButton_active: favorite,
+                                        })}
+                                        tabIndex={-1}
+                                        aria-pressed={favorite}
+                                        aria-label={
+                                            favorite
+                                                ? _t("composer|gif_remove_favorite")
+                                                : _t("composer|gif_add_favorite")
+                                        }
+                                        title={
+                                            favorite
+                                                ? _t("composer|gif_remove_favorite")
+                                                : _t("composer|gif_add_favorite")
+                                        }
+                                        onClick={() => onToggleFavorite(gif)}
+                                    >
+                                        {favorite ? <FavouriteSolidIcon /> : <FavouriteIcon />}
+                                    </button>
                                 </div>
                             );
                         })}

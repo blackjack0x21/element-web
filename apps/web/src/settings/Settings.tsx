@@ -300,6 +300,7 @@ export interface Settings {
     "language": IBaseSetting<string>;
     "breadcrumb_rooms": IBaseSetting<string[]>;
     "recent_emoji": IBaseSetting<RecentEmojiData>;
+    "recent_reactions": IBaseSetting<RecentEmojiData>;
     "gif_favorites": IBaseSetting<KlipyGifResult[]>;
     "showMediaEventIds": IBaseSetting<{ [eventId: string]: boolean }>;
     "pdfViewerState": IBaseSetting<{ [mxcUri: string]: PdfViewerState }>;
@@ -1078,6 +1079,13 @@ export const SETTINGS: Settings = {
         // not really a setting
         supportedLevels: [SettingLevel.ACCOUNT],
         default: [],
+        // For privacy
+        shouldExportToRageshake: false,
+    },
+    "recent_reactions": {
+        // not really a setting
+        supportedLevels: [SettingLevel.ACCOUNT],
+        default: [], // emoji the user has reacted with, with usage counts
         // For privacy
         shouldExportToRageshake: false,
     },

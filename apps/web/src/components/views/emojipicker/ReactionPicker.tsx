@@ -16,6 +16,7 @@ import { Action } from "../../../dispatcher/actions";
 import RoomContext from "../../../contexts/RoomContext";
 import { type FocusComposerPayload } from "../../../dispatcher/payloads/FocusComposerPayload";
 import { EmojiPickerWithRecents } from "../../../emojipicker/EmojiPickerWithRecents";
+import * as recentReactions from "../../../emojipicker/recentReactions";
 
 interface IProps {
     mxEvent: MatrixEvent;
@@ -108,6 +109,7 @@ class ReactionPicker extends React.Component<IProps, IState> {
                 },
             });
             dis.dispatch({ action: "message_sent" });
+            recentReactions.add(reaction);
             dis.dispatch<FocusComposerPayload>({
                 action: Action.FocusAComposer,
                 context: this.context.timelineRenderingType,

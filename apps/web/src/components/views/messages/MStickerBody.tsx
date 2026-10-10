@@ -17,8 +17,12 @@ import { useMediaVisible } from "../../../hooks/useMediaVisible";
 import AccessibleButton, { type ButtonEvent } from "../elements/AccessibleButton.tsx";
 
 class MStickerBodyInner extends ImageBodyBaseInner {
-    // Mostly empty to prevent default behaviour of MImageBody
+    // Stickers just reveal hidden media, except GIFs from the GIF picker which open in the image viewer
     protected onClick = (ev: ButtonEvent): void => {
+        if (this.props.mxEvent.getContent()["io.element.gif"]) {
+            this.openImageViewer(ev);
+            return;
+        }
         ev.preventDefault();
         if (!this.props.mediaVisible) {
             this.props.setMediaVisible(true);

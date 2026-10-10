@@ -24,6 +24,7 @@ import Spinner from "../elements/Spinner";
 import { type Media, mediaFromContent } from "../../../customisations/Media";
 import { BLURHASH_FIELD, createThumbnail } from "../../../utils/image-media";
 import ImageView from "../elements/ImageView";
+import { type ButtonEvent } from "../elements/AccessibleButton";
 import { type IBodyProps } from "./IBodyProps";
 import { suggestedSize as suggestedImageSize } from "../../../settings/enums/ImageSize";
 import { MatrixClientPeg } from "../../../MatrixClientPeg";
@@ -83,8 +84,11 @@ export class ImageBodyBaseInner extends React.Component<ImageBodyBaseProps, ISta
         placeholder: Placeholder.NoImage,
     };
 
-    protected onClick = (ev: React.MouseEvent): void => {
-        if (ev.button === 0 && !ev.metaKey) {
+    protected onClick = (ev: ButtonEvent): void => this.openImageViewer(ev);
+
+    protected openImageViewer(ev: ButtonEvent): void {
+        // Keyboard activation has no button, so treat it as a primary click
+        if (("button" in ev ? ev.button === 0 : true) && !("metaKey" in ev && ev.metaKey)) {
             ev.preventDefault();
             if (!this.props.mediaVisible) {
                 this.props.setMediaVisible(true);
@@ -128,7 +132,7 @@ export class ImageBodyBaseInner extends React.Component<ImageBodyBaseProps, ISta
 
             Modal.createDialog(ImageView, params, "mx_Dialog_lightbox", undefined, true);
         }
-    };
+    }
 
     private get shouldAutoplay(): boolean {
         return !(
@@ -622,7 +626,7 @@ export class ImageBodyBaseInner extends React.Component<ImageBodyBaseProps, ISta
 const FORCED_IMAGE_HEIGHT = 44;
 
 class MImageReplyBodyInner extends ImageBodyBaseInner {
-    public onClick = (ev: React.MouseEvent): void => {
+    public onClick = (ev: ButtonEvent): void => {
         ev.preventDefault();
     };
 

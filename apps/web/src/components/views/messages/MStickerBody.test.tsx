@@ -26,6 +26,8 @@ import {
 import { RoomPermalinkCreator } from "../../../utils/permalinks/Permalinks";
 import SettingsStore from "../../../settings/SettingsStore";
 import MStickerBody from "./MStickerBody";
+import Modal from "../../../Modal";
+import ImageView from "../elements/ImageView";
 
 describe("<MStickerBody/>", () => {
     const userId = "@user:server";
@@ -86,5 +88,31 @@ describe("<MStickerBody/>", () => {
         expect(screen.queryByRole("tooltip")).toBeNull();
         await userEvent.hover(screen.getByRole("img"));
         await expect(screen.findByRole("tooltip")).resolves.toHaveTextContent("sticker description");
+    });
+
+    it("should open GIF stickers in the image viewer", async () => {
+        fetchMock.get(url, { status: 200 });
+        const createDialog = vi.spyOn(Modal, "createDialog").mockReturnValue({} as any);
+        const gifEvent = new MatrixEvent({
+            room_id: "!room:server",
+            sender: userId,
+            type: EventType.Sticker,
+            content: { ...mediaEvent.getContent(), "io.element.gif": true },
+        });
+
+        render(<MStickerBody {...props} mxEvent={gifEvent} />, withClientContextRenderOptions(cli));
+        await userEvent.click(screen.getByRole("button"));
+
+        expect(createDialog).toHaveBeenCalledWith(ImageView, expect.anything(), "mx_Dialog_lightbox", undefined, true);
+    });
+
+    it("should not open regular stickers in the image viewer", async () => {
+        fetchMock.get(url, { status: 200 });
+        const createDialog = vi.spyOn(Modal, "createDialog").mockReturnValue({} as any);
+
+        render(<MStickerBody {...props} mxEvent={mediaEvent} />, withClientContextRenderOptions(cli));
+        await userEvent.click(screen.getByRole("button"));
+
+        expect(createDialog).not.toHaveBeenCalled();
     });
 });

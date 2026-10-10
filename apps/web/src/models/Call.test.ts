@@ -968,6 +968,20 @@ describe("ElementCall", () => {
             expect(call.connectionState).toBe(ConnectionState.Disconnected);
         });
 
+        it("sends the sound effect volume when the call starts", async () => {
+            const originalGetValue = SettingsStore.getValue;
+            SettingsStore.getValue = (name: SettingKey, roomId: string | null = null, excludeDefault = false): any =>
+                name === "callSoundEffectsVolume" ? 0.3 : originalGetValue(name, roomId, excludeDefault);
+            try {
+                await connect(call, widgetApi);
+                expect(widgetApi.transport.send).toHaveBeenCalledWith(ElementWidgetActions.SoundEffectVolume, {
+                    volume: 0.3,
+                });
+            } finally {
+                SettingsStore.getValue = originalGetValue;
+            }
+        });
+
         it("acknowledges mute_device widget action", async () => {
             await connect(call, widgetApi);
             const preventDefault = vi.fn();

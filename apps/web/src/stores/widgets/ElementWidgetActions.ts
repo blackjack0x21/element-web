@@ -43,6 +43,10 @@ export enum ElementWidgetActions {
     // NOTE: this is currently unused. Its only here to make EW aware
     // of this action so it does not throw errors.
     DeviceMute = "io.element.device_mute",
+
+    // toWidget: sets the volume of Element Call's sound effects.
+    // The data of the request is { volume: number }, from 0 (silent) to 1 (full).
+    SoundEffectVolume = "io.element.sound_effect_volume",
 }
 
 export interface IHangupCallApiRequest extends IWidgetApiRequest {

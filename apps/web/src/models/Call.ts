@@ -638,6 +638,7 @@ export class ElementCall extends Call {
     public readonly STUCK_DEVICE_TIMEOUT_MS = 1000 * 60 * 60; // 1 hour
 
     private settingsStoreCallEncryptionWatcher?: string;
+    private soundEffectVolumeWatcher?: string;
     private terminationTimer?: number;
 
     public get presented(): boolean {
@@ -993,6 +994,11 @@ export class ElementCall extends Call {
             null,
             this.onCallEncryptionSettingsChange.bind(this),
         );
+        this.soundEffectVolumeWatcher = SettingsStore.watchSetting(
+            "callSoundEffectsVolume",
+            null,
+            this.sendSoundEffectVolume,
+        );
         this.updateParticipants();
     }
 
@@ -1039,6 +1045,7 @@ export class ElementCall extends Call {
         widgetApi.on(`action:${ElementWidgetActions.HangupCall}`, this.onHangup);
         widgetApi.on(`action:${ElementWidgetActions.Close}`, this.onClose);
         widgetApi.on(`action:${ElementWidgetActions.DeviceMute}`, this.onDeviceMute);
+        void this.sendSoundEffectVolume();
         return widgetApi;
     }
 
@@ -1146,6 +1153,7 @@ export class ElementCall extends Call {
         this.client.matrixRTC.off(MatrixRTCSessionManagerEvents.SessionEnded, this.checkDestroy);
 
         SettingsStore.unwatchSetting(this.settingsStoreCallEncryptionWatcher);
+        SettingsStore.unwatchSetting(this.soundEffectVolumeWatcher);
         clearTimeout(this.terminationTimer);
         this.terminationTimer = undefined;
 
@@ -1206,6 +1214,20 @@ export class ElementCall extends Call {
         this.setDisconnected(); // Just in case the widget forgot to emit a hangup action (maybe it's in an error state)
         this.close(); // User is done with the call; tell the UI to close it
     }
+
+    /**
+     * Tells a widget-embedded Element Call how loud its sound effects should be. The React component
+     * takes the volume as a prop instead.
+     */
+    private readonly sendSoundEffectVolume = async (): Promise<void> => {
+        if (this.componentHandle !== null || this.widgetApi === null) return;
+        const volume = SettingsStore.getValue("callSoundEffectsVolume");
+        try {
+            await this.widgetApi.transport.send(ElementWidgetActions.SoundEffectVolume, { volume });
+        } catch (e) {
+            logger.warn("Failed to set the Element Call sound effect volume", e);
+        }
+    };
 
     /** The last mute state Element Call reported, or null before it has reported one. */
     private deviceMuteState: DeviceMuteState | null = null;

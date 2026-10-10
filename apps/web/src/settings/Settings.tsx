@@ -366,6 +366,7 @@ export interface Settings {
     "notificationSoundVolume": IBaseSetting<number>;
     "ringtoneVolume": IBaseSetting<number>;
     "callSoundsVolume": IBaseSetting<number>;
+    "callSoundEffectsVolume": IBaseSetting<number>;
     "videoInputMuted": IBaseSetting<boolean>;
     "activeCallRoomIds": IBaseSetting<string[]>;
     "releaseAnnouncementData": IBaseSetting<ReleaseAnnouncementData>;
@@ -1432,6 +1433,12 @@ export const SETTINGS: Settings = {
     "callSoundsVolume": {
         supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,
         default: 1,
+    },
+    // Volume for the sound effects inside Element Call (muting, joining…), between 0 and 1.
+    // Defaults to Element Call's own default, so that nothing changes until the user moves it.
+    "callSoundEffectsVolume": {
+        supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,
+        default: 0.5,
     },
     "videoInputMuted": {
         supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,

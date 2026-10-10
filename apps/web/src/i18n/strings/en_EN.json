@@ -3023,6 +3023,7 @@
         },
         "sounds": {
             "audio_playback": "Voice messages and audio files",
+            "call_sound_effects": "In-call sound effects",
             "call_sounds": "Call sounds",
             "notifications": "Notifications",
             "ringtone": "Ringtone",

@@ -75,15 +75,16 @@ const MarkReadyOnMount = ({ call }: { call: ElementCallModel }): null => {
  * Rendered inside the persisted root, where it lives for the whole call regardless of which tile
  * (room view, floating PiP) is showing the call, or whether any is (browser Picture-in-Picture window):
  * so this is where anything that must keep following Element Web while the call runs,
- * the theme and the language, is read.
+ * the theme, the sound effect volume and the language, is read.
  *
  * What the component reconnects on (`intent`, `config`) is decided once per call by the model; what it
- * takes live (`theme`, `language`, `hostBridge`) may change freely.
+ * takes live (`theme`, `soundEffectVolume`, `language`, `hostBridge`) may change freely.
  */
 export const WrappedElementCallComponent: FC<{ call: ElementCallModel; client: MatrixClient }> = ({ call, client }) => {
     // Real component or mock: independent of the widget-vs-React choice CallAppTile makes.
     const ElementCall = useSettingValue("Developer.elementCallMockComponent") ? MockElementCall : RealElementCall;
     const { effectiveTheme: theme } = useTheme();
+    const soundEffectVolume = useSettingValue("callSoundEffectsVolume");
     // Not a hook: changing the language reloads Element Web, so there is no live change to follow
     const language = getCurrentLanguage().replace("_", "-");
     const bridge = useMemo(
@@ -102,6 +103,7 @@ export const WrappedElementCallComponent: FC<{ call: ElementCallModel; client: M
                 hostBridge={bridge}
                 ref={call.setComponentHandle}
                 theme={theme}
+                soundEffectVolume={soundEffectVolume}
                 language={language}
             />
             <MarkReadyOnMount call={call} />

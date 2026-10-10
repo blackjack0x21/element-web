@@ -21,6 +21,7 @@ describe("<SoundVolumeSettings />", () => {
             "notificationSoundVolume",
             "ringtoneVolume",
             "callSoundsVolume",
+            "callSoundEffectsVolume",
             "audioPlaybackVolume",
             "videoPlaybackVolume",
         ] as const) {
@@ -35,6 +36,7 @@ describe("<SoundVolumeSettings />", () => {
         for (const name of ["Notifications", "Ringtone", "Call sounds", "Voice messages and audio files", "Videos"]) {
             expect(screen.getByRole("slider", { name })).toHaveValue("100");
         }
+        expect(screen.getByRole("slider", { name: "In-call sound effects" })).toHaveValue("50");
     });
 
     it("shows the stored volume", async () => {

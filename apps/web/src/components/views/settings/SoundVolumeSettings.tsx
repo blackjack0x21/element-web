@@ -19,6 +19,7 @@ type VolumeSettingKey =
     | "notificationSoundVolume"
     | "ringtoneVolume"
     | "callSoundsVolume"
+    | "callSoundEffectsVolume"
     | "audioPlaybackVolume"
     | "videoPlaybackVolume";
 
@@ -27,6 +28,7 @@ const VOLUME_SETTINGS: Array<[VolumeSettingKey, TranslationKey]> = [
     ["notificationSoundVolume", _td("settings|sounds|notifications")],
     ["ringtoneVolume", _td("settings|sounds|ringtone")],
     ["callSoundsVolume", _td("settings|sounds|call_sounds")],
+    ["callSoundEffectsVolume", _td("settings|sounds|call_sound_effects")],
     ["audioPlaybackVolume", _td("settings|sounds|audio_playback")],
     ["videoPlaybackVolume", _td("settings|sounds|video_playback")],
 ];
@@ -67,7 +69,7 @@ function SoundVolumeSetting({ setting, label }: Readonly<SoundVolumeSettingProps
 }
 
 /**
- * Sliders for the volume of the sounds the app plays: notifications, call sounds and media in the timeline.
+ * Sliders for the volume of the sounds the app plays: notifications, call sounds and media in the timeline, and the effects inside calls.
  */
 export function SoundVolumeSettings(): JSX.Element {
     return (

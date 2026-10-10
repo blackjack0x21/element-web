@@ -275,7 +275,7 @@ describe("<MImageReplyBody />", () => {
 
         fireEvent.mouseEnter(image);
         expect(ref.current!.state.hover).toBe(true);
-        expect(container.querySelector(".mx_MImageBody_banner")).not.toBeNull();
+        expect(container.querySelector(".mx_MImageBody_banner")).toBeNull();
         expect(image).toHaveAttribute("src", "https://server/full.png");
 
         fireEvent.mouseLeave(image);

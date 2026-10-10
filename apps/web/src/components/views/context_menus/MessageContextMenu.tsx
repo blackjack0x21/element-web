@@ -59,6 +59,7 @@ import { type ButtonEvent } from "../elements/AccessibleButton";
 import { copyPlaintext, getSelectedText } from "../../../utils/strings";
 import ContextMenu, { toRightOf, type MenuProps } from "../../structures/ContextMenu";
 import ReactionPicker from "../emojipicker/ReactionPicker";
+import { QuickReactionsRow } from "./QuickReactionsRow";
 import ViewSource from "../../structures/ViewSource";
 import { createRedactEventDialog } from "../dialogs/ConfirmRedactDialog";
 import { ShareDialog } from "../dialogs/ShareDialog";
@@ -737,6 +738,9 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         if (editButton || replyButton || reactButton || pinButton) {
             quickItemsList = (
                 <IconizedContextMenuOptionList>
+                    {reactButton && (
+                        <QuickReactionsRow mxEvent={mxEvent} reactions={reactions} onFinished={this.closeMenu} />
+                    )}
                     {reactButton}
                     {replyButton}
                     {replyInThreadButton}

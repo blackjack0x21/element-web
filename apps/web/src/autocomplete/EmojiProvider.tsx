@@ -73,7 +73,7 @@ export default class EmojiProvider extends AutocompleteProvider {
     public nameMatcher: QueryMatcher<ISortedEmoji>;
     private readonly recentlyUsed: Emoji[];
 
-    public constructor(room: Room, renderingType?: TimelineRenderingType) {
+    public constructor(room?: Room, renderingType?: TimelineRenderingType) {
         super({ commandRegex: EMOJI_REGEX, renderingType });
         this.matcher = new QueryMatcher<ISortedEmoji>(SORTED_EMOJI, {
             keys: [],

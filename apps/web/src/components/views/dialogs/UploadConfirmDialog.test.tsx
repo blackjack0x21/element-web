@@ -8,7 +8,7 @@ Please see LICENSE files in the repository root for full details.
 // @vitest-environment happy-dom
 
 import React from "react";
-import { render, waitFor, screen } from "test-utils-rtl";
+import { render, waitFor, screen, within } from "test-utils-rtl";
 import userEvent from "@testing-library/user-event";
 import { secureRandomString } from "matrix-js-sdk/src/randomstring";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
@@ -158,5 +158,53 @@ describe("<UploadConfirmDialog />", () => {
         await userEvent.click(screen.getByRole("button", { name: "Upload" }));
 
         expect(onFinished).toHaveBeenCalledWith(true, false, "hi 🎉");
+    });
+
+    describe("emoji suggestions", () => {
+        function renderDialog(onFinished = vi.fn()): HTMLElement {
+            const file = new File(["hello"], "notes.txt", { type: "text/plain" });
+            render(<UploadConfirmDialog file={file} currentIndex={0} totalFiles={1} onFinished={onFinished} />);
+            return screen.getByLabelText("Add a caption (optional)");
+        }
+
+        it("should suggest emoji while a shortcode is being typed", async () => {
+            const input = renderDialog();
+            await userEvent.type(input, "so :sob");
+
+            const list = await screen.findByRole("listbox");
+            expect(within(list).getAllByRole("option")[0]).toHaveTextContent(":sob:");
+        });
+
+        it("should insert the first suggestion when pressing Tab", async () => {
+            const input = renderDialog();
+            await userEvent.type(input, "so :sob");
+            await screen.findByRole("listbox");
+            await userEvent.keyboard("{Tab}");
+
+            expect(input).toHaveValue("so 😭");
+            expect(screen.queryByRole("listbox")).toBeNull();
+        });
+
+        it("should insert a suggestion chosen with the arrow keys and Enter without uploading", async () => {
+            const onFinished = vi.fn();
+            const input = renderDialog(onFinished);
+            await userEvent.type(input, ":sob");
+            await screen.findByRole("listbox");
+            await userEvent.keyboard("{ArrowDown}{Enter}");
+
+            expect((input as HTMLInputElement).value).toMatch(/^\p{Extended_Pictographic}/u);
+            expect(onFinished).not.toHaveBeenCalled();
+        });
+
+        it("should close the suggestions on Escape without closing the dialog", async () => {
+            const onFinished = vi.fn();
+            const input = renderDialog(onFinished);
+            await userEvent.type(input, ":sob");
+            await screen.findByRole("listbox");
+            await userEvent.keyboard("{Escape}");
+
+            expect(screen.queryByRole("listbox")).toBeNull();
+            expect(onFinished).not.toHaveBeenCalled();
+        });
     });
 });

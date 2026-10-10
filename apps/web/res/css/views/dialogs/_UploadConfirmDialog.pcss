@@ -26,6 +26,46 @@ Please see LICENSE files in the repository root for full details.
     border: 1px solid $dialog-close-fg-color;
 }
 
-.mx_UploadConfirmDialog_caption {
+.mx_UploadCaptionField {
     margin-top: var(--cpd-space-4x);
+}
+
+/* The postfix stretches to the field's height, so centre the button inside it */
+.mx_UploadCaptionField .mx_Field_postfix {
+    display: flex;
+    align-items: center;
+    padding: 0 var(--cpd-space-2x);
+}
+
+.mx_UploadCaptionField_emojiButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+
+    svg {
+        width: 26px;
+        height: 26px;
+    }
+}
+
+.mx_UploadCaptionField_suggestions {
+    margin-top: var(--cpd-space-2x);
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid var(--cpd-color-border-interactive-secondary);
+    border-radius: var(--cpd-space-2x);
+    background: var(--cpd-color-bg-canvas-default);
+
+    .mx_Autocomplete_Completion_pill {
+        border-radius: 0;
+        padding: var(--cpd-space-1x) var(--cpd-space-3x);
+        height: auto;
+    }
+
+    .mx_UploadCaptionField_selected,
+    .mx_Autocomplete_Completion_pill:hover {
+        background: var(--cpd-color-bg-subtle-secondary);
+    }
 }

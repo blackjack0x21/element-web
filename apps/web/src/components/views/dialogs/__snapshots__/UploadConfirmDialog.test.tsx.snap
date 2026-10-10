@@ -91,45 +91,49 @@ exports[`<UploadConfirmDialog /> > should display image preview 1`] = `
         </div>
       </div>
       <div
-        class="mx_Field mx_Field_input mx_UploadConfirmDialog_caption"
+        class="mx_UploadCaptionField"
       >
-        <input
-          id="mx_Field_1"
-          label="Add a caption (optional)"
-          placeholder="Add a caption (optional)"
-          type="text"
-          value=""
-        />
-        <label
-          for="mx_Field_1"
+        <div
+          class="mx_Field mx_Field_input mx_UploadCaptionField_field"
         >
-          Add a caption (optional)
-        </label>
-        <span
-          class="mx_Field_postfix"
-        >
-          <div
-            aria-label="Emoji"
-            class="mx_AccessibleButton mx_EmojiButton"
-            role="button"
-            tabindex="0"
+          <input
+            id="mx_Field_1"
+            label="Add a caption (optional)"
+            placeholder="Add a caption (optional)"
+            type="text"
+            value=""
+          />
+          <label
+            for="mx_Field_1"
           >
-            <svg
-              fill="currentColor"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
+            Add a caption (optional)
+          </label>
+          <span
+            class="mx_Field_postfix"
+          >
+            <div
+              aria-label="Emoji"
+              class="mx_AccessibleButton mx_EmojiButton mx_UploadCaptionField_emojiButton"
+              role="button"
+              tabindex="0"
             >
-              <path
-                d="M15.536 15.536a1 1 0 0 0-1.415-1.415 3 3 0 0 1-2.12.879 3 3 0 0 1-2.122-.879 1 1 0 1 0-1.414 1.415A5 5 0 0 0 12 17c1.38 0 2.632-.56 3.536-1.464M10 10.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m5.5 1.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"
-              />
-              <path
-                d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10m-2 0a8 8 0 1 0-16 0 8 8 0 0 0 16 0"
-              />
-            </svg>
-          </div>
-        </span>
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M15.536 15.536a1 1 0 0 0-1.415-1.415 3 3 0 0 1-2.12.879 3 3 0 0 1-2.122-.879 1 1 0 1 0-1.414 1.415A5 5 0 0 0 12 17c1.38 0 2.632-.56 3.536-1.464M10 10.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m5.5 1.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"
+                />
+                <path
+                  d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10m-2 0a8 8 0 1 0-16 0 8 8 0 0 0 16 0"
+                />
+              </svg>
+            </div>
+          </span>
+        </div>
       </div>
     </div>
     <div

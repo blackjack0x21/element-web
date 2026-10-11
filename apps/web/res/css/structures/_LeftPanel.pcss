@@ -55,8 +55,24 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
+.mx_LeftPanel_wrapper,
+.mx_SpacePanel {
+    /* Slightly darker than the main canvas so the sidebar reads as a separate area */
+    --mx-sidebar-background: color-mix(in srgb, var(--cpd-color-bg-canvas-default) 80%, black);
+}
+
+/* The darker sidebar background lowers contrast for grey text and icons in the light theme, so darken them. */
+.cpd-theme-light {
+    .mx_LeftPanel_wrapper,
+    .mx_SpacePanel {
+        --cpd-color-text-secondary: var(--cpd-color-gray-1200);
+        --cpd-color-icon-secondary: var(--cpd-color-gray-1200);
+        --cpd-color-icon-tertiary: var(--cpd-color-gray-1000);
+    }
+}
+
 .mx_LeftPanel {
-    background-color: var(--cpd-color-bg-canvas-default);
+    background-color: var(--mx-sidebar-background);
     /* The room list is not designed to be collapsed to just icons. */
     /* 224 + 68(spaces bar) was deemed by design to be a good minimum for the left panel. */
     --collapsedWidth: 224px;

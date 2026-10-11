@@ -31,3 +31,11 @@
 .iconButton[aria-expanded="true"] svg {
     transform: rotate(180deg);
 }
+
+/*
+ * The sidebar background is darker than the canvas, so fill unselected filters with the canvas color to keep
+ * them distinct from it. Selected and hovered chips keep Compound's own backgrounds.
+ */
+.roomListPrimaryFilters [aria-selected="false"]:not(:hover) {
+    background-color: var(--cpd-color-bg-canvas-default);
+}

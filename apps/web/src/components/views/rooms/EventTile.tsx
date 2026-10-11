@@ -815,9 +815,10 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
         });
     };
 
-    private createMessageTimestampProps(ts: number): MessageTimestampViewModelProps {
+    private createMessageTimestampProps(ts: number, showHeaderTime: boolean): MessageTimestampViewModelProps {
         return {
             showRelative: this.context.timelineRenderingType === TimelineRenderingType.ThreadsList,
+            showHeaderTime,
             showTwelveHour: this.props.isTwelveHour,
             ts,
             receivedTs: getLateEventInfo(this.props.mxEvent)?.received_ts,
@@ -1052,7 +1053,10 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
         // Timestamp slots.
         const ts = eventTileRenderState.timestamp.value;
 
-        const messageTimestampProps = this.createMessageTimestampProps(ts);
+        const messageTimestampProps = this.createMessageTimestampProps(
+            ts,
+            !!eventTileRenderState.root.state?.timestampInHeader,
+        );
         const linkedMessageTimestampProps = this.createLinkedMessageTimestampProps(messageTimestampProps);
 
         const plainTimestamp = eventTileRenderState.timestamp.displayState.showRealTimestamp ? (

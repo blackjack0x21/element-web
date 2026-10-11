@@ -42,6 +42,16 @@ describe("MessageTimestampViewModel", () => {
         });
     });
 
+    it("should format the header time for a message from an earlier day", () => {
+        vi.useFakeTimers({ now: nowDate });
+        const vm = new MessageTimestampViewModel({
+            ts: nowDate.getTime() - 3 * DAY_MS,
+            showHeaderTime: true,
+        });
+        expect(vm.getSnapshot().ts).toBe("12/14/2021, 08:09");
+        vi.useRealTimers();
+    });
+
     it("should return the snapshot with tsReceivedAt", () => {
         const vm = new MessageTimestampViewModel({
             ts: nowDate.getTime(),

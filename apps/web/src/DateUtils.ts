@@ -264,6 +264,53 @@ export function formatRelativeTime(date: Date, showTwelveHour = false, locale?: 
 }
 
 /**
+ * Whole days from `date` to `now`, comparing calendar days in the user's time zone.
+ */
+function calendarDaysBetween(date: Date, now: Date, locale: string): number {
+    const toUtcDay = (d: Date): number => {
+        const parts = new Intl.DateTimeFormat(locale, {
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+            timeZone: getUserTimezone(),
+        }).formatToParts(d);
+        const part = (type: string): number => Number(parts.find((p) => p.type === type)?.value);
+        return Date.UTC(part("year"), part("month") - 1, part("day"));
+    };
+    return Math.round((toUtcDay(now) - toUtcDay(date)) / DAY_MS);
+}
+
+/**
+ * Formats a given date for the timestamp shown next to a sender name.
+ *
+ * Today shows just the time, yesterday shows "Yesterday at <time>", and anything older shows the numeric date and
+ * time in the order and separators of the user's locale.
+ * @example 16:58, Yesterday at 16:58, 31/10/2020, 16:58 in en-GB locale
+ * @param date - date object to format
+ * @param showTwelveHour - whether to use 12-hour rather than 24-hour time. Defaults to `false` (24 hour mode).
+ * @param locale - the locale string to use, in BCP 47 format, defaulting to user's selected application locale
+ */
+export function formatHeaderTime(date: Date, showTwelveHour = false, locale?: string): string {
+    const _locale = locale ?? getUserLanguage();
+    const daysAgo = calendarDaysBetween(date, new Date(), _locale);
+    if (daysAgo === 0) {
+        return formatTime(date, showTwelveHour, _locale);
+    }
+    if (daysAgo === 1) {
+        return _t("time|yesterday_at_time", { time: formatTime(date, showTwelveHour, _locale) });
+    }
+    return new Intl.DateTimeFormat(_locale, {
+        ...getTwelveHourOptions(showTwelveHour),
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone: getUserTimezone(),
+    }).format(date);
+}
+
+/**
  * Formats duration in ms to human-readable string
  * Returns value in the biggest possible unit (day, hour, min, second)
  * Rounds values up until unit threshold

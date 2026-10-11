@@ -14,6 +14,7 @@ import { REPEATABLE_DATE } from "test-utils";
 import {
     formatSeconds,
     formatRelativeTime,
+    formatHeaderTime,
     formatDuration,
     formatFullDateNoDayISO,
     formatTimeLeft,
@@ -305,5 +306,41 @@ describe("formatLocalDateShort()", () => {
 
         locale.mockReturnValue("de-DE");
         expect(formatLocalDateShort(timestamp)).toEqual("17.12.21");
+    });
+});
+
+describe("formatHeaderTime", () => {
+    beforeAll(() => {
+        vi.useFakeTimers();
+        // Tuesday, 2 November 2021 11:18:03 UTC
+        vi.setSystemTime(1635851883000);
+    });
+
+    afterAll(() => {
+        vi.setSystemTime(vi.getRealSystemTime());
+        vi.useRealTimers();
+    });
+
+    it("returns just the time for today", () => {
+        expect(formatHeaderTime(new Date(Date.UTC(2021, 10, 2, 1, 5)))).toBe("1:05");
+    });
+
+    it("returns 'Yesterday at' with the time for the previous calendar day", () => {
+        // Less than 24 hours ago would still be yesterday here, and so would the very start of the day.
+        expect(formatHeaderTime(new Date(Date.UTC(2021, 10, 1, 23, 59)))).toBe("Yesterday at 23:59");
+        expect(formatHeaderTime(new Date(Date.UTC(2021, 10, 1, 0, 0)))).toBe("Yesterday at 0:00");
+    });
+
+    it("honours the 12-hour clock for today and yesterday", () => {
+        expect(formatHeaderTime(new Date(Date.UTC(2021, 10, 2, 1, 5)), true)).toBe("1:05 AM");
+        expect(formatHeaderTime(new Date(Date.UTC(2021, 10, 1, 15, 30)), true)).toBe("Yesterday at 3:30 PM");
+    });
+
+    it("returns the numeric date and time for older dates in the order of the locale", () => {
+        const date = new Date(Date.UTC(2021, 9, 31, 16, 58));
+        expect(formatHeaderTime(date, false, "en-GB")).toBe("31/10/2021, 16:58");
+        expect(formatHeaderTime(date, false, "en-US")).toBe("10/31/2021, 16:58");
+        expect(formatHeaderTime(date, false, "de")).toBe("31.10.2021, 16:58");
+        expect(formatHeaderTime(date, true, "en-US")).toBe("10/31/2021, 4:58 PM");
     });
 });

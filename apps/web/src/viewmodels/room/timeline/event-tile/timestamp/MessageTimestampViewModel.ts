@@ -12,7 +12,13 @@ import {
     type MessageTimestampViewModel as MessageTimestampViewModelInterface,
 } from "@element-hq/web-shared-components";
 
-import { formatFullDate, formatTime, formatFullTime, formatRelativeTime } from "../../../../../DateUtils";
+import {
+    formatFullDate,
+    formatHeaderTime,
+    formatTime,
+    formatFullTime,
+    formatRelativeTime,
+} from "../../../../../DateUtils";
 import { objectHasDiff } from "../../../../../utils/objects";
 
 export interface MessageTimestampViewModelProps {
@@ -36,6 +42,11 @@ export interface MessageTimestampViewModelProps {
      * If set, include seconds in the displayed timestamp.
      */
     showSeconds?: boolean;
+    /**
+     * If set, display the timestamp as shown next to a sender name: the time for today, "Yesterday at <time>" or the
+     * numeric date and time in the user's locale.
+     */
+    showHeaderTime?: boolean;
     /**
      * If set, display a relative timestamp (e.g. "5 minutes ago").
      */
@@ -77,6 +88,8 @@ export class MessageTimestampViewModel
         let timestamp: string;
         if (props.showRelative) {
             timestamp = formatRelativeTime(date, props.showTwelveHour);
+        } else if (props.showHeaderTime) {
+            timestamp = formatHeaderTime(date, props.showTwelveHour);
         } else if (props.showFullDate) {
             timestamp = formatFullDate(date, props.showTwelveHour, props.showSeconds);
         } else if (props.showSeconds) {

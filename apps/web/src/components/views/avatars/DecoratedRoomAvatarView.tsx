@@ -79,7 +79,7 @@ function getPresenceDecoration(presence: Presence): JSX.Element {
                     width="8px"
                     height="8px"
                     className="mx_RoomAvatarView_PresenceDecoration"
-                    color="var(--cpd-color-icon-quaternary)"
+                    color="#d9b072"
                     aria-label={getPresenceLabel(presence)}
                 />
             );

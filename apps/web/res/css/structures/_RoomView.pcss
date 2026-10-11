@@ -38,10 +38,16 @@ Please see LICENSE files in the repository root for full details.
     }
 
     .mx_MessageComposer {
-        width: 100%;
         flex: 0 0 auto;
-        margin-right: 2px;
-        padding-bottom: 1em;
+        margin: 0.5em;
+        border-radius: 8px;
+        background-color: var(--cpd-color-bg-subtle-secondary);
+        /* Transparent until focused so the border appearing doesn't shift the layout */
+        border: 1px solid transparent;
+
+        &:focus-within {
+            border-color: var(--cpd-color-gray-500);
+        }
     }
 }
 

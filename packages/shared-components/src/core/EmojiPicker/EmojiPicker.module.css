@@ -182,7 +182,10 @@
 }
 
 .footer {
-    background-color: var(--cpd-color-bg-subtle-secondary);
+    /* The picker sits in a context menu that already uses bg-subtle-secondary, so go one step darker.
+       The bottom corners match the menu's 12px radius inside its 1px border, so the background doesn't poke out. */
+    background-color: var(--cpd-color-bg-subtle-primary);
+    border-radius: 0 0 11px 11px;
     border-top: 1px solid var(--cpd-color-gray-400);
     min-height: 72px;
     max-height: 72px;

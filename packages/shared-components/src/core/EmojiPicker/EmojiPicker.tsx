@@ -25,14 +25,13 @@ import {
 import { Tabs } from "./Tabs";
 import { Search } from "./Search";
 import { Preview } from "./Preview";
-import { QuickReactions } from "./QuickReactions";
 import { Emoji } from "./Emoji";
 import { type ButtonEvent } from "./RovingButton";
 import styles from "./EmojiPicker.module.css";
 
 const ZERO_WIDTH_JOINER = "\u200D";
 
-export const EMOJI_HEIGHT = 35;
+export const EMOJI_HEIGHT = 48;
 export const EMOJIS_PER_ROW = 8;
 
 const CATEGORY_CONFIG: Category[] = [
@@ -123,10 +122,10 @@ export interface EmojiPickerProps {
      */
     getAction?: RovingTabIndexProviderProps["getAction"];
     /**
-     * Whether to show the quick reactions at the bottom of the picker. Defaults to true.
-     * Previews of emoji are displayed in the same bar as will also be hidden when this is false.
+     * Whether to show the bar at the bottom of the picker that previews the hovered emoji.
+     * Defaults to true.
      */
-    showQuickReactions?: boolean;
+    showPreview?: boolean;
 }
 
 /** Convert recent emoji characters to emoji data, removing unknowns and duplicates */
@@ -198,7 +197,7 @@ export function EmojiPicker({
     recentEmojis,
     onRecordRecent,
     getAction,
-    showQuickReactions = true,
+    showPreview = true,
 }: EmojiPickerProps): React.ReactNode {
     const [filter, setFilter] = useState("");
     const [previewEmoji, setPreviewEmoji] = useState<IEmoji | undefined>(undefined);
@@ -253,6 +252,10 @@ export function EmojiPicker({
         }
         return flat;
     }, [dataByCategory]);
+
+    // Until something is hovered, preview the first emoji in the grid
+    const firstRow = items.find((item) => item.type === "row");
+    const shownEmoji = previewEmoji ?? (firstRow?.type === "row" ? firstRow.emojis[0] : undefined);
 
     const onRangeChanged = useCallback(
         (range: ListRange): void => {
@@ -365,10 +368,6 @@ export function EmojiPicker({
         setPreviewEmoji(emoji);
     }, []);
 
-    const onHoverEmojiEnd = useCallback((): void => {
-        setPreviewEmoji(undefined);
-    }, []);
-
     const onClickEmoji = useCallback(
         (ev: ButtonEvent, emoji: IEmoji): void => {
             if (onChoose(emoji.unicode) !== false) {
@@ -411,13 +410,12 @@ export function EmojiPicker({
                         selectedEmojis={selectedEmojis}
                         onClick={onClickEmoji}
                         onMouseEnter={onHoverEmoji}
-                        onMouseLeave={onHoverEmojiEnd}
                         disabled={isEmojiDisabled?.(emoji.unicode)}
                     />
                 </div>
             ));
         },
-        [selectedEmojis, onClickEmoji, onHoverEmoji, onHoverEmojiEnd, isEmojiDisabled, emojiIdBase],
+        [selectedEmojis, onClickEmoji, onHoverEmoji, isEmojiDisabled, emojiIdBase],
     );
 
     const pickerBodyId = useId();
@@ -474,16 +472,8 @@ export function EmojiPicker({
                             />
                         )}
                     </AutoHideScrollbar>
-                    {showQuickReactions &&
-                        (previewEmoji ? (
-                            <Preview emoji={previewEmoji} />
-                        ) : (
-                            <QuickReactions
-                                onClick={onClickEmoji}
-                                selectedEmojis={selectedEmojis}
-                                getAction={getAction}
-                            />
-                        ))}
+                    {/* Keep the bar's height when there's nothing to preview so the grid doesn't resize */}
+                    {showPreview && (shownEmoji ? <Preview emoji={shownEmoji} /> : <div className={styles.footer} />)}
                 </section>
             )}
         </RovingGridIndexProvider>

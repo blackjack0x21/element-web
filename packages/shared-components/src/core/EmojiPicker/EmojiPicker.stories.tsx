@@ -52,6 +52,6 @@ export const DisabledEmoji: Story = {
 
 export const HideQuickReactions: Story = {
     args: {
-        showQuickReactions: false,
+        showPreview: false,
     },
 };

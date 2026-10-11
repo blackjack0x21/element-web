@@ -118,7 +118,7 @@ export function CustomStatusView({
                     recentEmojis={recentEmojis}
                     onRecordRecent={onRecordRecentEmoji}
                     onFinished={() => setPickerOpen(false)}
-                    showQuickReactions={false}
+                    showPreview={false}
                 />
             </Menu>
             <Field name="custom-status" className={styles.textField}>

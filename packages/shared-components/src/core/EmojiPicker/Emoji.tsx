@@ -42,7 +42,7 @@ interface IProps {
      *
      * @param emoji - The emoji that the mouse left
      */
-    onMouseLeave: (emoji: IEmoji) => void;
+    onMouseLeave?: (emoji: IEmoji) => void;
     /**
      * If true, the emoji will be disabled and not clickable.
      */
@@ -73,7 +73,7 @@ export const Emoji = React.memo(function Emoji({
     const isSelected = selectedEmojis?.has(emoji.unicode);
 
     const onMouseEnterWrapped = useCallback(() => onMouseEnter(emoji), [onMouseEnter, emoji]);
-    const onMouseLeaveWrapped = useCallback(() => onMouseLeave(emoji), [onMouseLeave, emoji]);
+    const onMouseLeaveWrapped = useCallback(() => onMouseLeave?.(emoji), [onMouseLeave, emoji]);
 
     return (
         <RovingButton

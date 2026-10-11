@@ -623,12 +623,10 @@
         "gif_item": "GIF",
         "gif_no_favorites": "No favorites yet. Star a GIF to save it here.",
         "gif_no_results": "No GIFs found",
-        "gif_powered_by_klipy": "Powered by Klipy",
         "gif_remove_favorite": "Remove from favorites",
         "gif_search_placeholder": "Search KLIPY",
         "gif_tab_favorites": "Favorites",
         "gif_tab_trending": "Trending",
-        "gif_trending": "Trending",
         "link_modal": {
             "link_field_label": "Link",
             "text_field_label": "Text",

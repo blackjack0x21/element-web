@@ -290,6 +290,22 @@ describe("EventTileViewModel", () => {
         expect(snapshot.root.state.timestampInHeader).toBe(false);
     });
 
+    it("does not keep the timestamp of the last tile visible in group layout", () => {
+        const snapshot = EventTileViewModel.createSnapshot(
+            makeProps({ display: { continuation: true, isLast: true } }),
+        );
+
+        expect(snapshot.timestamp.show).toBe(false);
+    });
+
+    it("keeps the timestamp of the last tile visible in IRC layout", () => {
+        const snapshot = EventTileViewModel.createSnapshot(
+            makeProps({ display: { layout: Layout.IRC, isLast: true } }),
+        );
+
+        expect(snapshot.timestamp.show).toBe(true);
+    });
+
     it("keeps timestamp display state for IRC layout", () => {
         const renderState = EventTileViewModel.createRenderState(
             makeProps({

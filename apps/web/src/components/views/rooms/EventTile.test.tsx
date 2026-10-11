@@ -312,14 +312,20 @@ describe("EventTile", () => {
             mxEvent = makeTimestampedMessage();
         });
 
-        it("hides the timestamp by default in room timelines", () => {
+        it("shows the timestamp by default for the first tile of a group", () => {
             const { container } = getComponent();
+
+            expect(container.querySelector(".mx_MessageTimestamp")).not.toBeNull();
+        });
+
+        it("hides the timestamp by default for continuations in room timelines", () => {
+            const { container } = getComponent({ continuation: true });
 
             expect(container.querySelector(".mx_MessageTimestamp")).toBeNull();
         });
 
         it("shows the timestamp when the tile is hovered", async () => {
-            const { container } = getComponent();
+            const { container } = getComponent({ continuation: true });
             const tile = getTile(container);
             stubHoverMatches(tile);
 
@@ -331,7 +337,7 @@ describe("EventTile", () => {
         });
 
         it("shows the timestamp when focus is within the tile", () => {
-            const { container } = getComponent();
+            const { container } = getComponent({ continuation: true });
 
             expect(container.querySelector(".mx_MessageTimestamp")).toBeNull();
 
@@ -342,10 +348,16 @@ describe("EventTile", () => {
             expect(container.querySelector(".mx_MessageTimestamp")).not.toBeNull();
         });
 
-        it("shows the timestamp for the last event", () => {
-            const { container } = getComponent({ last: true });
+        it("shows the timestamp for the last event outside the group layout", () => {
+            const { container } = getComponent({ last: true, layout: Layout.IRC });
 
             expect(container.querySelector(".mx_MessageTimestamp")).not.toBeNull();
+        });
+
+        it("does not keep the timestamp of the last continuation visible in the group layout", () => {
+            const { container } = getComponent({ last: true, continuation: true });
+
+            expect(container.querySelector(".mx_MessageTimestamp")).toBeNull();
         });
 
         it("shows the timestamp when timestamps are always shown", () => {
@@ -702,7 +714,7 @@ describe("EventTile", () => {
 
         it("shows the timestamp while the context menu is open", async () => {
             mxEvent = makeTimestampedMessage();
-            const { container } = getComponent();
+            const { container } = getComponent({ continuation: true });
 
             expect(container.querySelector(".mx_MessageTimestamp")).toBeNull();
 

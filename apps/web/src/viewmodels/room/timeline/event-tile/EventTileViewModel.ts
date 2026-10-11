@@ -35,7 +35,7 @@ import {
 } from "./EventTileDerivedState";
 import { type MemberInfo } from "./DisambiguatedProfileViewModel";
 import { TimelineRenderingType } from "../../../../contexts/RoomContext";
-import { type Layout } from "../../../../settings/enums/Layout";
+import { Layout } from "../../../../settings/enums/Layout";
 import { MessageTimestampViewModel, type MessageTimestampViewModelProps } from "./timestamp/MessageTimestampViewModel";
 import {
     ThreadMessagePreviewViewModel,
@@ -629,7 +629,8 @@ export class EventTileViewModel extends BaseViewModel<EventTileViewModelRenderSt
             isRtcNotification: event.isRtcNotification,
             hideTimestamp: timestamp.hideTimestamp,
             alwaysShowTimestamps: timestamp.alwaysShowTimestamps,
-            last: display.isLast,
+            // The group layout shows the time in each group's header, so the last tile needs no extra one.
+            last: display.layout === Layout.Group ? false : display.isLast,
             hover: interaction.hover,
             focusWithin: interaction.focusWithin,
             actionBarFocused: interaction.isActionBarFocused,

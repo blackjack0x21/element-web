@@ -243,7 +243,7 @@
        tile. It stands in for the direct sender slot above. */
     > .header {
         display: flex;
-        align-items: baseline;
+        align-items: center;
         gap: var(--cpd-space-2x);
         margin-inline-start: var(--event-tile-group-gutter);
         min-height: var(--cpd-font-size-heading-sm);
@@ -261,10 +261,11 @@
     > .header > .slotTimestamp {
         position: static;
         flex: none;
+        display: flex;
+        align-items: center;
         width: auto;
         height: auto;
         color: var(--cpd-color-text-secondary);
-        font: var(--cpd-font-body-xs-regular);
     }
 
     /* Slots. */

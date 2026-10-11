@@ -22,6 +22,7 @@ import {
     getEventTileTimestamp,
     getFooterDisplayState,
     getIsContinuation,
+    getIsTimestampInHeader,
     getReplyChainAlwaysShowTimestamps,
     getScrollToken,
     getSenderProfileMode,
@@ -614,6 +615,15 @@ export class EventTileViewModel extends BaseViewModel<EventTileViewModelRenderSt
             isCallInvite: event.isCallInvite,
             isRtcNotification: event.isRtcNotification,
         });
+        const continuation = isContinuation || event.isCallInvite || ElementCallEventType.matches(event.eventType);
+        const timestampInHeader =
+            !sender.hideSender &&
+            getIsTimestampInHeader({
+                timelineRenderingType: display.timelineRenderingType,
+                layout: display.layout,
+                continuation,
+                needsSenderProfile: senderProfileState.needsSenderProfile,
+            });
         const showTimestamp = getShouldShowTimestamp({
             eventTs: event.eventTs,
             isRtcNotification: event.isRtcNotification,
@@ -624,6 +634,7 @@ export class EventTileViewModel extends BaseViewModel<EventTileViewModelRenderSt
             focusWithin: interaction.focusWithin,
             actionBarFocused: interaction.isActionBarFocused,
             hasContextMenu: interaction.hasContextMenu,
+            inHeader: timestampInHeader,
         });
         const timestampValue = getEventTileTimestamp({
             timelineRenderingType: display.timelineRenderingType,
@@ -648,7 +659,8 @@ export class EventTileViewModel extends BaseViewModel<EventTileViewModelRenderSt
             highlighted: display.isHighlighted,
             selected: display.isSelected,
             editing: event.isEditing,
-            continuation: isContinuation || event.isCallInvite || ElementCallEventType.matches(event.eventType),
+            continuation,
+            timestampInHeader,
             lastInSection: display.isLastInSection,
             contextual: display.isContextual,
             actionBarFocused: interaction.isActionBarFocused,

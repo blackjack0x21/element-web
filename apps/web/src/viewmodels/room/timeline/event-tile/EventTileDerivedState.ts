@@ -227,6 +227,8 @@ export interface ShouldShowTimestampInput {
     actionBarFocused: boolean;
     /** Whether an EventTile context menu is currently open. */
     hasContextMenu: boolean;
+    /** Whether the timestamp renders in the header next to the sender name, where it is always visible. */
+    inHeader?: boolean;
 }
 
 /** Whether EventTile should render the message timestamp. */
@@ -240,12 +242,43 @@ export function getShouldShowTimestamp({
     focusWithin,
     actionBarFocused,
     hasContextMenu,
+    inHeader,
 }: ShouldShowTimestampInput): boolean {
     return (
         !!eventTs &&
         !isRtcNotification &&
         !hideTimestamp &&
-        (alwaysShowTimestamps || last || hover || focusWithin || actionBarFocused || hasContextMenu)
+        (inHeader || alwaysShowTimestamps || last || hover || focusWithin || actionBarFocused || hasContextMenu)
+    );
+}
+
+/** Inputs for header timestamp placement derivation. */
+export interface TimestampInHeaderInput {
+    /** The current timeline rendering mode. */
+    timelineRenderingType: TimelineRenderingType;
+    /** The current timeline layout. */
+    layout?: Layout;
+    /** Whether the tile renders as a continuation of the previous tile. */
+    continuation?: boolean;
+    /** Whether the tile renders a sender profile for the header to sit next to. */
+    needsSenderProfile: boolean;
+}
+
+/**
+ * Whether the timestamp belongs next to the sender name instead of in the message line. True for the first tile of
+ * a group in the group layout, so the header shows the time of the group's first message.
+ */
+export function getIsTimestampInHeader({
+    timelineRenderingType,
+    layout,
+    continuation,
+    needsSenderProfile,
+}: TimestampInHeaderInput): boolean {
+    return (
+        layout === Layout.Group &&
+        !continuation &&
+        needsSenderProfile &&
+        (timelineRenderingType === TimelineRenderingType.Room || timelineRenderingType === TimelineRenderingType.Search)
     );
 }
 

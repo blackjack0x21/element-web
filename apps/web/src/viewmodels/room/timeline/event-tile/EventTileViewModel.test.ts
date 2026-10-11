@@ -262,6 +262,34 @@ describe("EventTileViewModel", () => {
         expect(renderState.timestamp.displayState.showRealTimestamp).toBe(true);
     });
 
+    it("shows the timestamp in the header of the first tile of a group without hover", () => {
+        const snapshot = EventTileViewModel.createSnapshot(makeProps({ display: { continuation: false } }));
+
+        expect(snapshot.root.state.timestampInHeader).toBe(true);
+        expect(snapshot.timestamp.show).toBe(true);
+    });
+
+    it("keeps the timestamp hover-only for continuations in group layout", () => {
+        const snapshot = EventTileViewModel.createSnapshot(makeProps({ display: { continuation: true } }));
+
+        expect(snapshot.root.state.timestampInHeader).toBe(false);
+        expect(snapshot.timestamp.show).toBe(false);
+    });
+
+    it("does not move the timestamp to the header outside the group layout", () => {
+        for (const layout of [Layout.IRC, Layout.Bubble]) {
+            const snapshot = EventTileViewModel.createSnapshot(makeProps({ display: { layout, continuation: false } }));
+
+            expect(snapshot.root.state.timestampInHeader).toBe(false);
+        }
+    });
+
+    it("does not move the timestamp to the header when the sender is hidden", () => {
+        const snapshot = EventTileViewModel.createSnapshot(makeProps({ sender: { hideSender: true } }));
+
+        expect(snapshot.root.state.timestampInHeader).toBe(false);
+    });
+
     it("keeps timestamp display state for IRC layout", () => {
         const renderState = EventTileViewModel.createRenderState(
             makeProps({
@@ -389,6 +417,7 @@ describe("EventTileViewModel", () => {
             selected: true,
             editing: true,
             continuation: false,
+            timestampInHeader: false,
             lastInSection: true,
             contextual: true,
             actionBarFocused: true,
@@ -590,13 +619,15 @@ describe("EventTileViewModel", () => {
     });
 
     it("updates an instance snapshot when inputs change", () => {
-        const vm = new EventTileViewModel(makeDependencies(), makeProps());
+        // A continuation keeps its timestamp hidden until hovered.
+        const continuation = { display: { continuation: true } };
+        const vm = new EventTileViewModel(makeDependencies(), makeProps(continuation));
         const listener = vi.fn();
         const unsubscribe = vm.subscribe(listener);
 
         expect(vm.getSnapshot().snapshot.timestamp.show).toBe(false);
 
-        vm.setInputs(makeDependencies(), makeProps({ interaction: { hover: true } }));
+        vm.setInputs(makeDependencies(), makeProps({ ...continuation, interaction: { hover: true } }));
 
         expect(vm.getSnapshot().snapshot.timestamp.show).toBe(true);
         expect(listener).toHaveBeenCalled();

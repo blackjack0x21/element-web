@@ -48,6 +48,8 @@ export interface EventTileViewRootState {
     editing?: boolean;
     /** Whether the event continues the previous event block. */
     continuation?: boolean;
+    /** Whether the timestamp renders in the header next to the sender name instead of in the event line. */
+    timestampInHeader?: boolean;
     /** Whether this is the last event in a section. */
     lastInSection?: boolean;
     /** Whether the tile is a contextual search result. */

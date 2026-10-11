@@ -685,6 +685,52 @@ describe("EventTileView", () => {
         expect(getByTestId("receipt").parentElement?.parentElement).toBe(root);
     });
 
+    it("renders the timestamp next to the sender in the group layout header", () => {
+        const { container, getByTestId } = render(
+            <EventTileView
+                {...createProps({
+                    root: { ...renderState, state: { isOwnEvent: false, hasReply: false, timestampInHeader: true } },
+                    slots: {
+                        sender: <span data-testid="sender">Sender</span>,
+                        avatar: <span data-testid="avatar">Avatar</span>,
+                        timestamp: <span data-testid="timestamp">Timestamp</span>,
+                        body: <span data-testid="body">Body</span>,
+                    },
+                })}
+            />,
+            { presentation: { layout: "group" } },
+        );
+        const root = container.firstElementChild!;
+        const header = getByTestId("sender").parentElement?.parentElement;
+
+        expect(header).toHaveClass(styles.header);
+        expect(header?.parentElement).toBe(root);
+        expect(Array.from(header!.children).map((child) => child.getAttribute("data-testid"))).toEqual([
+            "event-tile-slot-sender",
+            "event-tile-slot-timestamp",
+        ]);
+        expect(getByTestId("body").parentElement?.parentElement).not.toContainElement(getByTestId("timestamp"));
+    });
+
+    it.each(["irc", "bubble"] as const)("keeps the timestamp out of a header in the %s layout", (layout) => {
+        const { container, getByTestId } = render(
+            <EventTileView
+                {...createProps({
+                    root: { ...renderState, state: { isOwnEvent: false, hasReply: false, timestampInHeader: true } },
+                    slots: {
+                        sender: <span data-testid="sender">Sender</span>,
+                        timestamp: <span data-testid="timestamp">Timestamp</span>,
+                        body: <span data-testid="body">Body</span>,
+                    },
+                })}
+            />,
+            { presentation: { layout } },
+        );
+
+        expect(container.querySelector(`.${styles.header}`)).toBeNull();
+        expect(getByTestId("timestamp")).toBeInTheDocument();
+    });
+
     it("forwards root and line interactions", () => {
         const onClick = vi.fn();
         const onContextMenu = vi.fn();

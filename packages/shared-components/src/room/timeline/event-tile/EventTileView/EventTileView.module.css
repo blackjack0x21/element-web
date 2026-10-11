@@ -239,6 +239,34 @@
         line-height: var(--cpd-font-size-heading-sm);
     }
 
+    /* Header: the sender name followed by the timestamp of the group's first
+       tile. It stands in for the direct sender slot above. */
+    > .header {
+        display: flex;
+        align-items: baseline;
+        gap: var(--cpd-space-2x);
+        margin-inline-start: var(--event-tile-group-gutter);
+        min-height: var(--cpd-font-size-heading-sm);
+        line-height: var(--cpd-font-size-heading-sm);
+    }
+
+    > .header > .slotSender {
+        min-width: 0;
+    }
+
+    > .header > .slotSender > * {
+        max-width: 100%;
+    }
+
+    > .header > .slotTimestamp {
+        position: static;
+        flex: none;
+        width: auto;
+        height: auto;
+        color: var(--cpd-color-text-secondary);
+        font: var(--cpd-font-body-xs-regular);
+    }
+
     /* Slots. */
     .slotAvatar {
         position: absolute;

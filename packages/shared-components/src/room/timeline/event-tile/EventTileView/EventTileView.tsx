@@ -236,12 +236,20 @@ export function EventTileView({
         );
     }
 
-    // Group and bubble layouts: sender details precede the line content.
+    // Group and bubble layouts: sender details precede the line content. The first tile of a group in the group
+    // layout shows its timestamp next to the sender name rather than in the line.
+    const timestampInHeader = layout === "group" && !!root.state?.timestampInHeader;
     return renderRoot(
         <>
-            {renderSlots("sender", "avatar")}
+            {timestampInHeader ? (
+                <div className={styles.header}>{renderSlots("sender", "timestamp")}</div>
+            ) : (
+                renderSlots("sender")
+            )}
+            {renderSlot("avatar")}
             <div id={root.id} data-testid="event-tile-line" className={lineClassName} onContextMenu={onContextMenu}>
-                {renderSlots("contextMenu", "timestamp", "padlock", "replyChain", "body", "actionBar")}
+                {renderSlots("contextMenu", ...(timestampInHeader ? [] : ["timestamp" as const]))}
+                {renderSlots("padlock", "replyChain", "body", "actionBar")}
             </div>
             {renderSlots("footer", "threadInfo", "receipt")}
         </>,

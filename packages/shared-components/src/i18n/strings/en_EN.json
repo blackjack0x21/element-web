@@ -394,6 +394,18 @@
         "open_security": "Security & Privacy",
         "open_settings": "All settings"
     },
+    "user_panel": {
+        "call_connected": "Call connected",
+        "deafen": "Deafen",
+        "hang_up": "Leave call",
+        "mute": "Mute",
+        "open_settings": "User settings",
+        "title": "User panel",
+        "turn_camera_off": "Turn camera off",
+        "turn_camera_on": "Turn camera on",
+        "undeafen": "Undeafen",
+        "unmute": "Unmute"
+    },
     "voip": {
         "element_call_mock": {
             "config_label": "Effective configuration",

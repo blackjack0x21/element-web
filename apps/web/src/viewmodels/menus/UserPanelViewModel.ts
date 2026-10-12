@@ -16,7 +16,7 @@ import { logger } from "matrix-js-sdk/src/logger";
 import { type OwnProfileStore } from "../../stores/OwnProfileStore";
 import { UPDATE_EVENT } from "../../stores/AsyncStore";
 import { CallStore, CallStoreEvent } from "../../stores/CallStore";
-import { CallEvent, ElementCall } from "../../models/Call";
+import { CallEvent, ConnectionState, ElementCall } from "../../models/Call";
 import type { MatrixDispatcher } from "../../dispatcher/dispatcher";
 import { Action } from "../../dispatcher/actions";
 import { type ActionPayload } from "../../dispatcher/payloads";
@@ -93,7 +93,8 @@ export class UserPanelViewModel
 
     private static findCall(callStore: CallStore): ElementCall | null {
         for (const call of callStore.connectedCalls) {
-            if (call instanceof ElementCall) return call;
+            // A call that is being left (or whose leave got stuck) is already gone as far as the user is concerned
+            if (call instanceof ElementCall && call.connectionState === ConnectionState.Connected) return call;
         }
         return null;
     }
@@ -135,8 +136,13 @@ export class UserPanelViewModel
     private watchCall(call: ElementCall | null): void {
         if (this.call === call) return;
         this.call?.off(CallEvent.DeviceMute, this.onDeviceMute);
+        this.call?.off(CallEvent.ConnectionState, this.onConnectedCalls);
+        this.call?.off(CallEvent.Destroy, this.onConnectedCalls);
         this.call = call;
         this.call?.on(CallEvent.DeviceMute, this.onDeviceMute);
+        // The store's list can lag behind the call itself, so also follow the call directly
+        this.call?.on(CallEvent.ConnectionState, this.onConnectedCalls);
+        this.call?.on(CallEvent.Destroy, this.onConnectedCalls);
     }
 
     /** The keyboard shortcut for the user menu opens the menu from here. */

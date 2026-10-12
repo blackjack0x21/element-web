@@ -13,7 +13,7 @@ import { type MatrixClient } from "matrix-js-sdk/src/matrix";
 
 import { UserPanelViewModel } from "./UserPanelViewModel";
 import { CallStore, CallStoreEvent } from "../../stores/CallStore";
-import { CallEvent, ElementCall } from "../../models/Call";
+import { CallEvent, ConnectionState, ElementCall } from "../../models/Call";
 import { UPDATE_EVENT } from "../../stores/AsyncStore";
 import { type OwnProfileStore } from "../../stores/OwnProfileStore";
 import { type MatrixDispatcher } from "../../dispatcher/dispatcher";
@@ -31,7 +31,7 @@ vi.mock("./UserMenuViewModel", () => ({
 
 class EventEmitter extends TypedEventEmitter<string, Record<string, () => void>> {}
 
-type MockCall = ElementCall & { deviceMute: unknown };
+type MockCall = ElementCall & { deviceMute: unknown; connectionState: ConnectionState };
 
 function mkCall(): MockCall {
     // Only the ElementCall surface the view model touches; instanceof still holds
@@ -40,6 +40,7 @@ function mkCall(): MockCall {
     // The real ones are prototype getters, so plain assignment would throw
     Object.defineProperties(call, {
         roomId: { value: "!room:example.org" },
+        connectionState: { value: ConnectionState.Connected, writable: true },
         deviceMute: {
             value: { audio_enabled: true, video_enabled: true, deafened: false },
             writable: true,
@@ -144,6 +145,27 @@ describe("UserPanelViewModel", () => {
             cameraAvailable: true,
         });
         connect(null);
+        expect(vm.getSnapshot().call).toBeUndefined();
+    });
+
+    it("hides the call as soon as the call itself disconnects, even if the store still lists it", () => {
+        const call = mkCall();
+        connect(call);
+        const vm = mkVm();
+        expect(vm.getSnapshot().call).toBeDefined();
+
+        call.connectionState = ConnectionState.Disconnected;
+        call.emit(CallEvent.ConnectionState, ConnectionState.Disconnected, ConnectionState.Connected);
+        expect(vm.getSnapshot().call).toBeUndefined();
+    });
+
+    it("hides the call as soon as the user starts leaving it", () => {
+        const call = mkCall();
+        connect(call);
+        const vm = mkVm();
+
+        call.connectionState = ConnectionState.Disconnecting;
+        call.emit(CallEvent.ConnectionState, ConnectionState.Disconnecting, ConnectionState.Connected);
         expect(vm.getSnapshot().call).toBeUndefined();
     });
 

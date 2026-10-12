@@ -94,9 +94,9 @@ describe("CallView", () => {
         client.reEmitter.stopReEmitting(room, [RoomStateEvent.Events]);
     });
 
-    const renderView = async (role: string | undefined = undefined): Promise<void> => {
+    const renderView = async (role: string | undefined = undefined, onClose = (): void => {}): Promise<void> => {
         render(
-            <CallView room={room} resizing={false} role={role} onClose={() => {}} />,
+            <CallView room={room} resizing={false} role={role} onClose={onClose} />,
             clientAndSDKContextRenderOptions(client, sdkContext),
         );
         await act(() => Promise.resolve()); // Let effects settle
@@ -111,5 +111,24 @@ describe("CallView", () => {
         const cleanSpy = vi.spyOn(call, "clean");
         await renderView();
         expect(cleanSpy).toHaveBeenCalled();
+    });
+
+    it("closes when the call goes away while on screen", async () => {
+        const onClose = vi.fn();
+        await renderView(undefined, onClose);
+        expect(onClose).not.toHaveBeenCalled();
+
+        // Destroyed without closing first, as happens once nobody is left in it
+        await act(() => call.destroy());
+        expect(onClose).toHaveBeenCalled();
+    });
+
+    it("stays open in a video room whose call goes away", async () => {
+        vi.spyOn(room, "isElementVideoRoom").mockReturnValue(true);
+        const onClose = vi.fn();
+        await renderView(undefined, onClose);
+
+        await act(() => call.destroy());
+        expect(onClose).not.toHaveBeenCalled();
     });
 });

@@ -15,6 +15,7 @@ import { CallStore } from "../../../stores/CallStore";
 import { useTypedEventEmitter } from "../../../hooks/useEventEmitter";
 import { useCall } from "../../../hooks/useCall";
 import { SDKContext } from "../../../contexts/SDKContext.ts";
+import { isVideoRoom } from "../../../utils/video-rooms";
 
 interface JoinCallViewProps {
     room: Room;
@@ -70,6 +71,13 @@ interface CallViewProps {
 
 export const CallView: FC<CallViewProps> = ({ room, resizing, role, onClose }) => {
     const call = useCall(room.roomId);
+
+    // A call can go away while it is on screen without closing first (it is destroyed once nobody is in it).
+    // Stop viewing it rather than leave an empty pane, from which viewing the room again would start a new call.
+    // Video rooms always show their call, so they have nothing to go back to.
+    useEffect(() => {
+        if (call === null && !isVideoRoom(room)) onClose();
+    }, [call, room, onClose]);
 
     return call && <JoinCallView room={room} resizing={resizing} call={call} role={role} onClose={onClose} />;
 };

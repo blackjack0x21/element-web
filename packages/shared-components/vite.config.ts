@@ -40,13 +40,18 @@ function layerCssAssets(): Plugin {
 
             const source = readFileSync(expectedPath, "utf-8");
             if (source.startsWith(cssLayerOrder)) return;
-            writeFileSync(expectedPath, `${cssLayerOrder}\n@layer ${sharedComponentsLayer} {\n${source}\n}\n`);
+            // Write to a temp file and rename so a watching consumer never reads a half-written file.
+            const tmpPath = `${expectedPath}.tmp`;
+            writeFileSync(tmpPath, `${cssLayerOrder}\n@layer ${sharedComponentsLayer} {\n${source}\n}\n`);
+            renameSync(tmpPath, expectedPath);
         },
     };
 }
 
 export default defineConfig({
     build: {
+        // Don't wipe dist/ on every watch rebuild, or the dev server fails to resolve the CSS mid-rebuild.
+        emptyOutDir: !process.argv.includes("--watch"),
         lib: {
             // Two entries: the main bundle and a standalone `numbers` utility that callers
             // running outside the browser DOM (e.g. AudioWorkletGlobalScope) can import without

@@ -102,6 +102,7 @@ export enum CallEvent {
     Destroy = "destroy",
     CallTypeChanged = "call_type_changed",
     DeviceMute = "device_mute",
+    VideoActive = "video_active",
 }
 
 interface CallEventHandlerMap {
@@ -114,6 +115,7 @@ interface CallEventHandlerMap {
     [CallEvent.Destroy]: () => void;
     [CallEvent.CallTypeChanged]: (callType: CallType) => void;
     [CallEvent.DeviceMute]: (state: DeviceMuteState) => void;
+    [CallEvent.VideoActive]: (active: boolean) => void;
 }
 
 /**
@@ -1047,6 +1049,7 @@ export class ElementCall extends Call {
         widgetApi.on(`action:${ElementWidgetActions.HangupCall}`, this.onHangup);
         widgetApi.on(`action:${ElementWidgetActions.Close}`, this.onClose);
         widgetApi.on(`action:${ElementWidgetActions.DeviceMute}`, this.onDeviceMute);
+        widgetApi.on(`action:${ElementWidgetActions.VideoActive}`, this.onVideoActive);
         void this.sendSoundEffectVolume();
         return widgetApi;
     }
@@ -1124,6 +1127,7 @@ export class ElementCall extends Call {
             this.widgetApi.off(`action:${ElementWidgetActions.HangupCall}`, this.onHangup);
             this.widgetApi.off(`action:${ElementWidgetActions.Close}`, this.onClose);
             this.widgetApi.off(`action:${ElementWidgetActions.DeviceMute}`, this.onDeviceMute);
+            this.widgetApi.off(`action:${ElementWidgetActions.VideoActive}`, this.onVideoActive);
         }
         // A start() still waiting on the component should learn that the call went away, rather than hang
         // until the timeout. Usually nothing is waiting, so mark the promise as handled first: an
@@ -1233,6 +1237,29 @@ export class ElementCall extends Call {
 
     /** The last mute state Element Call reported, or null before it has reported one. */
     private deviceMuteState: DeviceMuteState | null = null;
+
+    private _videoActive = false;
+    /**
+     * Whether anyone in the call has their camera on or is sharing their screen. Assumes not until Element Call
+     * says otherwise, so the call's pip doesn't flash up while joining.
+     */
+    public get videoActive(): boolean {
+        return this._videoActive;
+    }
+
+    /** Element Call reports camera / screen share activity (`HostBridge.notifyVideoActive` / `io.element.video_active`). */
+    public handleVideoActive(active: boolean): void {
+        if (active === this._videoActive) return;
+        this._videoActive = active;
+        this.emit(CallEvent.VideoActive, active);
+    }
+
+    private readonly onVideoActive = (ev: CustomEvent<IWidgetApiRequest>): void => {
+        ev.preventDefault();
+        this.widgetApi!.transport.reply(ev.detail, {}); // ack
+        const { active } = (ev.detail.data ?? {}) as { active?: unknown };
+        if (typeof active === "boolean") this.handleVideoActive(active);
+    };
 
     /** The mute state of the microphone, camera and speakers. Assumes everything is on until Element Call says otherwise. */
     public get deviceMute(): DeviceMuteState {

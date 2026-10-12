@@ -23,6 +23,8 @@ import { UPDATE_EVENT } from "../../stores/AsyncStore";
 import RoomAvatar from "../views/avatars/RoomAvatar";
 import { WidgetPipViewModel, type Props as WidgetPipViewModelProps } from "../../viewmodels/room/WidgetPipViewModel";
 import { SDKContext } from "../../contexts/SDKContext.ts";
+import { CallStore } from "../../stores/CallStore";
+import { CallEvent as ElementCallEvent, ElementCall } from "../../models/Call";
 
 const SHOW_CALL_IN_STATES = [
     CallState.Connected,
@@ -94,6 +96,18 @@ class PipContainerInner extends React.Component<IProps, IState> {
         ActiveWidgetStore.instance.on(ActiveWidgetStoreEvent.Undock, this.onWidgetDockChanges);
     }
 
+    /** The call whose video activity decides whether the widget pip is shown. */
+    private watchedCall: ElementCall | null = null;
+
+    private watchCall(call: ElementCall | null): void {
+        if (call === this.watchedCall) return;
+        this.watchedCall?.off(ElementCallEvent.VideoActive, this.onVideoActive);
+        this.watchedCall = call;
+        this.watchedCall?.on(ElementCallEvent.VideoActive, this.onVideoActive);
+    }
+
+    private onVideoActive = (): void => this.updateShowWidgetInPip();
+
     public componentWillUnmount(): void {
         this.context.legacyCallHandler.removeListener(LegacyCallHandlerEvent.CallChangeRoom, this.updateCalls);
         this.context.legacyCallHandler.removeListener(LegacyCallHandlerEvent.CallState, this.updateCalls);
@@ -106,6 +120,7 @@ class PipContainerInner extends React.Component<IProps, IState> {
         ActiveWidgetStore.instance.off(ActiveWidgetStoreEvent.Persistence, this.onWidgetPersistence);
         ActiveWidgetStore.instance.off(ActiveWidgetStoreEvent.Dock, this.onWidgetDockChanges);
         ActiveWidgetStore.instance.off(ActiveWidgetStoreEvent.Undock, this.onWidgetDockChanges);
+        this.watchCall(null);
     }
 
     /**
@@ -229,7 +244,14 @@ class PipContainerInner extends React.Component<IProps, IState> {
         // pip container) if it is not visible on screen: either because we are
         // viewing a different room OR because it is in none of the possible
         // containers of the room view.
-        const showWidgetInPip = fromAnotherRoom || notDocked;
+        let showWidgetInPip = fromAnotherRoom || notDocked;
+
+        // A call's pip only has something to show while a camera or screen share is on, so keep it out of the way
+        // otherwise. The call itself keeps running.
+        const call = persistentRoomId ? CallStore.instance.getCall(persistentRoomId) : null;
+        const watched = call instanceof ElementCall && call.widget.id === persistentWidgetId ? call : null;
+        this.watchCall(watched);
+        if (watched && !watched.videoActive) showWidgetInPip = false;
 
         this.setState({ showWidgetInPip, persistentWidgetId, persistentRoomId });
     }

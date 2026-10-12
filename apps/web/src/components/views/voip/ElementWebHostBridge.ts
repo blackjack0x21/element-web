@@ -76,6 +76,10 @@ export class ElementWebHostBridge implements ElementCallHostBridge {
         this.call.handleDeviceMute(state);
     };
 
+    public readonly notifyVideoActive = async (active: boolean): Promise<void> => {
+        this.call.handleVideoActive(active);
+    };
+
     public readonly close = async (): Promise<void> => {
         this.call.handleClose();
     };

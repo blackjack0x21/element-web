@@ -43,6 +43,8 @@ export enum ElementWidgetActions {
     // NOTE: this is currently unused. Its only here to make EW aware
     // of this action so it does not throw errors.
     DeviceMute = "io.element.device_mute",
+    /** Sent by Element Call: whether any camera or screen share in the call is on. Data is `{ active: boolean }`. */
+    VideoActive = "io.element.video_active",
 
     // toWidget: sets the volume of Element Call's sound effects.
     // The data of the request is { volume: number }, from 0 (silent) to 1 (full).

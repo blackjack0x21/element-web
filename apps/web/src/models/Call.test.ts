@@ -994,6 +994,42 @@ describe("ElementCall", () => {
             expect(preventDefault).toHaveBeenCalled();
         });
 
+        it("tracks camera and screen share activity reported by Element Call", async () => {
+            await connect(call, widgetApi);
+            const onVideoActive = vi.fn();
+            call.on(CallEvent.VideoActive, onVideoActive);
+            // Assumed inactive until Element Call says otherwise
+            expect(call.videoActive).toBe(false);
+            widgetApi.emit(`action:${ElementWidgetActions.VideoActive}`, {
+                preventDefault: vi.fn(),
+                detail: { data: { active: true } },
+            });
+            expect(call.videoActive).toBe(true);
+            onVideoActive.mockClear();
+
+            const preventDefault = vi.fn();
+            widgetApi.emit(`action:${ElementWidgetActions.VideoActive}`, {
+                preventDefault,
+                detail: { data: { active: false } },
+            });
+            expect(widgetApi.transport.reply).toHaveBeenCalledWith({ data: { active: false } }, {});
+            expect(preventDefault).toHaveBeenCalled();
+            expect(call.videoActive).toBe(false);
+            expect(onVideoActive).toHaveBeenCalledWith(false);
+
+            // Repeated reports and malformed data change nothing
+            widgetApi.emit(`action:${ElementWidgetActions.VideoActive}`, {
+                preventDefault,
+                detail: { data: { active: false } },
+            });
+            widgetApi.emit(`action:${ElementWidgetActions.VideoActive}`, { preventDefault, detail: { data: {} } });
+            expect(onVideoActive).toHaveBeenCalledTimes(1);
+
+            call.handleVideoActive(true);
+            expect(call.videoActive).toBe(true);
+            expect(onVideoActive).toHaveBeenLastCalledWith(true);
+        });
+
         it("emits events when connection state changes", async () => {
             // const wait = vi.spyOn(CallModule, "waitForEvent");
             const onConnectionState = vi.fn();

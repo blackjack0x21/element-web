@@ -79,7 +79,12 @@
     flex: 0 0 auto;
 }
 
-/* Muted / deafened / camera-off buttons are tinted red so the state reads at a glance. */
-.active svg {
+/* Muted / deafened / camera-off buttons are red so the state reads at a glance. */
+.button.active {
+    background-color: var(--cpd-color-bg-critical-subtle);
     color: var(--cpd-color-icon-critical-primary);
+
+    svg {
+        color: var(--cpd-color-icon-critical-primary);
+    }
 }

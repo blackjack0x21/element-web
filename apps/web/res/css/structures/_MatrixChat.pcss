@@ -36,7 +36,10 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /* not the left panel, and not the resize handle, so the roomview and friends */
-.mx_MatrixChat > :not(.mx_LeftPanel):not(.mx_SpacePanel):not(.mx_ResizeHandle):not(.mx_LeftPanel_outerWrapper) {
+.mx_MatrixChat
+    > :not(.mx_LeftPanel):not(.mx_SpacePanel):not(.mx_ResizeHandle):not(.mx_LeftPanel_outerWrapper):not(
+        .mx_UserPanelOverlay
+    ) {
     background-color: $background;
 
     flex: 1 1 0;
@@ -67,4 +70,11 @@ Please see LICENSE files in the repository root for full details.
         background-color: $primary-content;
         opacity: 0.8;
     }
+}
+
+/* Floats over the bottom of the space panel and room list; LoggedInView's UserPanel sets its left and width. */
+.mx_UserPanelOverlay {
+    position: absolute;
+    bottom: 8px;
+    z-index: 2;
 }

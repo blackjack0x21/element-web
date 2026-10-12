@@ -34,6 +34,8 @@ export interface UserPanelCallSnapshot {
     deafened: boolean;
     /** Whether the camera is on. */
     cameraOn: boolean;
+    /** Whether the device has a camera. The camera button is disabled when it has none. */
+    cameraAvailable: boolean;
 }
 
 export interface UserPanelViewSnapshot {
@@ -77,10 +79,11 @@ interface PanelButtonProps {
     onClick: () => void;
     /** Highlights the button, used for the muted / deafened states. */
     active?: boolean;
+    disabled?: boolean;
     children: JSX.Element;
 }
 
-function PanelButton({ label, onClick, active, children }: PanelButtonProps): JSX.Element {
+function PanelButton({ label, onClick, active, disabled, children }: PanelButtonProps): JSX.Element {
     return (
         <Tooltip label={label}>
             <IconButton
@@ -88,6 +91,7 @@ function PanelButton({ label, onClick, active, children }: PanelButtonProps): JS
                 aria-label={label}
                 aria-pressed={active}
                 onClick={onClick}
+                disabled={disabled}
                 size="28px"
             >
                 {children}
@@ -117,11 +121,18 @@ export function UserPanelView({ vm, className }: UserPanelViewProps): JSX.Elemen
                             </Text>
                         </button>
                         <PanelButton
-                            label={call.cameraOn ? _t("user_panel|turn_camera_off") : _t("user_panel|turn_camera_on")}
+                            label={
+                                !call.cameraAvailable
+                                    ? _t("user_panel|no_camera")
+                                    : call.cameraOn
+                                      ? _t("user_panel|turn_camera_off")
+                                      : _t("user_panel|turn_camera_on")
+                            }
                             onClick={vm.toggleCamera}
-                            active={!call.cameraOn}
+                            active={call.cameraAvailable && !call.cameraOn}
+                            disabled={!call.cameraAvailable}
                         >
-                            {call.cameraOn ? <VideoCallSolidIcon /> : <VideoCallOffSolidIcon />}
+                            {call.cameraAvailable && call.cameraOn ? <VideoCallSolidIcon /> : <VideoCallOffSolidIcon />}
                         </PanelButton>
                         <PanelButton label={_t("user_panel|hang_up")} onClick={vm.hangUp}>
                             <EndCallIcon />

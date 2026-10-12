@@ -17,7 +17,8 @@ Please see LICENSE files in the repository root for full details.
     background-color: var(--mx-sidebar-background, var(--cpd-color-bg-canvas-default));
     border-right: 1px solid var(--cpd-color-bg-subtle-primary);
     flex: 0 0 auto;
-    padding: 0;
+    /* Leave room for the floating user panel */
+    padding: 0 0 var(--mx-user-panel-inset, 0px);
     margin: 0;
     position: relative;
     /* Fix for the blurred avatar-background */

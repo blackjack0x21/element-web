@@ -48,6 +48,7 @@ describe("UserPanelViewModel", () => {
     let client: MatrixClient;
     let ownProfileStore: OwnProfileStore & EventEmitter;
     let callStore: CallStore & EventEmitter;
+    let hasCamera: () => Promise<boolean>;
     let dispatcher: { dispatch: ReturnType<typeof vi.fn> };
 
     const mkVm = (): UserPanelViewModel =>
@@ -55,6 +56,7 @@ describe("UserPanelViewModel", () => {
             client,
             ownProfileStore,
             callStore,
+            hasCamera,
             dispatcher: dispatcher as unknown as MatrixDispatcher,
         });
 
@@ -77,6 +79,7 @@ describe("UserPanelViewModel", () => {
         callStore = Object.assign(new EventEmitter(), { connectedCalls: new Set() }) as unknown as CallStore &
             EventEmitter;
         dispatcher = { dispatch: vi.fn() };
+        hasCamera = vi.fn().mockResolvedValue(true);
     });
 
     it("shows the profile and no call initially", () => {
@@ -105,6 +108,7 @@ describe("UserPanelViewModel", () => {
             microphoneMuted: false,
             deafened: false,
             cameraOn: true,
+            cameraAvailable: true,
         });
         connect(null);
         expect(vm.getSnapshot().call).toBeUndefined();
@@ -119,6 +123,31 @@ describe("UserPanelViewModel", () => {
         call.deviceMute = state;
         call.emit(CallEvent.DeviceMute, state);
         expect(vm.getSnapshot().call).toMatchObject({ microphoneMuted: true, deafened: true, cameraOn: false });
+    });
+
+    it("marks the camera as unavailable when the device has none", async () => {
+        hasCamera = vi.fn().mockResolvedValue(false);
+        connect(mkCall());
+        const vm = mkVm();
+        await vi.waitFor(() => expect(vm.getSnapshot().call?.cameraAvailable).toBe(false));
+    });
+
+    it("looks for a camera again when devices change", async () => {
+        const mediaDevices = new EventTarget();
+        vi.stubGlobal("navigator", { mediaDevices });
+        hasCamera = vi.fn().mockResolvedValueOnce(true).mockResolvedValue(false);
+        connect(mkCall());
+        const vm = mkVm();
+        await vi.waitFor(() => expect(hasCamera).toHaveBeenCalledTimes(1));
+        expect(vm.getSnapshot().call?.cameraAvailable).toBe(true);
+
+        mediaDevices.dispatchEvent(new Event("devicechange"));
+        await vi.waitFor(() => expect(vm.getSnapshot().call?.cameraAvailable).toBe(false));
+
+        vm.dispose();
+        mediaDevices.dispatchEvent(new Event("devicechange"));
+        expect(hasCamera).toHaveBeenCalledTimes(2);
+        vi.unstubAllGlobals();
     });
 
     it("forwards the controls to the call", () => {

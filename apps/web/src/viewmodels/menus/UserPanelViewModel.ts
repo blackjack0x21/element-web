@@ -19,12 +19,20 @@ import { CallStore, CallStoreEvent } from "../../stores/CallStore";
 import { CallEvent, ElementCall } from "../../models/Call";
 import type { MatrixDispatcher } from "../../dispatcher/dispatcher";
 import { Action } from "../../dispatcher/actions";
+import MediaDeviceHandler, { MediaDeviceKindEnum } from "../../MediaDeviceHandler";
 
 interface UserPanelViewModelProps {
     client: MatrixClient;
     ownProfileStore: OwnProfileStore;
     dispatcher: MatrixDispatcher;
     callStore?: CallStore;
+    /** Whether the device has a camera. Defaults to asking the browser. */
+    hasCamera?: () => Promise<boolean>;
+}
+
+async function browserHasCamera(): Promise<boolean> {
+    const devices = await MediaDeviceHandler.getDevices();
+    return (devices?.[MediaDeviceKindEnum.VideoInput].length ?? 0) > 0;
 }
 
 /**
@@ -38,6 +46,7 @@ export class UserPanelViewModel
     private readonly callStore: CallStore;
     /** The call whose controls are shown, together with the listeners attached to it. */
     private call: ElementCall | null = null;
+    private cameraAvailable = true;
 
     public constructor(props: UserPanelViewModelProps) {
         const callStore = props.callStore ?? CallStore.instance;
@@ -48,7 +57,24 @@ export class UserPanelViewModel
         this.disposables.trackListener(this.callStore, CallStoreEvent.ConnectedCalls, this.onConnectedCalls);
         this.disposables.track(() => this.watchCall(null));
         this.watchCall(UserPanelViewModel.findCall(callStore));
+
+        // Plugging in or removing a camera changes whether the camera button can be used
+        const mediaDevices = navigator.mediaDevices as MediaDevices | undefined;
+        mediaDevices?.addEventListener?.("devicechange", this.refreshCamera);
+        this.disposables.track(() => mediaDevices?.removeEventListener?.("devicechange", this.refreshCamera));
+        this.refreshCamera();
     }
+
+    private readonly refreshCamera = (): void => {
+        (this.props.hasCamera ?? browserHasCamera)().then(
+            (available) => {
+                if (this.isDisposed || available === this.cameraAvailable) return;
+                this.cameraAvailable = available;
+                this.onDeviceMute();
+            },
+            (e) => logger.warn("User panel: failed to look for a camera", e),
+        );
+    };
 
     private static findCall(callStore: CallStore): ElementCall | null {
         for (const call of callStore.connectedCalls) {
@@ -65,11 +91,15 @@ export class UserPanelViewModel
             displayName: ownProfileStore.displayName || userId,
             avatarUrl: ownProfileStore.getHttpAvatarUrl(64) ?? undefined,
             userStatus: ownProfileStore.userStatus,
-            call: call ? UserPanelViewModel.computeCall(client, call) : undefined,
+            call: call ? UserPanelViewModel.computeCall(client, call, true) : undefined,
         };
     }
 
-    private static computeCall(client: MatrixClient, call: ElementCall): UserPanelViewSnapshot["call"] {
+    private static computeCall(
+        client: MatrixClient,
+        call: ElementCall,
+        cameraAvailable: boolean,
+    ): UserPanelViewSnapshot["call"] {
         const { audio_enabled, video_enabled, deafened } = call.deviceMute;
         return {
             roomName: client.getRoom(call.roomId)?.name ?? call.roomId,
@@ -77,6 +107,7 @@ export class UserPanelViewModel
             microphoneMuted: !audio_enabled || deafened === true,
             deafened: deafened === true,
             cameraOn: video_enabled,
+            cameraAvailable,
         };
     }
 
@@ -101,12 +132,16 @@ export class UserPanelViewModel
     private readonly onConnectedCalls = (): void => {
         const call = UserPanelViewModel.findCall(this.callStore);
         this.watchCall(call);
-        this.snapshot.merge({ call: call ? UserPanelViewModel.computeCall(this.props.client, call) : undefined });
+        this.snapshot.merge({
+            call: call ? UserPanelViewModel.computeCall(this.props.client, call, this.cameraAvailable) : undefined,
+        });
     };
 
     private readonly onDeviceMute = (): void => {
         if (!this.call) return;
-        this.snapshot.merge({ call: UserPanelViewModel.computeCall(this.props.client, this.call) });
+        this.snapshot.merge({
+            call: UserPanelViewModel.computeCall(this.props.client, this.call, this.cameraAvailable),
+        });
     };
 
     private runOnCall(name: string, action: (call: ElementCall) => Promise<void>): void {

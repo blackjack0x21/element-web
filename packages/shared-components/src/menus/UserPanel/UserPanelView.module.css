@@ -9,9 +9,10 @@
     flex: 0 0 auto;
     display: flex;
     flex-direction: column;
-    margin: var(--cpd-space-2x);
-    border-radius: var(--cpd-space-3x);
+    border-radius: 8px;
+    border: 1px solid var(--cpd-color-border-disabled);
     background-color: var(--cpd-color-bg-subtle-secondary);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 25%);
     overflow: hidden;
 }
 

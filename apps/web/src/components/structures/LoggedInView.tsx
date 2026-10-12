@@ -34,6 +34,7 @@ import { SettingLevel } from "../../settings/SettingLevel";
 import PlatformPeg from "../../PlatformPeg";
 import { hideToast as hideServerLimitToast, showToast as showServerLimitToast } from "../../toasts/ServerLimitToast";
 import { Action } from "../../dispatcher/actions";
+import { UserPanel } from "../views/rooms/UserPanel/UserPanel";
 import LeftPanel from "./LeftPanel";
 import { type ViewRoomDeltaPayload } from "../../dispatcher/payloads/ViewRoomDeltaPayload";
 import RoomListStoreV3 from "../../stores/room-list-v3/RoomListStoreV3";
@@ -734,7 +735,10 @@ class LoggedInView extends React.Component<IProps, IState> {
                     aria-hidden={this.props.hideToSRUsers}
                 >
                     <ToastContainer />
-                    <div className={bodyClasses}>{content}</div>
+                    <div className={bodyClasses}>
+                        {content}
+                        {!moduleRenderer && <UserPanel />}
+                    </div>
                 </div>
                 <PipContainer />
                 <NonUrgentToastContainer />

@@ -23,7 +23,13 @@ class MockUserPanelViewModel extends MockViewModel<UserPanelViewSnapshot> implem
 }
 
 const base: UserPanelViewSnapshot = { userId: "@sally:example.org", displayName: "Sally" };
-const call = { roomName: "Design chat", microphoneMuted: false, deafened: false, cameraOn: true };
+const call = {
+    roomName: "Design chat",
+    microphoneMuted: false,
+    deafened: false,
+    cameraOn: true,
+    cameraAvailable: true,
+};
 
 describe("UserPanelView", () => {
     it("shows only the profile and settings when not in a call", async () => {
@@ -62,6 +68,16 @@ describe("UserPanelView", () => {
         expect(vm.toggleCamera).toHaveBeenCalled();
         expect(vm.hangUp).toHaveBeenCalled();
         expect(vm.openCallRoom).toHaveBeenCalled();
+    });
+
+    it("disables the camera button when there is no camera", async () => {
+        const vm = new MockUserPanelViewModel({ ...base, call: { ...call, cameraAvailable: false } });
+        render(<UserPanelView vm={vm} />);
+
+        const button = screen.getByRole("button", { name: "No camera available" });
+        expect(button).toBeDisabled();
+        await userEvent.click(button);
+        expect(vm.toggleCamera).not.toHaveBeenCalled();
     });
 
     it("offers the opposite action when muted, deafened and the camera is off", () => {

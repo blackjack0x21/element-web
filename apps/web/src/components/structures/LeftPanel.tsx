@@ -12,7 +12,6 @@ import classNames from "classnames";
 import type ResizeNotifier from "../../utils/ResizeNotifier";
 import { type SpaceKey, UPDATE_SELECTED_SPACE } from "../../stores/spaces";
 import { RoomListPanel } from "../views/rooms/RoomListPanel";
-import { UserPanel } from "../views/rooms/UserPanel/UserPanel";
 import { SDKContext } from "../../contexts/SDKContext.ts";
 
 interface IProps {
@@ -58,7 +57,6 @@ export default class LeftPanel extends React.Component<IProps, IState> {
             <div className={containerClasses}>
                 <div className="mx_LeftPanel_roomListContainer">
                     <RoomListPanel activeSpace={this.state.activeSpace} />
-                    <UserPanel />
                 </div>
             </div>
         );

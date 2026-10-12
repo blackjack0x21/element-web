@@ -52,13 +52,25 @@ export const WithStatus: Story = {
 
 export const InCall: Story = {
     args: {
-        call: { roomName: "Design chat", microphoneMuted: false, deafened: false, cameraOn: false },
+        call: {
+            roomName: "Design chat",
+            microphoneMuted: false,
+            deafened: false,
+            cameraOn: false,
+            cameraAvailable: true,
+        },
     },
 };
 
 export const Muted: Story = {
     args: {
-        call: { roomName: "Design chat", microphoneMuted: true, deafened: false, cameraOn: true },
+        call: {
+            roomName: "Design chat",
+            microphoneMuted: true,
+            deafened: false,
+            cameraOn: true,
+            cameraAvailable: true,
+        },
     },
 };
 
@@ -69,6 +81,18 @@ export const Deafened: Story = {
             microphoneMuted: true,
             deafened: true,
             cameraOn: false,
+        },
+    },
+};
+
+export const NoCamera: Story = {
+    args: {
+        call: {
+            roomName: "Design chat",
+            microphoneMuted: false,
+            deafened: false,
+            cameraOn: false,
+            cameraAvailable: false,
         },
     },
 };

@@ -303,6 +303,9 @@ const InnerSpacePanel = React.memo<IInnerSpacePanelProps>(
                 aria-label={_t("common|spaces")}
             >
                 {metaSpacesSection}
+                {(invites.length > 0 || actualSpaces.length > 0) && (
+                    <li className="mx_SpacePanel_separator" role="presentation" aria-hidden="true" />
+                )}
                 {invites.map((s) => (
                     <SpaceItem
                         key={s.roomId}

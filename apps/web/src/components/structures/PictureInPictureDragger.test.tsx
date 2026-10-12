@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import { vi, describe, it, expect, beforeEach, type Mock } from "vitest";
 import React, { type MouseEventHandler } from "react";
-import { screen, render, type RenderResult } from "test-utils-rtl";
+import { screen, render, fireEvent, type RenderResult } from "test-utils-rtl";
 import userEvent from "@testing-library/user-event";
 
 import PictureInPictureDragger, { type CreatePipChildren } from "./PictureInPictureDragger";
@@ -93,6 +93,11 @@ describe("PictureInPictureDragger", () => {
                 </PictureInPictureDragger>,
             );
             target = screen.getByText("Hello");
+        });
+
+        it("and pressing the mouse down, it should not start a text selection", () => {
+            // fireEvent returns false when the default action was cancelled
+            expect(fireEvent.mouseDown(target)).toBe(false);
         });
 
         it("and clicking without a drag motion, it should pass the click to children", async () => {

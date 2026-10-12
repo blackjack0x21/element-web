@@ -179,6 +179,9 @@ export default class PictureInPictureDragger extends React.Component<IProps> {
     };
 
     private onStartMoving = (event: React.MouseEvent | MouseEvent): void => {
+        // Stops the browser starting a text selection from here, which a fast drag (the pointer outrunning the
+        // pip) would otherwise extend over whatever the pointer passes.
+        event.preventDefault();
         this.mouseHeld = true;
         this.startingPositionX = event.clientX;
         this.startingPositionY = event.clientY;

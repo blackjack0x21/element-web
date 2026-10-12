@@ -1186,6 +1186,24 @@ describe("ElementCall", () => {
             expect(call.connectionState).toBe(ConnectionState.Connected);
         });
 
+        it("notices the user leaving when Element Call stops asking to stay on screen", async () => {
+            await connect(call, widgetApi);
+            expect(call.connectionState).toBe(ConnectionState.Connected);
+
+            // Element Call asks to stay on screen only while joined, and does not always send a hangup as well
+            const alwaysOnScreen = (value: boolean): CustomEvent =>
+                new CustomEvent("widgetapirequest", { detail: { data: { value } } });
+            widgetApi.emit("action:set_always_on_screen", alwaysOnScreen(true));
+            expect(call.connectionState).toBe(ConnectionState.Connected);
+
+            widgetApi.emit("action:set_always_on_screen", alwaysOnScreen(false));
+            expect(call.connectionState).toBe(ConnectionState.Disconnected);
+
+            // And the call can be joined again afterwards
+            await connect(call, widgetApi, false);
+            await waitFor(() => expect(call.connectionState).toBe(ConnectionState.Connected), { interval: 5 });
+        });
+
         it("can be joined again after leaving through disconnect()", async () => {
             await connect(call, widgetApi);
             const onClose = vi.fn();

@@ -19,7 +19,12 @@ import { KnownMembership, type Membership } from "matrix-js-sdk/src/types";
 import { logger as rootLogger } from "matrix-js-sdk/src/logger";
 import { secureRandomString } from "matrix-js-sdk/src/randomstring";
 import { CallType } from "matrix-js-sdk/src/webrtc/call";
-import { type IWidgetApiRequest, type ClientWidgetApi, type IWidgetData } from "matrix-widget-api";
+import {
+    type IWidgetApiRequest,
+    type ClientWidgetApi,
+    type IWidgetData,
+    WidgetApiFromWidgetAction,
+} from "matrix-widget-api";
 import {
     type MatrixRTCSession,
     MatrixRTCSessionEvent,
@@ -1113,6 +1118,7 @@ export class ElementCall extends Call {
         widgetApi.on(`action:${ElementWidgetActions.Close}`, this.onClose);
         widgetApi.on(`action:${ElementWidgetActions.DeviceMute}`, this.onDeviceMute);
         widgetApi.on(`action:${ElementWidgetActions.VideoActive}`, this.onVideoActive);
+        widgetApi.on(`action:${WidgetApiFromWidgetAction.UpdateAlwaysOnScreen}`, this.onAlwaysOnScreen);
     }
 
     private detachWidgetListeners(widgetApi: ClientWidgetApi): void {
@@ -1121,6 +1127,7 @@ export class ElementCall extends Call {
         widgetApi.off(`action:${ElementWidgetActions.Close}`, this.onClose);
         widgetApi.off(`action:${ElementWidgetActions.DeviceMute}`, this.onDeviceMute);
         widgetApi.off(`action:${ElementWidgetActions.VideoActive}`, this.onVideoActive);
+        widgetApi.off(`action:${WidgetApiFromWidgetAction.UpdateAlwaysOnScreen}`, this.onAlwaysOnScreen);
     }
 
     protected onWidgetApiReplaced(previous: ClientWidgetApi | null, next: ClientWidgetApi): void {
@@ -1287,6 +1294,22 @@ export class ElementCall extends Call {
         if (this.connectionState === ConnectionState.Disconnecting) return;
         this.setDisconnected();
     }
+
+    /**
+     * Element Call asks to be kept on screen (`setAlwaysOnScreen`) exactly while it is joined, and stops asking
+     * when the user leaves. It only sends a hangup as well while its call view is still alive, which it no longer
+     * is after the user leaves with its own button. So asking to stop means the user has left.
+     */
+    public handleAlwaysOnScreen(alwaysOnScreen: boolean): void {
+        if (alwaysOnScreen || this.connectionState !== ConnectionState.Connected) return;
+        this.debug("stopped asking to stay on screen, treating it as a hangup");
+        this.handleHangup();
+    }
+
+    private readonly onAlwaysOnScreen = (ev: CustomEvent<IWidgetApiRequest>): void => {
+        // Not acknowledged here: the widget messaging handles the request itself
+        this.handleAlwaysOnScreen(ev.detail.data?.value === true);
+    };
 
     /** Element Call wants to be dismissed (`HostBridge.close` / `io.element.close`). */
     public handleClose(): void {

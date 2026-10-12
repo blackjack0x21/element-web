@@ -26,6 +26,7 @@ describe("ElementWebHostBridge", () => {
         handleHangup: ReturnType<typeof vi.fn>;
         handleClose: ReturnType<typeof vi.fn>;
         handleDeviceMute: ReturnType<typeof vi.fn>;
+        handleAlwaysOnScreen: ReturnType<typeof vi.fn>;
     };
     let setWidgetPersistence: ReturnType<typeof vi.spyOn>;
     let bridge: ElementWebHostBridge;
@@ -38,6 +39,7 @@ describe("ElementWebHostBridge", () => {
             handleHangup: vi.fn(),
             handleClose: vi.fn(),
             handleDeviceMute: vi.fn(),
+            handleAlwaysOnScreen: vi.fn(),
         };
         setWidgetPersistence = vi
             .spyOn(ActiveWidgetStore.instance, "setWidgetPersistence")
@@ -69,6 +71,11 @@ describe("ElementWebHostBridge", () => {
         expect(call.handleClose).toHaveBeenCalled();
         await notifyJoined();
         expect(call.handleJoined).toHaveBeenCalled();
+    });
+
+    it("tells the call when Element Call stops asking to stay on screen", async () => {
+        await bridge.setAlwaysOnScreen(false);
+        expect(call.handleAlwaysOnScreen).toHaveBeenCalledWith(false);
     });
 
     it("sets persistence when asked to stay on screen", async () => {

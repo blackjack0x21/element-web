@@ -46,6 +46,8 @@ export class ElementWebHostBridge implements ElementCallHostBridge {
     ) {}
 
     public readonly setAlwaysOnScreen = async (alwaysOnScreen: boolean): Promise<void> => {
+        this.call.handleAlwaysOnScreen(alwaysOnScreen);
+
         // Only one call can be on screen. Before this one becomes sticky, hang up every other connected
         // call, as `CallView`'s stickyPromise does for the iframe embedding (through WidgetMessaging's
         // UpdateAlwaysOnScreen handling).

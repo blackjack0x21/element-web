@@ -458,7 +458,7 @@ describe("RoomViewStore", function () {
         expect(call.presented).toEqual(true);
     });
 
-    it("opens a voice-intent call directly in picture-in-picture rather than maximised", async () => {
+    it("opens a voice-intent call maximised in the room too", async () => {
         const call = {
             presented: false,
             connectionState: ConnectionState.Disconnected,
@@ -478,12 +478,9 @@ describe("RoomViewStore", function () {
         });
         await untilDispatch(Action.ViewRoom, dis);
 
-        // The call is started and marked persistent so it renders in the PiP container...
-        expect(call.presented).toEqual(true);
-        expect(persistenceSpy).toHaveBeenCalledWith("!widget:example.org", roomId, true);
+        expect(persistenceSpy).not.toHaveBeenCalled();
         expect(call.start).toHaveBeenCalledWith(expect.objectContaining({ voiceOnly: true }));
-        // ...but the room is not switched to the maximised call view.
-        expect(roomViewStore.isViewingCall()).toEqual(false);
+        expect(roomViewStore.isViewingCall()).toEqual(true);
     });
 
     it("opens a video-intent call maximised in the room", async () => {

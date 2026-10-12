@@ -55,7 +55,6 @@ import { setMarkedUnreadState } from "../utils/notifications";
 import { ConnectionState, ElementCall } from "../models/Call";
 import { isVideoRoom } from "../utils/video-rooms";
 import { ModuleApi } from "../modules/Api";
-import ActiveWidgetStore from "./ActiveWidgetStore";
 
 const NUM_JOIN_RETRY = 5;
 
@@ -382,11 +381,6 @@ export class RoomViewStore extends EventEmitter {
                     call = CallStore.instance.getCall(payload.room_id)!;
                 }
 
-                // Custom case where we start voice calls in pip
-                if (payload.voiceOnly ?? false) {
-                    viewingCall = false;
-                    ActiveWidgetStore.instance.setWidgetPersistence(call.widget.id, room.roomId, true);
-                }
                 call.presented = true;
                 // Immediately start the call. This will connect to all required widget events
                 // and allow the widget to show the lobby.

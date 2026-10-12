@@ -1005,6 +1005,8 @@ describe("ElementCall", () => {
         });
 
         it("tracks camera and screen share activity reported by Element Call", async () => {
+            // Until the user has joined, the widget has to stay on screen in order to start
+            expect(call.videoActive).toBe(true);
             await connect(call, widgetApi);
             const onVideoActive = vi.fn();
             call.on(CallEvent.VideoActive, onVideoActive);
@@ -1014,8 +1016,6 @@ describe("ElementCall", () => {
                 preventDefault: vi.fn(),
                 detail: { data: { active: true } },
             });
-            expect(call.videoActive).toBe(true);
-            // Until the user has joined, the widget has to stay on screen in order to start
             expect(call.videoActive).toBe(true);
             onVideoActive.mockClear();
 

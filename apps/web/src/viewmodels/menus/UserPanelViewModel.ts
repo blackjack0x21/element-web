@@ -164,6 +164,9 @@ export class UserPanelViewModel
 
     private readonly onConnectedCalls = (): void => {
         const call = UserPanelViewModel.findCall(this.callStore);
+        logger.info(
+            `[CallDebug] user panel: store lists ${this.callStore.connectedCalls.size} connected call(s), showing ${call?.roomId ?? "none"}`,
+        );
         this.watchCall(call);
         this.snapshot.merge({
             call: call ? UserPanelViewModel.computeCall(this.props.client, call, this.cameraAvailable) : undefined,

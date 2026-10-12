@@ -151,11 +151,20 @@ export abstract class Call extends TypedEventEmitter<CallEvent, CallEventHandler
         return this._widgetApi;
     }
     private set widgetApi(value: ClientWidgetApi | null) {
+        this.debug(
+            `widgetApi ${value ? "set" : "cleared"}${value && value !== this._widgetApi ? " (new instance)" : ""}`,
+        );
         this._widgetApi = value;
     }
 
     public get roomId(): string {
         return this.widget.roomId;
+    }
+
+    /** TEMPORARY: traces the call's life cycle while hunting an intermittent join problem. */
+    protected debug(message: string, withStack = false): void {
+        const stack = withStack ? ` | ${new Error().stack?.split("\n").slice(3, 7).join(" <- ")}` : "";
+        logger.info(`[CallDebug] ${this.widget?.roomId} ${message} (state=${this._connectionState})${stack}`);
     }
 
     private _connectionState = ConnectionState.Disconnected;
@@ -291,6 +300,7 @@ export abstract class Call extends TypedEventEmitter<CallEvent, CallEventHandler
     }
 
     protected setConnected(): void {
+        this.debug("setConnected");
         this.room.on(RoomEvent.MyMembership, this.onMyMembership);
         window.addEventListener("beforeunload", this.beforeUnload);
         this.connectionState = ConnectionState.Connected;
@@ -300,6 +310,7 @@ export abstract class Call extends TypedEventEmitter<CallEvent, CallEventHandler
      * Manually marks the call as disconnected.
      */
     protected setDisconnected(): void {
+        this.debug("setDisconnected", true);
         this.room.off(RoomEvent.MyMembership, this.onMyMembership);
         window.removeEventListener("beforeunload", this.beforeUnload);
         this.connectionState = ConnectionState.Disconnected;
@@ -323,6 +334,7 @@ export abstract class Call extends TypedEventEmitter<CallEvent, CallEventHandler
      * Stops further communication with the widget and tells the UI to close.
      */
     protected close(): void {
+        this.debug("close (base)", true);
         this.widgetApi = null;
         this.emit(CallEvent.Close);
     }
@@ -344,6 +356,7 @@ export abstract class Call extends TypedEventEmitter<CallEvent, CallEventHandler
     };
 
     private readonly onStopMessaging = (uid: string): void => {
+        if (uid === this.widgetUid) this.debug("widget messaging stopped");
         if (uid === this.widgetUid && this.connected) {
             logger.debug("The widget died; treating this as a user hangup");
             this.setDisconnected();
@@ -1048,7 +1061,9 @@ export class ElementCall extends Call {
             this.roomId,
             this.widgetGenerationParameters,
         ).toString();
+        this.debug("ElementCall.start: waiting for widget messaging");
         const widgetApi = (await super.start())!;
+        this.debug("ElementCall.start: attaching join/hangup/close listeners");
         widgetApi.on(`action:${ElementWidgetActions.JoinCall}`, this.onJoin);
         widgetApi.on(`action:${ElementWidgetActions.HangupCall}`, this.onHangup);
         widgetApi.on(`action:${ElementWidgetActions.Close}`, this.onClose);
@@ -1127,6 +1142,7 @@ export class ElementCall extends Call {
     }
 
     public close(): void {
+        this.debug("ElementCall.close: detaching listeners", true);
         if (this.widgetApi) {
             this.widgetApi.off(`action:${ElementWidgetActions.JoinCall}`, this.onJoin);
             this.widgetApi.off(`action:${ElementWidgetActions.HangupCall}`, this.onHangup);
@@ -1210,11 +1226,13 @@ export class ElementCall extends Call {
 
     /** The user has joined the call (`HostBridge.notifyJoined` / `io.element.join`). */
     public handleJoined(): void {
+        this.debug("handleJoined");
         this.setConnected();
     }
 
     /** The user has hung up (`HostBridge.notifyHungUp` / `im.vector.hangup`). */
     public handleHangup(): void {
+        this.debug("handleHangup");
         // If we're already in the middle of a client-initiated disconnection, ignore the event
         if (this.connectionState === ConnectionState.Disconnecting) return;
         this.setDisconnected();
@@ -1222,6 +1240,7 @@ export class ElementCall extends Call {
 
     /** Element Call wants to be dismissed (`HostBridge.close` / `io.element.close`). */
     public handleClose(): void {
+        this.debug("handleClose");
         this.setDisconnected(); // Just in case the widget forgot to emit a hangup action (maybe it's in an error state)
         this.close(); // User is done with the call; tell the UI to close it
     }

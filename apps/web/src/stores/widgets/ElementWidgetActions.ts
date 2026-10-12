@@ -49,6 +49,8 @@ export enum ElementWidgetActions {
     // toWidget: sets the volume of Element Call's sound effects.
     // The data of the request is { volume: number }, from 0 (silent) to 1 (full).
     SoundEffectVolume = "io.element.sound_effect_volume",
+    /** Sent to Element Call: whether it is shown as a small floating window, where it shows nothing but video. */
+    Pip = "io.element.pip",
 }
 
 export interface IHangupCallApiRequest extends IWidgetApiRequest {

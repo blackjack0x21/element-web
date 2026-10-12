@@ -103,6 +103,7 @@ export enum CallEvent {
     CallTypeChanged = "call_type_changed",
     DeviceMute = "device_mute",
     VideoActive = "video_active",
+    Pip = "pip",
 }
 
 interface CallEventHandlerMap {
@@ -116,6 +117,7 @@ interface CallEventHandlerMap {
     [CallEvent.CallTypeChanged]: (callType: CallType) => void;
     [CallEvent.DeviceMute]: (state: DeviceMuteState) => void;
     [CallEvent.VideoActive]: (active: boolean) => void;
+    [CallEvent.Pip]: (pip: boolean) => void;
 }
 
 /**
@@ -1051,6 +1053,7 @@ export class ElementCall extends Call {
         widgetApi.on(`action:${ElementWidgetActions.DeviceMute}`, this.onDeviceMute);
         widgetApi.on(`action:${ElementWidgetActions.VideoActive}`, this.onVideoActive);
         void this.sendSoundEffectVolume();
+        void this.sendPip();
         return widgetApi;
     }
 
@@ -1234,6 +1237,29 @@ export class ElementCall extends Call {
             logger.warn("Failed to set the Element Call sound effect volume", e);
         }
     };
+
+    private _pip = false;
+    /** Whether the call is shown as a small floating window, where Element Call shows nothing but video. */
+    public get pip(): boolean {
+        return this._pip;
+    }
+
+    public set pip(value: boolean) {
+        if (value === this._pip) return;
+        this._pip = value;
+        this.emit(CallEvent.Pip, value);
+        void this.sendPip();
+    }
+
+    /** Tells a widget-embedded Element Call about {@link pip}. The React component takes it as a prop instead. */
+    private async sendPip(): Promise<void> {
+        if (this.componentHandle !== null || this.widgetApi === null) return;
+        try {
+            await this.widgetApi.transport.send(ElementWidgetActions.Pip, { enabled: this._pip });
+        } catch (e) {
+            logger.warn("Failed to tell Element Call whether it is in a pip", e);
+        }
+    }
 
     /** The last mute state Element Call reported, or null before it has reported one. */
     private deviceMuteState: DeviceMuteState | null = null;

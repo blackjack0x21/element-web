@@ -994,6 +994,16 @@ describe("ElementCall", () => {
             expect(preventDefault).toHaveBeenCalled();
         });
 
+        it("tells Element Call when it is shown in a pip", async () => {
+            await connect(call, widgetApi);
+            // The state is sent along with the connection
+            expect(widgetApi.transport.send).toHaveBeenCalledWith(ElementWidgetActions.Pip, { enabled: false });
+
+            call.pip = true;
+            expect(widgetApi.transport.send).toHaveBeenLastCalledWith(ElementWidgetActions.Pip, { enabled: true });
+            expect(call.pip).toBe(true);
+        });
+
         it("tracks camera and screen share activity reported by Element Call", async () => {
             await connect(call, widgetApi);
             const onVideoActive = vi.fn();

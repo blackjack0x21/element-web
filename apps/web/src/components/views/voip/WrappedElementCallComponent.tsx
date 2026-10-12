@@ -5,12 +5,13 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { type FC, lazy, Suspense, useEffect, useMemo } from "react";
+import React, { type FC, lazy, Suspense, useCallback, useEffect, useMemo } from "react";
 import { type MatrixClient } from "matrix-js-sdk/src/matrix";
 // Type-only: the component itself is loaded lazily below
 import type * as ElementCallComponent from "@element-hq/element-call-component";
 
-import { ElementCall as ElementCallModel } from "../../../models/Call";
+import { CallEvent, ElementCall as ElementCallModel } from "../../../models/Call";
+import { useTypedEventEmitterState } from "../../../hooks/useEventEmitter";
 import { CallStore } from "../../../stores/CallStore";
 import { useSettingValue } from "../../../hooks/useSettings";
 import { getCurrentLanguage } from "../../../languageHandler";
@@ -85,6 +86,11 @@ export const WrappedElementCallComponent: FC<{ call: ElementCallModel; client: M
     const ElementCall = useSettingValue("Developer.elementCallMockComponent") ? MockElementCall : RealElementCall;
     const { effectiveTheme: theme } = useTheme();
     const soundEffectVolume = useSettingValue("callSoundEffectsVolume");
+    const pip = useTypedEventEmitterState(
+        call,
+        CallEvent.Pip,
+        useCallback((value?: boolean) => value ?? call.pip, [call]),
+    );
     // Not a hook: changing the language reloads Element Web, so there is no live change to follow
     const language = getCurrentLanguage().replace("_", "-");
     const bridge = useMemo(
@@ -104,6 +110,7 @@ export const WrappedElementCallComponent: FC<{ call: ElementCallModel; client: M
                 ref={call.setComponentHandle}
                 theme={theme}
                 soundEffectVolume={soundEffectVolume}
+                pip={pip}
                 language={language}
             />
             <MarkReadyOnMount call={call} />

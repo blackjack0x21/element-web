@@ -10,8 +10,36 @@ import React, { type JSX } from "react";
 import { fn } from "storybook/test";
 
 import { UserPanelView, type UserPanelViewActions, type UserPanelViewSnapshot } from "./UserPanelView";
-import { useMockedViewModel } from "../../core/viewmodel";
+import { MockViewModel, useMockedViewModel } from "../../core/viewmodel";
+import { type UserMenuViewActions, type UserMenuViewSnapshot } from "../UserMenu/UserMenu";
+import { type SetStatusViewSnapshot } from "../../status/SetStatusView";
 import { withViewDocs } from "../../../.storybook/withViewDocs";
+
+class MockSetStatusViewModel extends MockViewModel<SetStatusViewSnapshot> {
+    public setStatus = fn();
+    public clearStatus = fn();
+}
+
+class MockUserMenuViewModel extends MockViewModel<UserMenuViewSnapshot> implements UserMenuViewActions {
+    public setOpen = fn();
+    public createAccount = fn();
+    public signIn = fn();
+    public openHomePage = fn();
+    public linkNewDevice = fn();
+    public openSecurity = fn();
+    public openFeedback = fn();
+    public openSettings = fn();
+    public clearStatus = fn();
+}
+
+const userMenuViewModel = new MockUserMenuViewModel({
+    open: false,
+    expanded: true,
+    displayName: "Sally Sanderson",
+    userId: "@sally:homeserver.com",
+    setStatusViewModel: new MockSetStatusViewModel({ userStatus: undefined } as SetStatusViewSnapshot),
+    actions: { linkNewDevice: true, openSecurity: true, openFeedback: true, openSettings: true },
+});
 
 const UserPanelWrapperImpl = (snapshot: UserPanelViewSnapshot): JSX.Element => {
     const vm = useMockedViewModel<UserPanelViewSnapshot, UserPanelViewActions>(snapshot, {
@@ -38,6 +66,7 @@ const meta = {
     args: {
         displayName: "Sally Sanderson",
         userId: "@sally:homeserver.com",
+        userMenuViewModel,
     },
 } satisfies Meta<typeof UserPanelWrapper>;
 

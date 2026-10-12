@@ -120,9 +120,24 @@ export type UserMenuViewProps = {
      * Class name for the wrapper
      */
     className?: string;
+    /**
+     * Replaces the default avatar button as the element that opens the menu. It must be a single
+     * focusable element. The default wrapper spacing and the display name are dropped with it.
+     */
+    trigger?: JSX.Element;
+    /**
+     * Which side of the trigger the menu opens on.
+     * Default: "right"
+     */
+    side?: "top" | "right";
 };
 
-export function UserMenuView({ vm, className }: UserMenuViewProps): JSX.Element {
+export function UserMenuView({
+    vm,
+    className,
+    trigger: customTrigger,
+    side = "right",
+}: UserMenuViewProps): JSX.Element {
     const {
         userId,
         displayName,
@@ -136,7 +151,7 @@ export function UserMenuView({ vm, className }: UserMenuViewProps): JSX.Element 
         showUserStatus = true,
     } = useViewModel(vm);
     const { translate: _t } = useI18n();
-    const trigger = (
+    const trigger = customTrigger ?? (
         <button className={styles.triggerButton} aria-label={_t("menus|user_menu|title")} type="button">
             <div className={styles.avatarWrapper}>
                 <Avatar id={userId} name={displayName} type="round" size="36px" src={avatarUrl} />
@@ -152,7 +167,7 @@ export function UserMenuView({ vm, className }: UserMenuViewProps): JSX.Element 
     // The menu should appear to the right of the avatar, over the displayname if the menu is expanded,
     // so the display name goes outside the menu block in a wrapper.
     return (
-        <div className={classNames(styles.wrapper, className)}>
+        <div className={classNames({ [styles.wrapper]: !customTrigger }, className)}>
             <Menu
                 open={open}
                 showTitle={false}
@@ -160,7 +175,7 @@ export function UserMenuView({ vm, className }: UserMenuViewProps): JSX.Element 
                 trigger={trigger}
                 onOpenChange={vm.setOpen}
                 align="start"
-                side="right"
+                side={side}
                 className={styles.container}
             >
                 <section className={classNames(styles.profile, styles.profilePrimary)}>
@@ -237,7 +252,7 @@ export function UserMenuView({ vm, className }: UserMenuViewProps): JSX.Element 
                     )}
                 </section>
             </Menu>
-            {expanded && (
+            {expanded && !customTrigger && (
                 <Text type="heading" size="sm" as="span" weight="semibold" className={styles.displayName}>
                     {displayName}
                 </Text>

@@ -12,6 +12,35 @@ import { describe, it, expect, vi } from "vitest";
 
 import { UserPanelView, type UserPanelViewActions, type UserPanelViewSnapshot } from "./UserPanelView";
 import { MockViewModel } from "../../core/viewmodel";
+import { type UserMenuViewActions, type UserMenuViewSnapshot } from "../UserMenu/UserMenu";
+import { type SetStatusViewSnapshot } from "../../status/SetStatusView";
+
+class MockSetStatusViewModel extends MockViewModel<SetStatusViewSnapshot> {
+    public setStatus = vi.fn();
+    public clearStatus = vi.fn();
+}
+
+class MockUserMenuViewModel extends MockViewModel<UserMenuViewSnapshot> implements UserMenuViewActions {
+    public setOpen = vi.fn();
+    public createAccount = vi.fn();
+    public signIn = vi.fn();
+    public openHomePage = vi.fn();
+    public linkNewDevice = vi.fn();
+    public openSecurity = vi.fn();
+    public openFeedback = vi.fn();
+    public openSettings = vi.fn();
+    public clearStatus = vi.fn();
+}
+
+const mkUserMenu = (): MockUserMenuViewModel =>
+    new MockUserMenuViewModel({
+        open: false,
+        expanded: true,
+        displayName: "Sally",
+        userId: "@sally:example.org",
+        setStatusViewModel: new MockSetStatusViewModel({ userStatus: undefined } as SetStatusViewSnapshot),
+        actions: { openSettings: true },
+    });
 
 class MockUserPanelViewModel extends MockViewModel<UserPanelViewSnapshot> implements UserPanelViewActions {
     public toggleMicrophone = vi.fn();
@@ -22,7 +51,11 @@ class MockUserPanelViewModel extends MockViewModel<UserPanelViewSnapshot> implem
     public openSettings = vi.fn();
 }
 
-const base: UserPanelViewSnapshot = { userId: "@sally:example.org", displayName: "Sally" };
+const base: UserPanelViewSnapshot = {
+    userId: "@sally:example.org",
+    displayName: "Sally",
+    userMenuViewModel: mkUserMenu(),
+};
 const call = {
     roomName: "Design chat",
     microphoneMuted: false,
@@ -41,8 +74,16 @@ describe("UserPanelView", () => {
         expect(screen.queryByTestId("user-panel-call")).toBeNull();
         expect(screen.queryByRole("button", { name: "Mute" })).toBeNull();
 
-        await userEvent.click(screen.getAllByRole("button", { name: "User settings" })[0]);
+        await userEvent.click(screen.getByRole("button", { name: "User settings" }));
         expect(vm.openSettings).toHaveBeenCalled();
+    });
+
+    it("opens the user menu from the profile area", async () => {
+        const userMenuViewModel = mkUserMenu();
+        render(<UserPanelView vm={new MockUserPanelViewModel({ ...base, userMenuViewModel })} />);
+
+        await userEvent.click(screen.getByRole("button", { name: "User menu" }));
+        expect(userMenuViewModel.setOpen).toHaveBeenCalledWith(true);
     });
 
     it("shows the custom status instead of the user ID", () => {

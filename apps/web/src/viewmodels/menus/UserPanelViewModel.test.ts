@@ -18,6 +18,16 @@ import { UPDATE_EVENT } from "../../stores/AsyncStore";
 import { type OwnProfileStore } from "../../stores/OwnProfileStore";
 import { type MatrixDispatcher } from "../../dispatcher/dispatcher";
 import { Action } from "../../dispatcher/actions";
+import { type ActionPayload } from "../../dispatcher/payloads";
+
+const menu = vi.hoisted(() => ({ open: false, setOpen: vi.fn(), dispose: vi.fn() }));
+vi.mock("./UserMenuViewModel", () => ({
+    UserMenuViewModel: class {
+        public setOpen = menu.setOpen;
+        public dispose = menu.dispose;
+        public getSnapshot = (): { open: boolean } => ({ open: menu.open });
+    },
+}));
 
 class EventEmitter extends TypedEventEmitter<string, Record<string, () => void>> {}
 
@@ -49,7 +59,11 @@ describe("UserPanelViewModel", () => {
     let ownProfileStore: OwnProfileStore & EventEmitter;
     let callStore: CallStore & EventEmitter;
     let hasCamera: () => Promise<boolean>;
-    let dispatcher: { dispatch: ReturnType<typeof vi.fn> };
+    let dispatcher: {
+        dispatch: ReturnType<typeof vi.fn>;
+        register: ReturnType<typeof vi.fn>;
+        unregister: ReturnType<typeof vi.fn>;
+    };
 
     const mkVm = (): UserPanelViewModel =>
         new UserPanelViewModel({
@@ -78,19 +92,38 @@ describe("UserPanelViewModel", () => {
         }) as unknown as OwnProfileStore & EventEmitter;
         callStore = Object.assign(new EventEmitter(), { connectedCalls: new Set() }) as unknown as CallStore &
             EventEmitter;
-        dispatcher = { dispatch: vi.fn() };
+        dispatcher = { dispatch: vi.fn(), register: vi.fn().mockReturnValue("ref"), unregister: vi.fn() };
+        menu.open = false;
+        menu.setOpen.mockClear();
+        menu.dispose.mockClear();
         hasCamera = vi.fn().mockResolvedValue(true);
     });
 
     it("shows the profile and no call initially", () => {
         const vm = mkVm();
-        expect(vm.getSnapshot()).toEqual({
+        expect(vm.getSnapshot()).toMatchObject({
             userId: "@me:example.org",
             displayName: "Me",
             avatarUrl: "http://avatar",
             userStatus: undefined,
             call: undefined,
         });
+    });
+
+    it("exposes the user menu and toggles it from the dispatcher", () => {
+        const vm = mkVm();
+        expect(vm.getSnapshot().userMenuViewModel).toBeDefined();
+
+        const onAction = dispatcher.register.mock.calls[0][0] as (payload: ActionPayload) => void;
+        onAction({ action: Action.ToggleUserMenu });
+        expect(menu.setOpen).toHaveBeenCalledWith(true);
+
+        menu.open = true;
+        onAction({ action: Action.ToggleUserMenu });
+        expect(menu.setOpen).toHaveBeenLastCalledWith(false);
+
+        onAction({ action: Action.ViewRoom });
+        expect(menu.setOpen).toHaveBeenCalledTimes(2);
     });
 
     it("follows profile changes", () => {
@@ -192,5 +225,7 @@ describe("UserPanelViewModel", () => {
         vm.dispose();
         expect(call.listenerCount(CallEvent.DeviceMute)).toBe(0);
         expect(callStore.listenerCount(CallStoreEvent.ConnectedCalls)).toBe(0);
+        expect(dispatcher.unregister).toHaveBeenCalledWith("ref");
+        expect(menu.dispose).toHaveBeenCalled();
     });
 });

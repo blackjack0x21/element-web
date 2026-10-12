@@ -19,6 +19,8 @@ import { CallStore, CallStoreEvent } from "../../stores/CallStore";
 import { CallEvent, ElementCall } from "../../models/Call";
 import type { MatrixDispatcher } from "../../dispatcher/dispatcher";
 import { Action } from "../../dispatcher/actions";
+import { type ActionPayload } from "../../dispatcher/payloads";
+import { UserMenuViewModel } from "./UserMenuViewModel";
 import MediaDeviceHandler, { MediaDeviceKindEnum } from "../../MediaDeviceHandler";
 
 interface UserPanelViewModelProps {
@@ -47,11 +49,24 @@ export class UserPanelViewModel
     /** The call whose controls are shown, together with the listeners attached to it. */
     private call: ElementCall | null = null;
     private cameraAvailable = true;
+    private readonly userMenu: UserMenuViewModel;
 
     public constructor(props: UserPanelViewModelProps) {
         const callStore = props.callStore ?? CallStore.instance;
-        super(props, UserPanelViewModel.computeSnapshot(props, UserPanelViewModel.findCall(callStore)));
+        // The profile area opens the same menu the space panel used to have
+        const userMenu = new UserMenuViewModel(
+            { ownProfileStore: props.ownProfileStore },
+            props.dispatcher,
+            props.client,
+            false,
+        );
+        super(props, UserPanelViewModel.computeSnapshot(props, userMenu, UserPanelViewModel.findCall(callStore)));
         this.callStore = callStore;
+        this.userMenu = userMenu;
+        this.disposables.track(() => userMenu.dispose());
+
+        const dispatcherRef = props.dispatcher.register(this.onAction);
+        this.disposables.track(() => props.dispatcher.unregister(dispatcherRef));
 
         this.disposables.trackListener(props.ownProfileStore, UPDATE_EVENT, this.onProfileChanged);
         this.disposables.trackListener(this.callStore, CallStoreEvent.ConnectedCalls, this.onConnectedCalls);
@@ -83,7 +98,11 @@ export class UserPanelViewModel
         return null;
     }
 
-    private static computeSnapshot(props: UserPanelViewModelProps, call: ElementCall | null): UserPanelViewSnapshot {
+    private static computeSnapshot(
+        props: UserPanelViewModelProps,
+        userMenuViewModel: UserMenuViewModel,
+        call: ElementCall | null,
+    ): UserPanelViewSnapshot {
         const { client, ownProfileStore } = props;
         const userId = client.getSafeUserId();
         return {
@@ -91,6 +110,7 @@ export class UserPanelViewModel
             displayName: ownProfileStore.displayName || userId,
             avatarUrl: ownProfileStore.getHttpAvatarUrl(64) ?? undefined,
             userStatus: ownProfileStore.userStatus,
+            userMenuViewModel,
             call: call ? UserPanelViewModel.computeCall(client, call, true) : undefined,
         };
     }
@@ -118,6 +138,13 @@ export class UserPanelViewModel
         this.call = call;
         this.call?.on(CallEvent.DeviceMute, this.onDeviceMute);
     }
+
+    /** The keyboard shortcut for the user menu opens the menu from here. */
+    private readonly onAction = (payload: ActionPayload): void => {
+        if (payload.action === Action.ToggleUserMenu) {
+            this.userMenu.setOpen(!this.userMenu.getSnapshot().open);
+        }
+    };
 
     private readonly onProfileChanged = (): void => {
         const { client, ownProfileStore } = this.props;

@@ -23,6 +23,7 @@ import styles from "./UserPanelView.module.css";
 import { useViewModel, type ViewModel } from "../../core/viewmodel";
 import { useI18n } from "../../core/i18n/i18nContext";
 import { type UserStatus } from "../../core/userStatus";
+import { UserMenuView, type UserMenuViewActions, type UserMenuViewSnapshot } from "../UserMenu/UserMenu";
 
 /** The call the user is connected to. */
 export interface UserPanelCallSnapshot {
@@ -47,6 +48,8 @@ export interface UserPanelViewSnapshot {
     avatarUrl?: string;
     /** The user's custom status, if they have one. */
     userStatus?: UserStatus;
+    /** View model of the user menu that the profile area opens. */
+    userMenuViewModel: ViewModel<UserMenuViewSnapshot, UserMenuViewActions>;
     /** The connected call, or undefined when the user is not in a call. */
     call?: UserPanelCallSnapshot;
 }
@@ -104,7 +107,7 @@ function PanelButton({ label, onClick, active, disabled, children }: PanelButton
  * The panel at the bottom of the left sidebar: who you are, your call controls and a shortcut to the settings.
  */
 export function UserPanelView({ vm, className }: UserPanelViewProps): JSX.Element {
-    const { userId, displayName, avatarUrl, userStatus, call } = useViewModel(vm);
+    const { userId, displayName, avatarUrl, userStatus, userMenuViewModel, call } = useViewModel(vm);
     const { translate: _t } = useI18n();
 
     return (
@@ -141,22 +144,24 @@ export function UserPanelView({ vm, className }: UserPanelViewProps): JSX.Elemen
                 </div>
             )}
             <div className={styles.user}>
-                <button
-                    type="button"
-                    className={styles.profile}
-                    onClick={vm.openSettings}
-                    title={_t("user_panel|open_settings")}
-                >
-                    <Avatar id={userId} name={displayName} type="round" size="32px" src={avatarUrl} />
-                    <span className={styles.names}>
-                        <Text as="span" size="md" weight="semibold" className={styles.ellipsis}>
-                            {displayName}
-                        </Text>
-                        <Text as="span" size="sm" className={classNames(styles.ellipsis, styles.secondary)}>
-                            {userStatus ? `${userStatus.emoji} ${userStatus.text}` : userId}
-                        </Text>
-                    </span>
-                </button>
+                <UserMenuView
+                    vm={userMenuViewModel}
+                    className={styles.menu}
+                    side="top"
+                    trigger={
+                        <button type="button" className={styles.profile} aria-label={_t("menus|user_menu|title")}>
+                            <Avatar id={userId} name={displayName} type="round" size="32px" src={avatarUrl} />
+                            <span className={styles.names}>
+                                <Text as="span" size="md" weight="semibold" className={styles.ellipsis}>
+                                    {displayName}
+                                </Text>
+                                <Text as="span" size="sm" className={classNames(styles.ellipsis, styles.secondary)}>
+                                    {userStatus ? `${userStatus.emoji} ${userStatus.text}` : userId}
+                                </Text>
+                            </span>
+                        </button>
+                    }
+                />
                 {call && (
                     <>
                         <PanelButton

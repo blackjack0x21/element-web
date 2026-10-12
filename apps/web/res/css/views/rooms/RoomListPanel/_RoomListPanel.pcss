@@ -7,5 +7,7 @@
 
 .mx_RoomListPanel {
     background-color: var(--mx-sidebar-background, var(--cpd-color-bg-canvas-default));
-    height: 100%;
+    /* Fills the space the user panel below it leaves over */
+    flex: 1 1 0;
+    min-height: 0;
 }

@@ -33,6 +33,11 @@
     padding: var(--cpd-space-2x) var(--cpd-space-3x);
 }
 
+.menu {
+    flex: 1;
+    min-width: 0;
+}
+
 .callRoom,
 .profile {
     flex: 1;
@@ -46,6 +51,10 @@
     color: var(--cpd-color-text-primary);
     text-align: start;
     cursor: pointer;
+}
+
+.profile {
+    width: 100%;
 }
 
 .callRoom {
@@ -84,6 +93,6 @@
  * colours its children from these tokens in every state (hover, pressed), so override them here.
  */
 .button.active {
-    --cpd-color-icon-primary: var(--cpd-color-icon-critical-primary);
-    --cpd-color-icon-secondary: var(--cpd-color-icon-critical-primary);
+    --cpd-color-icon-primary: color-mix(in srgb, var(--cpd-color-icon-critical-primary) 70%, transparent);
+    --cpd-color-icon-secondary: color-mix(in srgb, var(--cpd-color-icon-critical-primary) 70%, transparent);
 }

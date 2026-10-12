@@ -79,11 +79,11 @@
     flex: 0 0 auto;
 }
 
-/* Muted / deafened / camera-off buttons are red so the state reads at a glance. */
+/*
+ * Muted / deafened / camera-off buttons get a red icon so the state reads at a glance. Compound's IconButton
+ * colours its children from these tokens in every state (hover, pressed), so override them here.
+ */
 .button.active {
-    color: var(--cpd-color-icon-critical-primary);
-
-    svg {
-        color: var(--cpd-color-icon-critical-primary);
-    }
+    --cpd-color-icon-primary: var(--cpd-color-icon-critical-primary);
+    --cpd-color-icon-secondary: var(--cpd-color-icon-critical-primary);
 }

@@ -20,7 +20,6 @@ import { WidgetLayoutStore } from "../../stores/widgets/WidgetLayoutStore";
 import ActiveWidgetStore, { ActiveWidgetStoreEvent } from "../../stores/ActiveWidgetStore";
 import { type ViewRoomPayload } from "../../dispatcher/payloads/ViewRoomPayload";
 import { UPDATE_EVENT } from "../../stores/AsyncStore";
-import RoomAvatar from "../views/avatars/RoomAvatar";
 import { WidgetPipViewModel, type Props as WidgetPipViewModelProps } from "../../viewmodels/room/WidgetPipViewModel";
 import { SDKContext } from "../../contexts/SDKContext.ts";
 import { CallStore } from "../../stores/CallStore";
@@ -101,11 +100,11 @@ class PipContainerInner extends React.Component<IProps, IState> {
 
     private watchCall(call: ElementCall | null): void {
         if (call === this.watchedCall) return;
-        this.watchedCall?.off(ElementCallEvent.ConnectionState, this.onVideoActive);
         this.watchedCall?.off(ElementCallEvent.VideoActive, this.onVideoActive);
+        this.watchedCall?.off(ElementCallEvent.ConnectionState, this.onVideoActive);
         this.watchedCall = call;
-        this.watchedCall?.on(ElementCallEvent.ConnectionState, this.onVideoActive);
         this.watchedCall?.on(ElementCallEvent.VideoActive, this.onVideoActive);
+        this.watchedCall?.on(ElementCallEvent.ConnectionState, this.onVideoActive);
     }
 
     private onVideoActive = (): void => this.updateShowWidgetInPip();
@@ -327,11 +326,5 @@ const WidgetPipWrappedView: React.FC<Props> = (props: Props) => {
         vm.setViewingRoom(props.viewingRoom);
     }, [vm, props.viewingRoom]);
 
-    return (
-        <WidgetPipView
-            vm={vm}
-            // Props only used in the view and not the view model get passed directly.
-            RoomAvatar={({ size }) => <RoomAvatar size={size} room={props.room} />}
-        />
-    );
+    return <WidgetPipView vm={vm} />;
 };

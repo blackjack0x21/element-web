@@ -16,23 +16,24 @@ import { withViewDocs } from "../../../.storybook/withViewDocs";
 type WidgetPipViewProps = WidgetPipViewSnapshot & WidgetPipViewActions;
 
 // Helper components that are provided outside of this storybook
-const RoomAvatarMock: React.FC<{ className?: string; size: string }> = ({ className, size }) => (
-    <div className={className} style={{ width: size, height: size, borderRadius: "50%", backgroundColor: "grey" }} />
+const PersistentAppMock: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
+    <div style={{ backgroundColor: "grey", flexGrow: 1, position: "relative" }}>{children}</div>
 );
-const PersistentAppMock: React.FC = () => <div style={{ backgroundColor: "grey", flexGrow: 1 }} />;
 
 const WidgetPipViewWrapperImpl = ({
     onBackClick,
     persistentAppComponent,
     onStartMoving,
+    onLeave,
     ...rest
 }: WidgetPipViewProps): JSX.Element => {
     const vm = useMockedViewModel(rest, {
         onBackClick,
         persistentAppComponent,
         onStartMoving,
+        onLeave,
     });
-    return <WidgetPipView vm={vm} RoomAvatar={RoomAvatarMock} />;
+    return <WidgetPipView vm={vm} />;
 };
 
 const WidgetPipViewWrapper = withViewDocs(WidgetPipViewWrapperImpl, WidgetPipView);
@@ -49,6 +50,8 @@ export default {
         onBackClick: fn(),
         persistentAppComponent: PersistentAppMock,
         onStartMoving: fn(),
+        onLeave: fn(),
+        canLeave: true,
     },
     parameters: {
         design: {
@@ -81,8 +84,9 @@ const CallPill: React.FC = () => (
 );
 WithElementCallWidgetMock.args = {
     roomName: "Element Call Room",
-    persistentAppComponent: () => (
-        <div style={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+    persistentAppComponent: ({ children }) => (
+        <div style={{ flexGrow: 1, display: "flex", flexDirection: "column", position: "relative" }}>
+            {children}
             <div style={{ flexGrow: 4, backgroundColor: "gray", borderRadius: "24px" }} />
             <div style={{ display: "flex", justifyContent: "space-between", margin: "10px" }}>
                 <CallPill />

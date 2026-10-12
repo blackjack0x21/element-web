@@ -18,7 +18,7 @@ import defaultDispatcher from "../../dispatcher/dispatcher";
 import { Action } from "../../dispatcher/actions";
 import { WidgetLayoutStore } from "../../stores/widgets/WidgetLayoutStore";
 import { CallStore, CallStoreEvent } from "../../stores/CallStore";
-import { type Call } from "../../models/Call";
+import { type Call, ElementCall } from "../../models/Call";
 
 const userId = "@example:example.org";
 const widgetId = "test-widget-id";
@@ -90,6 +90,33 @@ describe("WidgetPipViewModel", () => {
             view_call: true,
             metricsTrigger: "WebFloatingCallWindow",
         });
+    });
+
+    it("puts the call in pip mode while it is shown", () => {
+        const call = Object.create(ElementCall.prototype, { widget: { value: { id: widgetId } } }) as ElementCall;
+        const setPip = vi.fn();
+        Object.defineProperty(call, "pip", { set: setPip, configurable: true });
+
+        CallStore.instance.emit(CallStoreEvent.Call, call, room.roomId);
+        expect(setPip).toHaveBeenLastCalledWith(true);
+
+        vm.dispose();
+        expect(setPip).toHaveBeenLastCalledWith(false);
+    });
+
+    it("offers to leave only when the widget is a call, and leaves it", () => {
+        expect(vm.getSnapshot().canLeave).toBe(false);
+
+        const disconnect = vi.fn().mockResolvedValue(undefined);
+        const call = { widget: { id: widgetId }, disconnect } as unknown as Call;
+        CallStore.instance.emit(CallStoreEvent.Call, call, room.roomId);
+        expect(vm.getSnapshot().canLeave).toBe(true);
+
+        vm.onLeave();
+        expect(disconnect).toHaveBeenCalled();
+
+        CallStore.instance.emit(CallStoreEvent.Call, null, room.roomId);
+        expect(vm.getSnapshot().canLeave).toBe(false);
     });
 
     it("updates onBackClick if viewingRoom changes", () => {

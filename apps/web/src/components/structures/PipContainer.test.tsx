@@ -177,6 +177,19 @@ describe("PipContainer", () => {
     };
 
     const withWidget = async (fn: () => Promise<void>): Promise<void> => {
+        // The pip's controls are drawn over the widget by its own tile, which only does so once the widget has
+        // started talking to us
+        WidgetMessagingStore.instance.storeMessaging(
+            new Widget({ id: "1", creatorUserId: "@alice:example.org", type: "jitsi", url: "https://example.org" }),
+            room.roomId,
+            {
+                on: () => {},
+                off: () => {},
+                prepare: async () => {},
+                stop: () => {},
+                widgetApi: { hasCapability: vi.fn(), feedStateUpdate: vi.fn().mockResolvedValue(undefined) },
+            } as unknown as WidgetMessaging,
+        );
         act(() => ActiveWidgetStore.instance.setWidgetPersistence("1", room.roomId, true));
         try {
             await fn();
@@ -248,6 +261,16 @@ describe("PipContainer", () => {
         mockPlatformPeg({ supportsJitsiScreensharing: () => true });
         setUpRoomViewStore();
         viewRoom(room2.roomId);
+        WidgetStore.instance.addVirtualWidget(
+            {
+                id: "1",
+                creatorUserId: "@alice:example.org",
+                type: WidgetType.JITSI.preferred,
+                url: "https://example.org",
+                name: "Jitsi",
+            },
+            room.roomId,
+        );
 
         renderPip();
 

@@ -11,13 +11,14 @@ import {
     type WidgetPipViewModel as WidgetPipViewModelInterface,
 } from "@element-hq/web-shared-components";
 import { type Room, RoomEvent } from "matrix-js-sdk/src/matrix";
+import { logger } from "matrix-js-sdk/src/logger";
 import React from "react";
 
 import type { RefObject, FC } from "react";
 import { Action } from "../../dispatcher/actions";
 import WidgetStore, { type IApp } from "../../stores/WidgetStore";
 import { CallStore, CallStoreEvent } from "../../stores/CallStore";
-import { type Call } from "../../models/Call";
+import { type Call, ElementCall } from "../../models/Call";
 import defaultDispatcher from "../../dispatcher/dispatcher";
 import { type ViewRoomPayload } from "../../dispatcher/payloads/ViewRoomPayload";
 import { WidgetLayoutStore } from "../../stores/widgets/WidgetLayoutStore";
@@ -60,10 +61,18 @@ export class WidgetPipViewModel
     private viewingRoom?: boolean;
 
     public constructor(props: Props) {
-        super(props, { widgetId: props.widgetId, roomName: props.room.name, roomId: props.room.roomId });
+        super(props, {
+            widgetId: props.widgetId,
+            roomName: props.room.name,
+            roomId: props.room.roomId,
+            canLeave: false,
+        });
         this.widget = WidgetStore.instance.getApps(props.room.roomId).find((app) => app.id === this.props.widgetId)!;
         this.call = CallStore.instance.getCall(props.room.roomId) ?? null;
         this.onStartMoving = props.onStartMoving;
+        this.snapshot.merge({ canLeave: this.call !== null });
+        this.setCallPip(true);
+        this.disposables.track(() => this.setCallPip(false));
 
         this.disposables.trackListener(props.room, RoomEvent.Name, this.onRoomName);
         this.disposables.trackListener(CallStore.instance, CallStoreEvent.Call, this.onCallChange);
@@ -78,6 +87,10 @@ export class WidgetPipViewModel
     public setViewingRoom(viewing: boolean): void {
         this.viewingRoom = viewing;
     }
+
+    public onLeave = (): void => {
+        this.call?.disconnect().catch((e) => logger.warn("Failed to leave the call from the pip", e));
+    };
 
     public onBackClick(ev: React.MouseEvent): void {
         ev.preventDefault();
@@ -107,16 +120,23 @@ export class WidgetPipViewModel
      * @returns
      */
     public persistentAppComponent: FC<
-        Pick<React.ComponentProps<typeof PersistentApp>, "persistentWidgetId" | "persistentRoomId">
+        Pick<React.ComponentProps<typeof PersistentApp>, "persistentWidgetId" | "persistentRoomId" | "children">
     > = (props) => {
         return (
             <PersistentApp
                 persistentWidgetId={props.persistentWidgetId}
                 persistentRoomId={props.persistentRoomId}
                 movePersistedElement={this.props.movePersistedElement}
-            />
+            >
+                {props.children}
+            </PersistentApp>
         );
     };
+
+    /** Element Call shows nothing but the video while it is in the pip, since the pip draws its own controls. */
+    private setCallPip(pip: boolean): void {
+        if (this.call instanceof ElementCall) this.call.pip = pip;
+    }
 
     private readonly onRoomName = (): void => {
         this.snapshot.merge({ roomName: this.props.room.name });
@@ -125,7 +145,10 @@ export class WidgetPipViewModel
     private readonly onCallChange = (...args: unknown[]): void => {
         const [call, forRoomId] = args as [Call | null, string];
         if (forRoomId === this.props.room.roomId) {
+            this.setCallPip(false);
             this.call = call?.widget.id === this.props.widgetId ? call : null;
+            this.snapshot.merge({ canLeave: this.call !== null });
+            this.setCallPip(true);
         }
     };
 }

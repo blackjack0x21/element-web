@@ -9,20 +9,41 @@ Please see LICENSE files in the repository root for full details.
    the same height at its bottom so the last message is never covered. */
 .mx_WhoIsTypingTile {
     position: absolute;
-    inset-inline: 0;
+    inset-inline: 0 16px; /* leave the scrollbar uncovered */
     bottom: 0;
     z-index: 1;
     pointer-events: none;
     box-sizing: border-box;
     height: var(--WhoIsTypingTile-height);
-    background: linear-gradient(to top, var(--cpd-color-bg-canvas-default) 10%, transparent);
     padding: 0 var(--cpd-space-4x);
     display: flex;
     align-items: center;
     gap: var(--cpd-space-2x);
-    overflow: hidden;
     font: var(--cpd-font-body-sm-medium);
     color: var(--cpd-color-text-primary);
+
+    /* Fade the messages out behind the text. Taller than the strip itself, and solid below the fade. */
+    &::before {
+        content: "";
+        position: absolute;
+        inset-inline: 0;
+        bottom: 0;
+        height: 96px;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+        background: linear-gradient(
+            to bottom,
+            transparent,
+            var(--cpd-color-bg-canvas-default) 72px,
+            var(--cpd-color-bg-canvas-default) 100%
+        );
+    }
+}
+
+/* The fade only shows while someone is typing. */
+.mx_WhoIsTypingTile_active::before {
+    opacity: 1;
 }
 
 .mx_WhoIsTypingTile_dots {

@@ -7,6 +7,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React from "react";
+import classNames from "classnames";
 import { type Room, RoomEvent, type RoomMember, RoomMemberEvent, type MatrixEvent } from "matrix-js-sdk/src/matrix";
 
 import * as WhoIsTyping from "../../../WhoIsTyping";
@@ -186,7 +187,12 @@ export default class WhoIsTypingTile extends React.Component<IProps, IState> {
             : "";
 
         return (
-            <div className="mx_WhoIsTypingTile" role="status" aria-live="polite" aria-atomic="true">
+            <div
+                className={classNames("mx_WhoIsTypingTile", { mx_WhoIsTypingTile_active: !!typingString })}
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+            >
                 {typingString && (
                     <>
                         <span className="mx_WhoIsTypingTile_dots" aria-hidden="true">

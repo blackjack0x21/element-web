@@ -81,7 +81,6 @@
 
 /* Muted / deafened / camera-off buttons are red so the state reads at a glance. */
 .button.active {
-    background-color: var(--cpd-color-bg-critical-subtle);
     color: var(--cpd-color-icon-critical-primary);
 
     svg {

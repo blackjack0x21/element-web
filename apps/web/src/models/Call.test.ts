@@ -1254,6 +1254,18 @@ describe("ElementCall with the React component embedding", () => {
         expect(setDeviceMute).toHaveBeenLastCalledWith({ deafened: false });
     });
 
+    it("exposes the reported device state and emits when it changes", () => {
+        const onDeviceMute = vi.fn();
+        call.on(CallEvent.DeviceMute, onDeviceMute);
+
+        // Everything is assumed to be on until Element Call reports otherwise
+        expect(call.deviceMute).toEqual({ audio_enabled: true, video_enabled: true, deafened: false });
+
+        call.handleDeviceMute({ audio_enabled: false, video_enabled: true, deafened: true });
+        expect(call.deviceMute).toEqual({ audio_enabled: false, video_enabled: true, deafened: true });
+        expect(onDeviceMute).toHaveBeenCalledWith(call.deviceMute);
+    });
+
     it("fails to disconnect when no component is listening", async () => {
         call.handleJoined();
         await expect(call.disconnect()).rejects.toThrow("no Element Call component is mounted");

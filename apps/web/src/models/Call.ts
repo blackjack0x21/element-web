@@ -101,6 +101,7 @@ export enum CallEvent {
     Close = "close",
     Destroy = "destroy",
     CallTypeChanged = "call_type_changed",
+    DeviceMute = "device_mute",
 }
 
 interface CallEventHandlerMap {
@@ -112,6 +113,7 @@ interface CallEventHandlerMap {
     [CallEvent.Close]: () => void;
     [CallEvent.Destroy]: () => void;
     [CallEvent.CallTypeChanged]: (callType: CallType) => void;
+    [CallEvent.DeviceMute]: (state: DeviceMuteState) => void;
 }
 
 /**
@@ -1232,6 +1234,11 @@ export class ElementCall extends Call {
     /** The last mute state Element Call reported, or null before it has reported one. */
     private deviceMuteState: DeviceMuteState | null = null;
 
+    /** The mute state of the microphone, camera and speakers. Assumes everything is on until Element Call says otherwise. */
+    public get deviceMute(): DeviceMuteState {
+        return this.deviceMuteState ?? { audio_enabled: true, video_enabled: true, deafened: false };
+    }
+
     /** Element Call reports its mute state (`HostBridge.notifyDeviceMute` / `io.element.device_mute`). */
     public handleDeviceMute(state?: DeviceMuteState): void {
         if (state) {
@@ -1240,6 +1247,7 @@ export class ElementCall extends Call {
                 video_enabled: state.video_enabled,
                 deafened: state.deafened ?? false,
             };
+            this.emit(CallEvent.DeviceMute, this.deviceMuteState);
         }
     }
 

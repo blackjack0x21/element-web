@@ -217,6 +217,7 @@ export abstract class Call extends TypedEventEmitter<CallEvent, CallEventHandler
         this.widgetUid = WidgetUtils.getWidgetUid(this.widget);
         this.room = this.client.getRoom(this.roomId)!;
         WidgetMessagingStore.instance.on(WidgetMessagingStoreEvent.StopMessaging, this.onStopMessaging);
+        WidgetMessagingStore.instance.on(WidgetMessagingStoreEvent.StoreMessaging, this.onStoreMessaging);
         this._callType = initialCallType;
     }
 
@@ -248,6 +249,7 @@ export abstract class Call extends TypedEventEmitter<CallEvent, CallEventHandler
      * @returns The ClientWidgetApi for this call, or null if the call is not accessed through a widget.
      */
     public async start(_params?: WidgetGenerationParameters): Promise<ClientWidgetApi | null> {
+        this.started = true;
         const messagingStore = WidgetMessagingStore.instance;
         const startTime = performance.now();
         let messaging: WidgetMessaging | undefined = messagingStore.getMessagingForUid(this.widgetUid);
@@ -348,11 +350,44 @@ export abstract class Call extends TypedEventEmitter<CallEvent, CallEventHandler
             this.close();
         }
         WidgetMessagingStore.instance.off(WidgetMessagingStoreEvent.StopMessaging, this.onStopMessaging);
+        WidgetMessagingStore.instance.off(WidgetMessagingStoreEvent.StoreMessaging, this.onStoreMessaging);
         this.emit(CallEvent.Destroy);
     }
 
     private readonly onMyMembership = async (_room: Room, membership: Membership): Promise<void> => {
         if (membership !== KnownMembership.Join) this.setDisconnected();
+    };
+
+    /** Whether start() has been called, i.e. whether this call should follow the widget's connection. */
+    private started = false;
+
+    /**
+     * Called when the widget's connection is replaced by a new one after start(), so the call can move whatever
+     * it listens to over from `previous` to `next`.
+     */
+    protected onWidgetApiReplaced(_previous: ClientWidgetApi | null, _next: ClientWidgetApi): void {}
+
+    /**
+     * The widget can get a new connection while the call lives on: React remounts it (strict mode, or moving it
+     * between the room and the pip). start() only saw the connection that existed at the time, so follow the
+     * replacement, or a join on it would go unnoticed.
+     */
+    private readonly onStoreMessaging = (uid: string, messaging: WidgetMessaging): void => {
+        if (uid !== this.widgetUid || !this.started) return;
+
+        const follow = (): void => {
+            const next = messaging.widgetApi;
+            // Ignore a connection that was itself replaced again before it started
+            if (!next || next === this._widgetApi) return;
+            if (WidgetMessagingStore.instance.getMessagingForUid(uid) !== messaging) return;
+            this.debug("following the widget's new connection");
+            const previous = this._widgetApi;
+            this.widgetApi = next;
+            this.onWidgetApiReplaced(previous, next);
+        };
+
+        if (messaging.widgetApi) follow();
+        else messaging.once(WidgetMessagingEvent.Start, follow);
     };
 
     private readonly onStopMessaging = (uid: string): void => {
@@ -1064,14 +1099,35 @@ export class ElementCall extends Call {
         this.debug("ElementCall.start: waiting for widget messaging");
         const widgetApi = (await super.start())!;
         this.debug("ElementCall.start: attaching join/hangup/close listeners");
+        this.attachWidgetListeners(widgetApi);
+        void this.sendSoundEffectVolume();
+        void this.sendPip();
+        return widgetApi;
+    }
+
+    /** Listens to the actions Element Call sends. Safe to call twice for the same connection. */
+    private attachWidgetListeners(widgetApi: ClientWidgetApi): void {
+        this.detachWidgetListeners(widgetApi);
         widgetApi.on(`action:${ElementWidgetActions.JoinCall}`, this.onJoin);
         widgetApi.on(`action:${ElementWidgetActions.HangupCall}`, this.onHangup);
         widgetApi.on(`action:${ElementWidgetActions.Close}`, this.onClose);
         widgetApi.on(`action:${ElementWidgetActions.DeviceMute}`, this.onDeviceMute);
         widgetApi.on(`action:${ElementWidgetActions.VideoActive}`, this.onVideoActive);
+    }
+
+    private detachWidgetListeners(widgetApi: ClientWidgetApi): void {
+        widgetApi.off(`action:${ElementWidgetActions.JoinCall}`, this.onJoin);
+        widgetApi.off(`action:${ElementWidgetActions.HangupCall}`, this.onHangup);
+        widgetApi.off(`action:${ElementWidgetActions.Close}`, this.onClose);
+        widgetApi.off(`action:${ElementWidgetActions.DeviceMute}`, this.onDeviceMute);
+        widgetApi.off(`action:${ElementWidgetActions.VideoActive}`, this.onVideoActive);
+    }
+
+    protected onWidgetApiReplaced(previous: ClientWidgetApi | null, next: ClientWidgetApi): void {
+        if (previous) this.detachWidgetListeners(previous);
+        this.attachWidgetListeners(next);
         void this.sendSoundEffectVolume();
         void this.sendPip();
-        return widgetApi;
     }
 
     /**
@@ -1143,13 +1199,7 @@ export class ElementCall extends Call {
 
     public close(): void {
         this.debug("ElementCall.close: detaching listeners", true);
-        if (this.widgetApi) {
-            this.widgetApi.off(`action:${ElementWidgetActions.JoinCall}`, this.onJoin);
-            this.widgetApi.off(`action:${ElementWidgetActions.HangupCall}`, this.onHangup);
-            this.widgetApi.off(`action:${ElementWidgetActions.Close}`, this.onClose);
-            this.widgetApi.off(`action:${ElementWidgetActions.DeviceMute}`, this.onDeviceMute);
-            this.widgetApi.off(`action:${ElementWidgetActions.VideoActive}`, this.onVideoActive);
-        }
+        if (this.widgetApi) this.detachWidgetListeners(this.widgetApi);
         // A start() still waiting on the component should learn that the call went away, rather than hang
         // until the timeout. Usually nothing is waiting, so mark the promise as handled first: an
         // unobserved rejection would otherwise surface as an unhandled promise rejection.

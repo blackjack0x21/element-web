@@ -1170,6 +1170,22 @@ describe("ElementCall", () => {
             call.off(CallEvent.Destroy, onDestroy);
         });
 
+        it("notices a join on the widget connection that replaced the one it started with", async () => {
+            // Start listening, as when the call view mounts
+            await call.start({});
+            expect(call.connectionState).toBe(ConnectionState.Disconnected);
+
+            // The widget remounts (React strict mode, moving between the room and the pip), which gives it a
+            // brand new connection that start() never saw
+            const replacement = setUpWidget(call);
+
+            replacement.widgetApi.emit(
+                `action:${ElementWidgetActions.JoinCall}`,
+                new CustomEvent("widgetapirequest", {}),
+            );
+            expect(call.connectionState).toBe(ConnectionState.Connected);
+        });
+
         it("can be joined again after leaving through disconnect()", async () => {
             await connect(call, widgetApi);
             const onClose = vi.fn();

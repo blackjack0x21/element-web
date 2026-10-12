@@ -150,8 +150,10 @@
 .slotActionBar {
     position: absolute;
     z-index: 10;
+    /* Sits half its own height lower than fully clear of the tile. */
     inset-block-start: calc(
-        -1 * (var(--event-tile-action-bar-size) + 2 * (var(--event-tile-action-bar-margin) + var(--cpd-border-width-1)))
+        -0.5 *
+            (var(--event-tile-action-bar-size) + 2 * (var(--event-tile-action-bar-margin) + var(--cpd-border-width-1)))
     );
     inset-inline-end: var(--event-tile-action-bar-offset);
     user-select: none;
@@ -887,7 +889,7 @@
     }
 
     .slotActionBar {
-        inset-block-start: -28px;
+        inset-block-start: -10px;
         inset-inline-start: calc(100% - var(--event-tile-action-bar-size) - 2 * var(--event-tile-action-bar-margin));
         inset-inline-end: auto;
     }
@@ -971,7 +973,7 @@
     }
 
     &.stateOwnEvent .slotActionBar {
-        inset-block-start: -28px;
+        inset-block-start: -10px;
         inset-inline-start: auto;
         inset-inline-end: 0;
     }
@@ -1362,7 +1364,7 @@
 
     /* Slots. */
     .slotActionBar {
-        inset-block-start: -36px;
+        inset-block-start: -18px;
         inset-inline-end: 0;
     }
 

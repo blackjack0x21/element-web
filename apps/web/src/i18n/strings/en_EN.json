@@ -1851,9 +1851,7 @@
         "unreachable": "Account provider of the user is unreachable"
     },
     "quick_settings": {
-        "all_settings": "All settings",
-        "sidebar_settings": "More options",
-        "title": "Quick settings"
+        "sidebar_settings": "More options"
     },
     "quit_warning": {
         "call_in_progress": "You seem to be in a call, are you sure you want to quit?",
@@ -3319,8 +3317,7 @@
         "tos": "Terms of Service"
     },
     "theme": {
-        "light_high_contrast": "Light high contrast",
-        "match_system": "Match system"
+        "light_high_contrast": "Light high contrast"
     },
     "thread_view_back_action_label": "Back to thread",
     "threads": {

@@ -661,6 +661,23 @@ describe("RoomView", () => {
             vi.spyOn(room, "getMyMembership").mockReturnValue(KnownMembership.Join);
         });
 
+        it("doesn't open the chat panel for unread messages when arriving to view a call", async () => {
+            vi.spyOn(NotificationState.prototype, "isUnread", "get").mockReturnValue(true);
+            // Arrive in the room straight into its call, as when answering from another room
+            await act(() =>
+                stores.roomViewStore.viewRoom({
+                    action: Action.ViewRoom,
+                    room_id: room.roomId,
+                    metricsTrigger: undefined,
+                    view_call: true,
+                }),
+            );
+            expect(stores.roomViewStore.isViewingCall()).toEqual(true);
+            await mountRoomView();
+            expect(stores.roomViewStore.isViewingCall()).toEqual(true);
+            expect(stores.rightPanelStore.isOpen).toEqual(false);
+        });
+
         it("hides the right panel chat when closing a call", async () => {
             await mountRoomView();
 

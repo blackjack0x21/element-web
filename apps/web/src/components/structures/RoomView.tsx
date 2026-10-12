@@ -1485,6 +1485,9 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
 
         if (
             this.getMainSplitContentType(room) !== MainSplitContentType.Timeline &&
+            // Not for a call that was opened from a regular room (say by answering it): the unread message is the
+            // call itself, and the user came for the call.
+            !(this.roomViewStore.isViewingCall() && !isVideoRoom(room)) &&
             this.context.roomNotificationStateStore.getRoomState(room).isUnread
         ) {
             // Automatically open the chat panel to make unread messages easier to discover

@@ -99,6 +99,7 @@ import EditorStateTransfer from "../../utils/EditorStateTransfer";
 import ErrorDialog from "../views/dialogs/ErrorDialog";
 import UploadBar from "./UploadBar";
 import MessageComposer from "../views/rooms/MessageComposer";
+import WhoIsTypingTile from "../views/rooms/WhoIsTypingTile";
 import JumpToBottomButton from "../views/rooms/JumpToBottomButton";
 import TopUnreadMessagesBar from "../views/rooms/TopUnreadMessagesBar";
 import { fetchInitialEvent } from "../../utils/EventUtils";
@@ -2535,6 +2536,8 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
             );
         }
 
+        const whoIsTyping = showComposer && this.state.room && <WhoIsTypingTile room={this.state.room} />;
+
         // if we have search results, we keep the messagepanel (so that it preserves its
         // scroll state), but hide it.
         let searchResultsPanel;
@@ -2685,6 +2688,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                         </main>
                         {statusBarArea}
                         {previewBar}
+                        {whoIsTyping}
                         {messageComposer}
                     </RoomUploadContextProvider>
                 );

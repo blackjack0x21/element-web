@@ -34,7 +34,6 @@ import EventTile, {
 import IRCTimelineProfileResizer from "../views/elements/IRCTimelineProfileResizer";
 import defaultDispatcher from "../../dispatcher/dispatcher";
 import type LegacyCallEventGrouper from "./LegacyCallEventGrouper";
-import WhoIsTypingTile from "../views/rooms/WhoIsTypingTile";
 import ScrollPanel, { type IScrollState } from "./ScrollPanel";
 import ErrorBoundary from "../views/elements/ErrorBoundary";
 import Spinner from "../views/elements/Spinner";
@@ -203,7 +202,6 @@ interface IProps {
 
 interface IState {
     ghostReadMarkers: string[];
-    showTypingNotifications: boolean;
     hideSender: boolean;
 }
 
@@ -263,10 +261,8 @@ export default class MessagePanel extends React.Component<IProps, IState> {
     private unmounted = false;
 
     private readMarkerNode: HTMLLIElement | null = null;
-    private whoIsTyping = createRef<WhoIsTypingTile>();
     public scrollPanel = createRef<ScrollPanel>();
 
-    private showTypingNotificationsWatcherRef?: string;
     private eventTiles: Record<string, UnwrappedEventTile> = {};
 
     // A map to allow groupers to maintain consistent keys even if their first event is uprooted due to back-pagination.
@@ -279,7 +275,6 @@ export default class MessagePanel extends React.Component<IProps, IState> {
             // previous positions the read marker has been in, so we can
             // display 'ghost' read markers that are animating away
             ghostReadMarkers: [],
-            showTypingNotifications: SettingsStore.getValue("showTypingNotifications"),
             hideSender: this.shouldHideSender(),
         };
 
@@ -291,11 +286,6 @@ export default class MessagePanel extends React.Component<IProps, IState> {
 
     public componentDidMount(): void {
         this.unmounted = false;
-        this.showTypingNotificationsWatcherRef = SettingsStore.watchSetting(
-            "showTypingNotifications",
-            null,
-            this.onShowTypingNotificationsChange,
-        );
         this.calculateRoomMembersCount();
         this.props.room?.currentState.on(RoomStateEvent.Update, this.calculateRoomMembersCount);
     }
@@ -303,7 +293,6 @@ export default class MessagePanel extends React.Component<IProps, IState> {
     public componentWillUnmount(): void {
         this.unmounted = true;
         this.props.room?.currentState.off(RoomStateEvent.Update, this.calculateRoomMembersCount);
-        SettingsStore.unwatchSetting(this.showTypingNotificationsWatcherRef);
         this.readReceiptMap = {};
         this.resizeObserver.disconnect();
     }
@@ -347,12 +336,6 @@ export default class MessagePanel extends React.Component<IProps, IState> {
     private calculateRoomMembersCount = (): void => {
         this.setState({
             hideSender: this.shouldHideSender(),
-        });
-    };
-
-    private onShowTypingNotificationsChange = (): void => {
-        this.setState({
-            showTypingNotifications: SettingsStore.getValue("showTypingNotifications"),
         });
     };
 
@@ -972,52 +955,6 @@ export default class MessagePanel extends React.Component<IProps, IState> {
 
     private resizeObserver = new ResizeObserver(this.onHeightChanged);
 
-    private onTypingShown = (): void => {
-        const scrollPanel = this.scrollPanel.current;
-        // this will make the timeline grow, so checkScroll
-        scrollPanel?.checkScroll();
-        if (scrollPanel && scrollPanel.getScrollState().stuckAtBottom) {
-            scrollPanel.preventShrinking();
-        }
-    };
-
-    private onTypingHidden = (): void => {
-        const scrollPanel = this.scrollPanel.current;
-        if (scrollPanel) {
-            // as hiding the typing notifications doesn't
-            // update the scrollPanel, we tell it to apply
-            // the shrinking prevention once the typing notifs are hidden
-            scrollPanel.updatePreventShrinking();
-            // order is important here as checkScroll will scroll down to
-            // reveal added padding to balance the notifs disappearing.
-            scrollPanel.checkScroll();
-        }
-    };
-
-    public updateTimelineMinHeight(): void {
-        const scrollPanel = this.scrollPanel.current;
-
-        if (scrollPanel) {
-            const isAtBottom = scrollPanel.isAtBottom();
-            const whoIsTyping = this.whoIsTyping.current;
-            const isTypingVisible = whoIsTyping && whoIsTyping.isVisible();
-            // when messages get added to the timeline,
-            // but somebody else is still typing,
-            // update the min-height, so once the last
-            // person stops typing, no jumping occurs
-            if (isAtBottom && isTypingVisible) {
-                scrollPanel.preventShrinking();
-            }
-        }
-    }
-
-    public onTimelineReset(): void {
-        const scrollPanel = this.scrollPanel.current;
-        if (scrollPanel) {
-            scrollPanel.clearPreventShrinking();
-        }
-    }
-
     public render(): React.ReactNode {
         let topSpinner;
         let bottomSpinner;
@@ -1037,22 +974,6 @@ export default class MessagePanel extends React.Component<IProps, IState> {
         }
 
         const style = this.props.hidden ? { display: "none" } : {};
-
-        let whoIsTyping;
-        if (
-            this.props.room &&
-            this.state.showTypingNotifications &&
-            this.context.timelineRenderingType === TimelineRenderingType.Room
-        ) {
-            whoIsTyping = (
-                <WhoIsTypingTile
-                    room={this.props.room}
-                    onShown={this.onTypingShown}
-                    onHidden={this.onTypingHidden}
-                    ref={this.whoIsTyping}
-                />
-            );
-        }
 
         let ircResizer: JSX.Element | undefined;
         if (this.props.layout == Layout.IRC) {
@@ -1079,7 +1000,6 @@ export default class MessagePanel extends React.Component<IProps, IState> {
                 >
                     {topSpinner}
                     {this.getEventTiles()}
-                    {whoIsTyping}
                     {bottomSpinner}
                 </ScrollPanel>
             </ErrorBoundary>

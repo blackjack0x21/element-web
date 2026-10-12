@@ -20,12 +20,13 @@ import { KnownMembership } from "matrix-js-sdk/src/types";
 import BaseCard from "./BaseCard";
 import type ResizeNotifier from "../../../utils/ResizeNotifier";
 import MessageComposer from "../rooms/MessageComposer";
+import WhoIsTypingTile from "../rooms/WhoIsTypingTile";
 import { type RoomPermalinkCreator } from "../../../utils/permalinks/Permalinks";
 import { Layout } from "../../../settings/enums/Layout";
 import TimelinePanel from "../../structures/TimelinePanel";
 import { type E2EStatus } from "../../../utils/ShieldUtils";
 import EditorStateTransfer from "../../../utils/EditorStateTransfer";
-import RoomContext, { type TimelineRenderingType } from "../../../contexts/RoomContext";
+import RoomContext, { TimelineRenderingType } from "../../../contexts/RoomContext";
 import dis from "../../../dispatcher/dispatcher";
 import { _t } from "../../../languageHandler";
 import { type ActionPayload } from "../../../dispatcher/payloads";
@@ -200,12 +201,13 @@ export default class TimelineCard extends React.Component<IProps, IState> {
 
         const myMembership = this.props.room.getMyMembership();
         const showComposer = myMembership === KnownMembership.Join;
+        const timelineRenderingType = this.props.timelineRenderingType ?? this.context.timelineRenderingType;
         const layout = this.state.layout === Layout.Bubble ? Layout.Bubble : Layout.Group;
 
         return (
             <ScopedRoomContextProvider
                 {...this.context}
-                timelineRenderingType={this.props.timelineRenderingType ?? this.context.timelineRenderingType}
+                timelineRenderingType={timelineRenderingType}
                 liveTimeline={this.props.timelineSet?.getLiveTimeline()}
                 narrow={this.state.narrow}
             >
@@ -248,6 +250,10 @@ export default class TimelineCard extends React.Component<IProps, IState> {
                         </div>
 
                         {isUploading && <UploadBar room={this.props.room} relation={this.props.composerRelation} />}
+
+                        {showComposer && timelineRenderingType === TimelineRenderingType.Room && (
+                            <WhoIsTypingTile room={this.props.room} />
+                        )}
 
                         {showComposer && (
                             <MessageComposer

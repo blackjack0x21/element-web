@@ -117,6 +117,11 @@ Please see LICENSE files in the repository root for full details.
         background-color: var(--cpd-color-border-interactive-secondary);
     }
 
+    &.collapsed .mx_SpacePanel_separator {
+        /* The scrollbar gutter makes the list narrower than the panel, so match the 40px buttons exactly */
+        width: 40px;
+    }
+
     .mx_SpaceItem_new {
         position: relative;
     }

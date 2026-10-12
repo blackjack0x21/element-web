@@ -387,7 +387,7 @@ export class SpaceItem extends React.PureComponent<IItemProps, IItemState> {
                     contextMenuTooltip={_t("space|context_menu|options")}
                     notificationState={notificationState}
                     isNarrow={isPanelCollapsed}
-                    size={isNested ? "24px" : "32px"}
+                    size={isNested ? "24px" : "40px"}
                     onKeyDown={this.onKeyDown}
                     ContextMenuComponent={
                         this.props.space.getMyMembership() === KnownMembership.Join ? SpaceContextMenu : undefined

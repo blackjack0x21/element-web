@@ -97,17 +97,17 @@ exports[`SpaceItem > should render a space with subspaces 1`] = `
             data-testid="avatar-img"
             data-type="square"
             role="img"
-            style="--cpd-avatar-size: 32px;"
+            style="--cpd-avatar-size: 40px;"
           >
             <img
               alt=""
               class="_image"
               data-type="square"
-              height="32px"
+              height="40px"
               loading="lazy"
               referrerpolicy="no-referrer"
               src="http://this.is.a.url/avatar.url/room.png"
-              width="32px"
+              width="40px"
             />
           </span>
         </div>
@@ -187,17 +187,17 @@ exports[`SpaceItem > should render a space with subspaces 2`] = `
             data-testid="avatar-img"
             data-type="square"
             role="img"
-            style="--cpd-avatar-size: 32px;"
+            style="--cpd-avatar-size: 40px;"
           >
             <img
               alt=""
               class="_image"
               data-type="square"
-              height="32px"
+              height="40px"
               loading="lazy"
               referrerpolicy="no-referrer"
               src="http://this.is.a.url/avatar.url/room.png"
-              width="32px"
+              width="40px"
             />
           </span>
         </div>

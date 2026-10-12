@@ -129,7 +129,7 @@ interface IMetaSpaceButtonProps extends ComponentProps<typeof SpaceButton> {
 
 type MetaSpaceButtonProps = Pick<IMetaSpaceButtonProps, "selected" | "isPanelCollapsed">;
 
-const MetaSpaceButton: React.FC<IMetaSpaceButtonProps> = ({ selected, isPanelCollapsed, size = "32px", ...props }) => {
+const MetaSpaceButton: React.FC<IMetaSpaceButtonProps> = ({ selected, isPanelCollapsed, size = "40px", ...props }) => {
     return (
         <li
             className={classNames("mx_SpaceItem", {
@@ -170,7 +170,7 @@ const HomeButton: React.FC<MetaSpaceButtonProps> = ({ selected, isPanelCollapsed
             notificationState={notificationState}
             ContextMenuComponent={HomeButtonContextMenu}
             contextMenuTooltip={_t("common|options")}
-            size="32px"
+            size="40px"
             icon={<HomeSolidIcon />}
         />
     );
@@ -185,7 +185,7 @@ const OrphansButton: React.FC<MetaSpaceButtonProps> = ({ selected, isPanelCollap
             isPanelCollapsed={isPanelCollapsed}
             label={getMetaSpaceName(MetaSpace.Orphans)}
             notificationState={sdkContext.spaceStore.getNotificationState(MetaSpace.Orphans)}
-            size="32px"
+            size="40px"
             icon={<RoomIcon />}
         />
     );
@@ -200,7 +200,7 @@ const VideoRoomsButton: React.FC<MetaSpaceButtonProps> = ({ selected, isPanelCol
             isPanelCollapsed={isPanelCollapsed}
             label={getMetaSpaceName(MetaSpace.VideoRooms)}
             notificationState={sdkContext.spaceStore.getNotificationState(MetaSpace.VideoRooms)}
-            size="32px"
+            size="40px"
             icon={<VideoCallSolidIcon />}
         />
     );
@@ -247,7 +247,7 @@ const CreateSpaceButton: React.FC<Pick<IInnerSpacePanelProps, "isPanelCollapsed"
                 onClick={onNewClick}
                 isNarrow={isPanelCollapsed}
                 innerRef={handle}
-                size="32px"
+                size="40px"
                 icon={<PlusIcon />}
             />
 
@@ -342,7 +342,7 @@ const InnerSpacePanel = React.memo<IInnerSpacePanelProps>(
                         <SpaceButton
                             {...item}
                             isNarrow={isPanelCollapsed}
-                            size="32px"
+                            size="40px"
                             selected={activeSpace === item.spaceKey}
                             onClick={() => {
                                 sdkContext.spaceStore.setActiveSpace(item.spaceKey);

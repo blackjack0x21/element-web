@@ -1170,6 +1170,22 @@ describe("ElementCall", () => {
             call.off(CallEvent.Destroy, onDestroy);
         });
 
+        it("can be joined again after leaving through disconnect()", async () => {
+            await connect(call, widgetApi);
+            const onClose = vi.fn();
+            call.on(CallEvent.Close, onClose);
+
+            // Leaving from outside Element Call (e.g. the user panel) must not stop listening to the widget,
+            // since a video room keeps showing the lobby that the user joins again from
+            await disconnect(call, widgetApi);
+            expect(call.connectionState).toBe(ConnectionState.Disconnected);
+            expect(onClose).not.toHaveBeenCalled();
+
+            await connect(call, widgetApi, false);
+            await waitFor(() => expect(call.connectionState).toBe(ConnectionState.Connected), { interval: 5 });
+            call.off(CallEvent.Close, onClose);
+        });
+
         it("handles remote disconnection and reconnect right after", async () => {
             expect(call.connectionState).toBe(ConnectionState.Disconnected);
             await connect(call, widgetApi);

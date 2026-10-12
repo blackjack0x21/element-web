@@ -314,7 +314,9 @@ export abstract class Call extends TypedEventEmitter<CallEvent, CallEventHandler
         this.connectionState = ConnectionState.Disconnecting;
         await this.performDisconnection();
         this.setDisconnected();
-        this.close();
+        // A video room keeps showing the call's lobby after the user leaves, and they join again from it. Closing
+        // here would stop listening to the widget, so the next join would never be noticed.
+        if (!isVideoRoom(this.room)) this.close();
     }
 
     /**

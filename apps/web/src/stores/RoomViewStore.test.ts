@@ -458,6 +458,36 @@ describe("RoomViewStore", function () {
         expect(call.presented).toEqual(true);
     });
 
+    it("keeps presenting a call when its room is viewed again", async () => {
+        const call = {
+            presented: false,
+            connectionState: ConnectionState.Disconnected,
+            widget: { id: "!widget:example.org" },
+            start: vi.fn(),
+        } as unknown as Call;
+        vi.spyOn(CallStore.instance, "getCall").mockReturnValue(call);
+        await setupAsyncStoreWithClient(CallStore.instance, MatrixClientPeg.safeGet());
+
+        dis.dispatch<ViewRoomPayload>({
+            action: Action.ViewRoom,
+            room_id: roomId,
+            view_call: true,
+            metricsTrigger: undefined,
+        });
+        await untilDispatch(Action.ViewRoom, dis);
+
+        // Viewing the same room again, say from the room list, leaves the call on screen
+        dis.dispatch<ViewRoomPayload>({
+            action: Action.ViewRoom,
+            room_id: roomId,
+            metricsTrigger: undefined,
+        });
+        await untilDispatch(Action.ViewRoom, dis);
+
+        expect(roomViewStore.isViewingCall()).toEqual(true);
+        expect(call.presented).toEqual(true);
+    });
+
     it("opens a voice-intent call maximised in the room too", async () => {
         const call = {
             presented: false,

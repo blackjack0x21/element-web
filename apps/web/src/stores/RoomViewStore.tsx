@@ -388,9 +388,11 @@ export class RoomViewStore extends EventEmitter {
                     void call.start({ skipLobby: payload.skipLobby, voiceOnly: payload.voiceOnly });
                 }
             }
-            // If we switch to a different room from the call, we are no longer presenting it
+            // If we switch to a different room from the call, or stop viewing it, we are no longer presenting it.
+            // This has to follow viewingCall rather than payload.view_call: viewing the same room again without
+            // saying keeps the call on screen, and a call that thinks it isn't shown can be destroyed under the user.
             const prevRoomCall = this.state.roomId ? CallStore.instance.getCall(this.state.roomId) : null;
-            if (prevRoomCall !== null && (!payload.view_call || payload.room_id !== this.state.roomId))
+            if (prevRoomCall !== null && (!viewingCall || payload.room_id !== this.state.roomId))
                 prevRoomCall.presented = false;
 
             if (SettingsStore.getValue("feature_simplified_sliding_sync") && this.state.roomId !== payload.room_id) {

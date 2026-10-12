@@ -8,3 +8,5 @@
 export { OptionMenuView } from "./OptionMenuView";
 export { SpaceMenuView } from "./SpaceMenuView";
 export { ComposeMenuView } from "./ComposeMenuView";
+export { FilterMenuView } from "./FilterMenuView";
+export type { FilterMenuViewModel, FilterMenuViewSnapshot, FilterMenuViewActions } from "./FilterMenuView";

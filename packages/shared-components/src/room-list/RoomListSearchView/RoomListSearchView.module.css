@@ -5,20 +5,22 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
+/* Discord-style quick switcher: a compact, recessed field under the header */
 .view {
-    /* From figma, this should be aligned with the room header */
-    min-height: 64px;
     box-sizing: border-box;
-    border-bottom: var(--cpd-border-width-1) solid var(--cpd-color-bg-subtle-primary);
-    padding: 0 var(--cpd-space-3x);
+    padding: var(--cpd-space-2x);
 }
 
 .search {
     /* The search button should take all the remaining space */
     flex: 1;
-    font: var(--cpd-font-body-md-regular);
-    color: var(--cpd-color-text-secondary);
     min-width: 0;
+    padding: 0 var(--cpd-space-2x);
+    border-radius: 4px;
+    border: none;
+    background: var(--cpd-color-bg-canvas-disabled, var(--cpd-color-bg-subtle-secondary));
+    font: var(--cpd-font-body-sm-regular);
+    color: var(--cpd-color-text-secondary);
 
     svg {
         fill: var(--cpd-color-icon-secondary);
@@ -34,6 +36,8 @@
 
     kbd {
         font-family: inherit;
+        font-size: 11px;
+        opacity: 0.7;
     }
 }
 

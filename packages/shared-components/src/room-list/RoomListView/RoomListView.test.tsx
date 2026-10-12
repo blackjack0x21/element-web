@@ -124,13 +124,19 @@ describe("<RoomListView />", () => {
         expect(container).toMatchSnapshot();
     });
 
-    it("should call onToggleFilter when filter is clicked", async () => {
+    it("shows which filter is applied and lets the user clear it", async () => {
         const user = userEvent.setup();
+        renderWithMockContext(<WithActiveFilter />);
+
+        expect(screen.getByRole("status")).toBeInTheDocument();
+        expect(screen.getByText("Showing only: People")).toBeInTheDocument();
+        await user.click(screen.getByRole("button", { name: "Clear" }));
+        expect(WithActiveFilter.args.onToggleFilter).toHaveBeenCalledWith("people");
+    });
+
+    it("does not show the filter bar when no filter is applied", () => {
         renderWithMockContext(<Default />);
-
-        await user.click(screen.getByRole("option", { name: "People" }));
-
-        expect(Default.args.onToggleFilter).toHaveBeenCalled();
+        expect(screen.queryByTestId("room-list-active-filter")).not.toBeInTheDocument();
     });
 
     it("should call createRoom when New room button is clicked", async () => {

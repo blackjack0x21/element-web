@@ -1,0 +1,32 @@
+/*
+ * Copyright 2026 Kreesty
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Commercial
+ * Please see LICENSE files in the repository root for full details.
+ */
+
+.button {
+    position: relative;
+}
+
+/* Filled button plus a dot, so an applied filter is noticeable without opening the menu */
+.active {
+    background: var(--cpd-color-bg-accent-rest);
+
+    svg {
+        fill: var(--cpd-color-icon-on-solid-primary);
+    }
+
+    &::after {
+        content: "";
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--cpd-color-bg-critical-primary);
+        border: 2px solid var(--cpd-color-bg-canvas-default);
+        box-sizing: content-box;
+    }
+}

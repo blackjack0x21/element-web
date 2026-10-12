@@ -18,7 +18,7 @@ import styles from "./RoomListPrimaryFilters.module.css";
 /**
  * Maps filter IDs to translated labels
  */
-const filterIdToLabel = (filterId: FilterId): string => {
+export const filterIdToLabel = (filterId: FilterId): string => {
     switch (filterId) {
         case "unread":
             return _t("room_list|filters|unread");

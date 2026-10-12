@@ -5,15 +5,22 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
+/* Discord-style server name bar: fixed height, divider and a soft shadow over the list */
 .header {
-    min-height: 60px;
-    padding: 0 var(--cpd-space-4x) 0 var(--cpd-space-3x);
+    height: 48px;
+    min-height: 48px;
+    box-sizing: border-box;
+    padding: 0 var(--cpd-space-3x) 0 var(--cpd-space-4x);
+    border-bottom: var(--cpd-border-width-1) solid var(--cpd-color-bg-subtle-primary);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
+    position: relative;
+    z-index: 1;
 }
 
 .container {
     flex: 1;
-    padding-bottom: var(--cpd-space-3x);
     min-width: 0;
+    height: 100%;
 }
 
 .title {
@@ -26,5 +33,8 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         user-select: none; /* currently supported by Chrome, Edge, Opera and Firefox */
+        font: var(--cpd-font-body-md-semibold);
+        font-size: 15px;
+        color: var(--cpd-color-text-primary);
     }
 }

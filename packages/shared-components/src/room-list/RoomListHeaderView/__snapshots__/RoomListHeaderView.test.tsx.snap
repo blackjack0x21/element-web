@@ -6,7 +6,7 @@ exports[`RoomListHeaderView > renders collapse button 1`] = `
     aria-label="Room options"
     class="Flex-module_flex RoomListHeaderView-module_header"
     data-testid="room-list-header"
-    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: end; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
   >
     <div
       class="Flex-module_flex RoomListHeaderView-module_container"
@@ -162,7 +162,7 @@ exports[`RoomListHeaderView > renders expand button 1`] = `
     aria-label="Room options"
     class="Flex-module_flex RoomListHeaderView-module_header"
     data-testid="room-list-header"
-    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: end; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
   >
     <div
       class="Flex-module_flex RoomListHeaderView-module_container"
@@ -318,7 +318,7 @@ exports[`RoomListHeaderView > renders the default state 1`] = `
     aria-label="Room options"
     class="Flex-module_flex RoomListHeaderView-module_header"
     data-testid="room-list-header"
-    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: end; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
   >
     <div
       class="Flex-module_flex RoomListHeaderView-module_container"
@@ -447,7 +447,7 @@ exports[`RoomListHeaderView > renders without space menu 1`] = `
     aria-label="Room options"
     class="Flex-module_flex RoomListHeaderView-module_header"
     data-testid="room-list-header"
-    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: end; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
   >
     <div
       class="Flex-module_flex RoomListHeaderView-module_container"

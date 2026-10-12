@@ -13,3 +13,4 @@ export type {
     CollapseSectionsOption,
 } from "./RoomListHeaderView";
 export { RoomListHeaderView } from "./RoomListHeaderView";
+export type { FilterMenuViewModel, FilterMenuViewSnapshot, FilterMenuViewActions } from "./menu";

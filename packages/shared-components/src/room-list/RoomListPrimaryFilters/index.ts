@@ -5,7 +5,7 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-export { RoomListPrimaryFilters } from "./RoomListPrimaryFilters";
+export { RoomListPrimaryFilters, filterIdToLabel } from "./RoomListPrimaryFilters";
 export type { RoomListPrimaryFiltersProps } from "./RoomListPrimaryFilters";
 export { useCollapseFilters } from "./useCollapseFilters";
 export { useVisibleFilters } from "./useVisibleFilters";

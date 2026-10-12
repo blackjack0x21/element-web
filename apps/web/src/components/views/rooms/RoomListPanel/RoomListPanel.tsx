@@ -17,6 +17,7 @@ import { getKeyBindingsManager } from "../../../../KeyBindingsManager";
 import { KeyBindingAction } from "../../../../accessibility/KeyboardShortcuts";
 import { Landmark, LandmarkNavigation } from "../../../../accessibility/LandmarkNavigation";
 import { type IState as IRovingTabIndexState } from "../../../../accessibility/RovingTabIndex";
+import { RoomListViewModel } from "../../../../viewmodels/room-list/RoomListViewModel";
 import { RoomListHeaderViewModel } from "../../../../viewmodels/room-list/RoomListHeaderViewModel";
 import { useMatrixClientContext } from "../../../../contexts/MatrixClientContext";
 import { SDKContext } from "../../../../contexts/SDKContext.ts";
@@ -66,6 +67,15 @@ export const RoomListPanel: React.FC<RoomListPanelProps> = ({ activeSpace }) => 
         () => new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore }),
     );
 
+    const roomListVm = useCreateAutoDisposedViewModel(
+        () =>
+            new RoomListViewModel({
+                client: sdkContext.client!,
+                roomViewStore: sdkContext.roomViewStore,
+                spaceStore: sdkContext.spaceStore,
+            }),
+    );
+
     return (
         <Flex
             as="nav"
@@ -77,9 +87,9 @@ export const RoomListPanel: React.FC<RoomListPanelProps> = ({ activeSpace }) => 
             onBlur={onBlur}
             onKeyDown={onKeyDown}
         >
+            <RoomListHeaderView vm={vm} filterVm={roomListVm} />
             {displayRoomSearch && <RoomListSearch activeSpace={activeSpace} />}
-            <RoomListHeaderView vm={vm} />
-            <RoomListView />
+            <RoomListView vm={roomListVm} />
         </Flex>
     );
 };

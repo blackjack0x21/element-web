@@ -210,6 +210,14 @@
         },
         "expand_all_sections": "Expand all sections",
         "expand_filters": "Expand filter list",
+        "filter_menu": {
+            "all": "All chats",
+            "button": "Filter rooms",
+            "button_active": "Filter rooms (%(filter)s applied)",
+            "clear": "Clear",
+            "showing_only": "Showing only: %(filter)s",
+            "title": "Filter"
+        },
         "filters": {
             "favourite": "Favourites",
             "invites": "Invites",

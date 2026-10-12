@@ -12,7 +12,7 @@ import { CollapseAllIcon, ExpandAllIcon, ChatIcon } from "@vector-im/compound-de
 import { type ViewModel, useViewModel } from "../../core/viewmodel";
 import { Flex } from "../../core/utils/Flex";
 import { useI18n } from "../../core/i18n/i18nContext";
-import { ComposeMenuView, OptionMenuView, SpaceMenuView } from "./menu";
+import { ComposeMenuView, FilterMenuView, OptionMenuView, SpaceMenuView, type FilterMenuViewModel } from "./menu";
 import styles from "./RoomListHeaderView.module.css";
 
 /**
@@ -136,6 +136,10 @@ interface RoomListHeaderViewProps {
      * The view model for the room list header component.
      */
     vm: RoomListHeaderViewModel;
+    /**
+     * Provides the room list filters. When omitted, no filter button is shown.
+     */
+    filterVm?: FilterMenuViewModel;
 }
 
 /**
@@ -147,7 +151,7 @@ interface RoomListHeaderViewProps {
  * <RoomListHeaderView vm={roomListHeaderViewModel} />
  * ```
  */
-export function RoomListHeaderView({ vm }: Readonly<RoomListHeaderViewProps>): JSX.Element {
+export function RoomListHeaderView({ vm, filterVm }: Readonly<RoomListHeaderViewProps>): JSX.Element {
     const { translate: _t } = useI18n();
     const { title, displaySpaceMenu, collapseSections, areSectionsEnabled, canCreateRoom, canCreateVideoRoom } =
         useViewModel(vm);
@@ -158,7 +162,7 @@ export function RoomListHeaderView({ vm }: Readonly<RoomListHeaderViewProps>): J
             as="header"
             className={styles.header}
             aria-label={_t("room|context_menu|title")}
-            align="end"
+            align="center"
             data-testid="room-list-header"
         >
             <Flex className={styles.container} justify="space-between" align="center" gap="var(--cpd-space-3x)">
@@ -169,6 +173,7 @@ export function RoomListHeaderView({ vm }: Readonly<RoomListHeaderViewProps>): J
                     {displaySpaceMenu && <SpaceMenuView vm={vm} />}
                 </Flex>
                 <Flex align="center" gap="var(--cpd-space-2x)">
+                    {filterVm && <FilterMenuView vm={filterVm} />}
                     <OptionMenuView vm={vm} />
                     {areSectionsEnabled && collapseSections && (
                         <IconButton

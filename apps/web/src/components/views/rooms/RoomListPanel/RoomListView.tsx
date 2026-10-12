@@ -5,12 +5,8 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { useCallback, type JSX, type ReactNode, useContext } from "react";
-import {
-    RoomListView as SharedRoomListView,
-    useCreateAutoDisposedViewModel,
-    type Room as SharedRoom,
-} from "@element-hq/web-shared-components";
+import React, { useCallback, type JSX, type ReactNode } from "react";
+import { RoomListView as SharedRoomListView, type Room as SharedRoom } from "@element-hq/web-shared-components";
 import { Room } from "matrix-js-sdk/src/matrix";
 
 import { DecoratedRoomAvatarView } from "../../avatars/DecoratedRoomAvatarView";
@@ -19,25 +15,19 @@ import { PreviewRoomAvatarData } from "../../../../viewmodels/room-list/PreviewR
 import { getKeyBindingsManager } from "../../../../KeyBindingsManager";
 import { KeyBindingAction } from "../../../../accessibility/KeyboardShortcuts";
 import { Landmark, LandmarkNavigation } from "../../../../accessibility/LandmarkNavigation";
-import { RoomListViewModel } from "../../../../viewmodels/room-list/RoomListViewModel";
-import { SDKContext } from "../../../../contexts/SDKContext.ts";
+import { type RoomListViewModel } from "../../../../viewmodels/room-list/RoomListViewModel";
+
+interface RoomListViewProps {
+    /**
+     * The view model of the room list. It is owned by the parent so that the header can share its filters.
+     */
+    vm: RoomListViewModel;
+}
 
 /**
  * RoomListView component using shared components with proper MVVM pattern.
  */
-export function RoomListView(): JSX.Element {
-    const sdkContext = useContext(SDKContext);
-
-    // Create and auto-dispose ViewModel instance
-    const vm = useCreateAutoDisposedViewModel(
-        () =>
-            new RoomListViewModel({
-                client: sdkContext.client!,
-                roomViewStore: sdkContext.roomViewStore,
-                spaceStore: sdkContext.spaceStore,
-            }),
-    );
-
+export function RoomListView({ vm }: RoomListViewProps): JSX.Element {
     // Render avatar for each room - memoized to prevent re-renders
     const renderAvatar = useCallback((room: SharedRoom): ReactNode => {
         if (room instanceof Room) return <DecoratedRoomAvatarView room={room} />;

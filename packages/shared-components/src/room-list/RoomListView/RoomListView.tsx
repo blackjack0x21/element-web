@@ -8,8 +8,9 @@
 import React, { type JSX, type ReactNode } from "react";
 
 import { useViewModel, type ViewModel } from "../../core/viewmodel";
-import { RoomListPrimaryFilters, type FilterId } from "../RoomListPrimaryFilters";
+import { type FilterId } from "../RoomListPrimaryFilters";
 import { RoomListLoadingSkeleton } from "./RoomListLoadingSkeleton";
+import { RoomListActiveFilterBar } from "./RoomListActiveFilterBar";
 import { RoomListEmptyStateView } from "./RoomListEmptyStateView";
 import { VirtualizedRoomListView, type RoomListViewState } from "../VirtualizedRoomListView";
 import { type Room, type RoomListItemViewModel } from "../VirtualizedRoomListView/RoomListItemWrapper/RoomListItemView";
@@ -140,13 +141,12 @@ export const RoomListView: React.FC<RoomListViewProps> = ({ vm, renderAvatar, on
 
     return (
         <>
-            <div>
-                <RoomListPrimaryFilters
-                    filterIds={snapshot.filterIds}
-                    activeFilterId={snapshot.activeFilterId}
-                    onToggleFilter={vm.onToggleFilter}
+            {snapshot.activeFilterId && (
+                <RoomListActiveFilterBar
+                    filterId={snapshot.activeFilterId}
+                    onClear={() => vm.onToggleFilter(snapshot.activeFilterId!)}
                 />
-            </div>
+            )}
             <Flex direction="column" className={styles.list}>
                 <AutoHideScrollbar className={styles.scrollbar}>
                     {listBody}

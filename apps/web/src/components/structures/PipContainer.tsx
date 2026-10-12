@@ -101,8 +101,10 @@ class PipContainerInner extends React.Component<IProps, IState> {
 
     private watchCall(call: ElementCall | null): void {
         if (call === this.watchedCall) return;
+        this.watchedCall?.off(ElementCallEvent.ConnectionState, this.onVideoActive);
         this.watchedCall?.off(ElementCallEvent.VideoActive, this.onVideoActive);
         this.watchedCall = call;
+        this.watchedCall?.on(ElementCallEvent.ConnectionState, this.onVideoActive);
         this.watchedCall?.on(ElementCallEvent.VideoActive, this.onVideoActive);
     }
 

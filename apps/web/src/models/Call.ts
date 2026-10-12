@@ -1240,11 +1240,11 @@ export class ElementCall extends Call {
 
     private _videoActive = false;
     /**
-     * Whether anyone in the call has their camera on or is sharing their screen. Assumes not until Element Call
-     * says otherwise, so the call's pip doesn't flash up while joining.
+     * Whether the call has something to show: anyone has their camera on or is sharing their screen. Always true
+     * until the user has joined, since the widget can only start (and join) while it is on screen.
      */
     public get videoActive(): boolean {
-        return this._videoActive;
+        return !this.connected || this._videoActive;
     }
 
     /** Element Call reports camera / screen share activity (`HostBridge.notifyVideoActive` / `io.element.video_active`). */

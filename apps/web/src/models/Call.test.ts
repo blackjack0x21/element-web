@@ -1005,6 +1005,8 @@ describe("ElementCall", () => {
                 detail: { data: { active: true } },
             });
             expect(call.videoActive).toBe(true);
+            // Until the user has joined, the widget has to stay on screen in order to start
+            expect(call.videoActive).toBe(true);
             onVideoActive.mockClear();
 
             const preventDefault = vi.fn();

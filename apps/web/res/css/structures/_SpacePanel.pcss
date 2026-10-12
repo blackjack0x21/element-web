@@ -8,8 +8,6 @@ Please see LICENSE files in the repository root for full details.
 
 .mx_SpacePanel {
     --activeBackground-color: $panel-actions;
-    --activeBorder-color: $primary-content;
-    --activeBorder-transparent-gap: 1px;
     --gutterSize: 16px;
     --height-nested: 24px;
     --height-topLevel: 40px;
@@ -112,8 +110,9 @@ Please see LICENSE files in the repository root for full details.
     /* Divider between the meta spaces (Home, …) and the user's spaces */
     .mx_SpacePanel_separator {
         height: 1px;
-        width: 32px;
-        margin: 0 auto;
+        /* Line up with the space buttons: same side inset in both the collapsed and expanded panel */
+        width: calc(100% - 2 * var(--gutterSize));
+        margin: 0 var(--gutterSize);
         flex-shrink: 0;
         background-color: var(--cpd-color-border-interactive-secondary);
     }
@@ -125,9 +124,16 @@ Please see LICENSE files in the repository root for full details.
     .mx_SpaceItem:not(.hasSubSpaces) > .mx_SpaceButton {
         margin-left: var(--gutterSize);
         min-width: 40px;
+
+        /* These buttons are inset by the gutter; the marker still sits at the panel edge */
+        &.mx_SpaceButton_active::before {
+            left: calc(-1 * var(--gutterSize));
+        }
     }
 
     .mx_SpaceButton {
+        /* Positions the selected marker */
+        position: relative;
         border-radius: 8px;
         display: flex;
         align-items: center;
@@ -141,11 +147,17 @@ Please see LICENSE files in the repository root for full details.
                 background-color: var(--activeBackground-color);
             }
 
-            &.mx_SpaceButton_narrow .mx_SpaceButton_selectionWrapper {
-                /* Ring drawn outside the 40x40 button so the avatar size stays constant */
-                box-shadow:
-                    0 0 0 var(--activeBorder-transparent-gap) var(--mx-sidebar-background),
-                    0 0 0 calc(var(--activeBorder-transparent-gap) + 2px) var(--activeBorder-color);
+            /* Marker at the left edge of the panel, like the selected room in the room list */
+            &::before {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 0;
+                width: 4px;
+                height: 24px;
+                transform: translateY(-50%);
+                background-color: var(--cpd-color-bg-accent-rest);
+                border-radius: 0 8px 8px 0;
             }
         }
 

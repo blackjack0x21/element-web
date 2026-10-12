@@ -7,6 +7,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React from "react";
+import classNames from "classnames";
 import {
     type IEventRelation,
     type MatrixEvent,
@@ -202,6 +203,7 @@ export default class TimelineCard extends React.Component<IProps, IState> {
         const myMembership = this.props.room.getMyMembership();
         const showComposer = myMembership === KnownMembership.Join;
         const timelineRenderingType = this.props.timelineRenderingType ?? this.context.timelineRenderingType;
+        const showTypingIndicator = showComposer && timelineRenderingType === TimelineRenderingType.Room;
         const layout = this.state.layout === Layout.Bubble ? Layout.Bubble : Layout.Group;
 
         return (
@@ -220,7 +222,11 @@ export default class TimelineCard extends React.Component<IProps, IState> {
                 >
                     <RoomUploadContextProvider>
                         <Measured sensor={this.card} onMeasurement={this.onMeasurement} />
-                        <div className="mx_TimelineCard_timeline">
+                        <div
+                            className={classNames("mx_TimelineCard_timeline", {
+                                mx_TimelineCard_timeline_typingIndicator: showTypingIndicator,
+                            })}
+                        >
                             <FileDropTarget parent={this.card.current} />
                             {jumpToBottom}
                             <EventPresentationContextProvider layout={layout}>
@@ -247,13 +253,10 @@ export default class TimelineCard extends React.Component<IProps, IState> {
                                     onScroll={this.onScroll}
                                 />
                             </EventPresentationContextProvider>
+                            {showTypingIndicator && <WhoIsTypingTile room={this.props.room} />}
                         </div>
 
                         {isUploading && <UploadBar room={this.props.room} relation={this.props.composerRelation} />}
-
-                        {showComposer && timelineRenderingType === TimelineRenderingType.Room && (
-                            <WhoIsTypingTile room={this.props.room} />
-                        )}
 
                         {showComposer && (
                             <MessageComposer

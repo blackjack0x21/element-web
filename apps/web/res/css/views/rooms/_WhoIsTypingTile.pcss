@@ -5,18 +5,24 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-/* Always present, so the timeline height does not change when someone starts or stops typing. */
+/* Floats over the bottom of the timeline, so messages scroll underneath it. The message list reserves
+   the same height at its bottom so the last message is never covered. */
 .mx_WhoIsTypingTile {
-    flex: 0 0 auto;
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 1;
+    pointer-events: none;
     box-sizing: border-box;
-    height: 24px;
+    height: var(--WhoIsTypingTile-height);
+    background: linear-gradient(to top, var(--cpd-color-bg-canvas-default) 10%, transparent);
     padding: 0 var(--cpd-space-4x);
     display: flex;
     align-items: center;
     gap: var(--cpd-space-2x);
     overflow: hidden;
     font: var(--cpd-font-body-sm-medium);
-    color: var(--cpd-color-text-secondary);
+    color: var(--cpd-color-text-primary);
 }
 
 .mx_WhoIsTypingTile_dots {

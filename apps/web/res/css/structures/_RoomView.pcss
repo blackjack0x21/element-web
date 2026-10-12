@@ -8,6 +8,8 @@ Please see LICENSE files in the repository root for full details.
 
 :root {
     --RoomView_MessageList-padding: 18px;
+    /* Height of the floating typing indicator; the message list leaves this much room at the bottom. */
+    --WhoIsTypingTile-height: 24px;
 }
 
 .mx_LeftPanel_panel {
@@ -145,6 +147,11 @@ Please see LICENSE files in the repository root for full details.
     margin-left: 65px;
     border-top: 1px solid $primary-hairline-color;
     height: 1px;
+}
+
+/* Leave room below the last message for the floating typing indicator. */
+.mx_RoomView_timeline_typingIndicator .mx_RoomView_MessageList {
+    padding-bottom: calc(var(--RoomView_MessageList-padding) + var(--WhoIsTypingTile-height));
 }
 
 .mx_RoomView_messageListWrapper {

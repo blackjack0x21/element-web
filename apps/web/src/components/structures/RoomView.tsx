@@ -2653,6 +2653,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
 
         const timelineClasses = classNames("mx_RoomView_timeline", {
             mx_RoomView_timeline_rr_enabled: this.state.showReadReceipts,
+            mx_RoomView_timeline_typingIndicator: !!whoIsTyping,
         });
 
         let { mainSplitContentType } = this.state;
@@ -2685,10 +2686,10 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                             {jumpToBottom}
                             {messagePanel}
                             {searchResultsPanel}
+                            {whoIsTyping}
                         </main>
                         {statusBarArea}
                         {previewBar}
-                        {whoIsTyping}
                         {messageComposer}
                     </RoomUploadContextProvider>
                 );

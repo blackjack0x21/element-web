@@ -51,6 +51,14 @@ import type { AttachmentCancel } from "@matrix-org/analytics-events/types/typesc
 
 const logger = rootLogger.getChild("RoomUploadViewModel");
 
+/** Lets the composer hand its text over to the upload dialog, and take it back if the upload is cancelled. */
+export interface ComposerTextHandler {
+    /** Returns the text in the composer and empties it. */
+    take: () => string;
+    /** Puts text that was taken back into the composer. */
+    restore: (text: string) => void;
+}
+
 interface RoomUploadViewSnapshot extends UploadButtonViewSnapshot {
     mayDragAndDropFile: boolean;
 }
@@ -59,6 +67,7 @@ export class RoomUploadViewModel
     extends BaseViewModel<RoomUploadViewSnapshot, Record<string, never>>
     implements UploadButtonViewActions
 {
+    private composerTextHandler?: ComposerTextHandler;
     private readonly uploadSelectFns = new Map<string, ComposerApiFileUploadOption["onSelected"]>();
     public constructor(
         private readonly room: Room,
@@ -123,6 +132,37 @@ export class RoomUploadViewModel
         this.updateOptions();
     };
 
+    /** Registers the composer whose text moves into the upload dialog. Returns a function to unregister it. */
+    public registerComposerTextHandler = (handler: ComposerTextHandler): (() => void) => {
+        this.composerTextHandler = handler;
+        return () => {
+            if (this.composerTextHandler === handler) this.composerTextHandler = undefined;
+        };
+    };
+
+    /**
+     * Sends the files, using the text already in the composer as the first file's caption.
+     * The text goes back to the composer if that file is not uploaded.
+     */
+    private async sendFiles(files: File[]): Promise<void> {
+        const handler = this.composerTextHandler;
+        const text = handler?.take() ?? "";
+        let captionUsed = false;
+        try {
+            captionUsed = await ContentMessages.sharedInstance().sendContentListToRoom(
+                files,
+                this.room.roomId,
+                this.threadRelation,
+                this.replyToEvent,
+                this.client,
+                this.timelineRenderingType,
+                text || undefined,
+            );
+        } finally {
+            if (text && !captionUsed) handler?.restore(text);
+        }
+    }
+
     public setReplyToEvent = (replyToEvent?: MatrixEvent): void => {
         this.replyToEvent = replyToEvent;
     };
@@ -139,14 +179,7 @@ export class RoomUploadViewModel
         logger.info("initiateViaInputFiles for", roomId);
         if (!files?.length) return;
         try {
-            await ContentMessages.sharedInstance().sendContentListToRoom(
-                Array.from(files),
-                roomId,
-                this.threadRelation,
-                this.replyToEvent,
-                this.client,
-                this.timelineRenderingType,
-            );
+            await this.sendFiles(Array.from(files));
         } catch (ex) {
             logger.warn("Failed to handle file upload transfer", ex);
         }
@@ -161,14 +194,7 @@ export class RoomUploadViewModel
         if (!dataTransfer.files?.length) return;
 
         try {
-            await ContentMessages.sharedInstance().sendContentListToRoom(
-                Array.from(dataTransfer.files),
-                roomId,
-                this.threadRelation,
-                this.replyToEvent,
-                this.client,
-                this.timelineRenderingType,
-            );
+            await this.sendFiles(Array.from(dataTransfer.files));
         } catch (ex) {
             logger.warn("Failed to handle drag and drop data transfer", ex);
         }

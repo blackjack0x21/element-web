@@ -133,7 +133,7 @@ describe("RoomUploadViewModel", () => {
             expect(dis.dispatch).not.toHaveBeenCalled();
         });
         it("uploads with correct context", async () => {
-            sendContentListToRoomSpy.mockResolvedValue(undefined);
+            sendContentListToRoomSpy.mockResolvedValue(true);
             const vm = new RoomUploadViewModel(
                 room,
                 client,
@@ -162,7 +162,33 @@ describe("RoomUploadViewModel", () => {
                 replyEvent,
                 client,
                 TimelineRenderingType.Thread,
+                undefined,
             );
+        });
+
+        describe("composer text", () => {
+            const files = [{ name: "fake.png", size: 1024, type: "image/png" }] as unknown as FileList;
+            const makeVm = (): RoomUploadViewModel =>
+                new RoomUploadViewModel(room, client, TimelineRenderingType.Room, dis, undefined, undefined, () => {});
+
+            it("is used as the caption and not restored when the upload is confirmed", async () => {
+                sendContentListToRoomSpy.mockResolvedValue(true);
+                const vm = makeVm();
+                const handler = { take: vi.fn().mockReturnValue("hello"), restore: vi.fn() };
+                vm.registerComposerTextHandler(handler);
+                await vm.initiateViaInputFiles(files);
+                expect(sendContentListToRoomSpy.mock.calls.at(-1)?.[6]).toBe("hello");
+                expect(handler.restore).not.toHaveBeenCalled();
+            });
+
+            it("is restored when the upload is cancelled", async () => {
+                sendContentListToRoomSpy.mockResolvedValue(false);
+                const vm = makeVm();
+                const handler = { take: vi.fn().mockReturnValue("hello"), restore: vi.fn() };
+                vm.registerComposerTextHandler(handler);
+                await vm.initiateViaInputFiles(files);
+                expect(handler.restore).toHaveBeenCalledWith("hello");
+            });
         });
     });
 
@@ -195,7 +221,7 @@ describe("RoomUploadViewModel", () => {
             expect(dis.dispatch).not.toHaveBeenCalled();
         });
         it("uploads with correct context", async () => {
-            sendContentListToRoomSpy.mockResolvedValue(undefined);
+            sendContentListToRoomSpy.mockResolvedValue(true);
             const vm = new RoomUploadViewModel(
                 room,
                 client,
@@ -224,13 +250,14 @@ describe("RoomUploadViewModel", () => {
                 replyEvent,
                 client,
                 TimelineRenderingType.Thread,
+                undefined,
             );
         });
     });
 
     describe("RoomUploadContextProvider", () => {
         it("uploads when called via module API", async () => {
-            sendContentListToRoomSpy.mockResolvedValue(undefined);
+            sendContentListToRoomSpy.mockResolvedValue(true);
             render(
                 <MatrixClientContext.Provider value={client}>
                     <ScopedRoomContextProvider {...getRoomContext(room, {})}>
@@ -262,6 +289,7 @@ describe("RoomUploadViewModel", () => {
                 undefined,
                 client,
                 TimelineRenderingType.Room,
+                undefined,
             );
         });
     });

@@ -29,6 +29,8 @@ interface IProps {
     currentIndex?: number;
     /** Defaults to 1. */
     totalFiles?: number;
+    /** Text to pre-fill the caption with, e.g. what the user had already typed in the composer. */
+    initialCaption?: string;
     /**
      * Called when the dialog closes. `caption` is the text the user typed for the file, if any;
      * it is only meaningful when the upload was confirmed.
@@ -106,10 +108,11 @@ export default function UploadConfirmDialog({
     file,
     currentIndex = 0,
     totalFiles = 1,
+    initialCaption = "",
     onFinished,
 }: IProps): JSX.Element {
     const vm = useCreateAutoDisposedViewModel(() => new UploadPreviewViewModel(file));
-    const [caption, setCaption] = useState("");
+    const [caption, setCaption] = useState(initialCaption);
 
     let title: string;
     if (totalFiles > 1 && currentIndex !== undefined) {

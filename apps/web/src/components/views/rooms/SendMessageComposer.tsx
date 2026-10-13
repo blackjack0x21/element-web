@@ -168,6 +168,7 @@ export class SendMessageComposer extends React.Component<ISendMessageComposerPro
     private model: EditorModel;
     private currentlyComposedEditorState: SerializedPart[] | null = null;
     private dispatcherRef?: string;
+    private unregisterTextHandler?: () => void;
     private sendHistoryManager: SendHistoryManager;
 
     public constructor(props: ISendMessageComposerProps, context: React.ContextType<typeof RoomContext>) {
@@ -191,6 +192,10 @@ export class SendMessageComposer extends React.Component<ISendMessageComposerPro
     public componentDidMount(): void {
         window.addEventListener("beforeunload", this.saveStoredEditorState);
         this.dispatcherRef = dis.register(this.onAction);
+        this.unregisterTextHandler = this.props.uploadVm.registerComposerTextHandler({
+            take: this.takeText,
+            restore: this.restoreText,
+        });
 
         // Restore the draft here rather than in the constructor, as another composer for the same room
         // may be unmounting in this same render (e.g. the right panel timeline when a call ends), and it
@@ -531,7 +536,24 @@ export class SendMessageComposer extends React.Component<ISendMessageComposerPro
         }
     }
 
+    // Hands the composer's text to the upload dialog's caption
+    private takeText = (): string => {
+        const text = textSerialize(this.model);
+        if (!text.trim()) return "";
+        this.model.reset([]);
+        this.clearStoredEditorState();
+        return text;
+    };
+
+    // Puts back text that was taken for an upload that did not happen
+    private restoreText = (text: string): void => {
+        const parts = [this.model.partCreator.plain(text), ...this.model.parts];
+        this.model.reset(parts);
+        this.editorRef.current?.focus();
+    };
+
     public componentWillUnmount(): void {
+        this.unregisterTextHandler?.();
         dis.unregister(this.dispatcherRef);
         window.removeEventListener("beforeunload", this.saveStoredEditorState);
         this.saveStoredEditorState();

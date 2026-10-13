@@ -442,7 +442,9 @@ export default class ContentMessages {
      * @param replyToEvent - The event being replied to, if any.
      * @param matrixClient - The Matrix client to use for sending the files.
      * @param context - The context in which the files are being sent.
-     * @returns A promise that resolves when the files have been sent.
+     * @param initialCaption - Text to pre-fill the caption of the first file's confirmation dialog with.
+     * @returns A promise that resolves when the files have been sent. It resolves to false if
+     * `initialCaption` was not used because the first file was never confirmed for upload.
      */
     public async sendContentListToRoom(
         files: File[],
@@ -451,10 +453,11 @@ export default class ContentMessages {
         replyToEvent: MatrixEvent | undefined,
         matrixClient: MatrixClient,
         context = TimelineRenderingType.Room,
-    ): Promise<void> {
+        initialCaption?: string,
+    ): Promise<boolean> {
         if (matrixClient.isGuest()) {
             dis.dispatch({ action: "require_registration" });
-            return;
+            return false;
         }
 
         if (!this.mediaConfig) {
@@ -463,7 +466,7 @@ export default class ContentMessages {
             await Promise.race([this.ensureMediaConfigFetched(matrixClient), modal.finished]);
             if (!this.mediaConfig) {
                 // User cancelled by clicking away on the spinner
-                return;
+                return false;
             } else {
                 modal.close();
             }
@@ -487,7 +490,7 @@ export default class ContentMessages {
                 contentMessages: this,
             });
             const [shouldContinue] = await finished;
-            if (!shouldContinue) return;
+            if (!shouldContinue) return false;
         }
 
         let uploadAll = false;
@@ -495,6 +498,7 @@ export default class ContentMessages {
         // to match the order the files were specified in
         let promBefore: Promise<any> = Promise.resolve();
         const sentFileTypes: string[] = [];
+        let captionUsed = false;
         for (let i = 0; i < okFiles.length; ++i) {
             const file = okFiles[i];
             const loopPromiseBefore = promBefore;
@@ -505,6 +509,7 @@ export default class ContentMessages {
                     file,
                     currentIndex: i,
                     totalFiles: okFiles.length,
+                    initialCaption: i === 0 ? initialCaption : undefined,
                 });
                 const [shouldContinue, shouldUploadAll, enteredCaption] = await finished;
                 if (!shouldContinue) break;
@@ -512,6 +517,7 @@ export default class ContentMessages {
                     uploadAll = true;
                 }
                 caption = enteredCaption;
+                if (i === 0) captionUsed = true;
             }
             sentFileTypes.push(file.type.split("/")[0]);
 
@@ -567,6 +573,8 @@ export default class ContentMessages {
             action: Action.FocusSendMessageComposer,
             context,
         });
+
+        return captionUsed;
     }
 
     public getCurrentUploads(relation?: IEventRelation): RoomUpload[] {
